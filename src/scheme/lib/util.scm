@@ -8,3 +8,11 @@
      (set! binding (+ binding increment)))))
 
 ; (+set! cont -1)
+
+(define l (lambda (list) (length list)))
+
+; (l (list "a" "b"))
+
+(define ls (lambda (str) (string-length str)))
+
+; (ls "ab")

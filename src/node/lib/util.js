@@ -1,4 +1,10 @@
+/*
 
+npx kill-port [port]
+nvm list
+nvm use [version]
+
+*/
 function aprox(num, dec){
 
 	return parseFloat(Math.round( num * 100) / 100).toFixed(dec);
