@@ -16,3 +16,12 @@
 (define ls (lambda (str) (string-length str)))
 
 ; (ls "ab")
+
+(define-syntax push
+  (syntax-rules ()
+    ((_ expr var)
+     (set! var (cons expr var)))))
+
+; (define test_list (list))
+; (push "a" test_list)
+; (push "b" test_list)
