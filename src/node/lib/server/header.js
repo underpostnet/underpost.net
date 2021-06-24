@@ -17,7 +17,7 @@ function logHeader(req, res, data, i, html_head){
 		`
 	);
 
-  var lang = (''+req.acceptsLanguages()).split('-')[0];
+  var lang = (''+req.acceptsLanguages()).split('-')[0].split(',')[0];
   var id = lang=='es'? 1 : 0;
 
   if(html_head){
