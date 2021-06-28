@@ -1,1 +1,0 @@
-/* ejecutar customizado a como ya esta en mi pc */
