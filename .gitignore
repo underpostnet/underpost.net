@@ -1,3 +1,5 @@
-/src/node/src
+/src/node/apps
 /src/scheme/src
-/src/node/lib/gen/private
+/src/node/src/gen/private
+/src/node/node_modules
+/src/node/package-lock.json
