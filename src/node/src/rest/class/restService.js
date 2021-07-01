@@ -6,9 +6,9 @@ export class RestService {
 
   constructor(){}
 
-  async getContent(url, fn, err){
+  async getContent(url, storage, fn, err){
     await fileGetContents(url).then(json => {
-        fn(JSON.parse(json));
+        fn(JSON.parse(json), storage);
     }).catch(error => {
         err(error);
     });
