@@ -117,6 +117,74 @@ fs.writeFileSync(
 
 util = util.replace(//g, '');
 
+import { Keys } from 'file:///C:/dd/underpost.net/src/node/src/keys/class/Keys.js';
+const { startTimestamp: start, stopTimestamp: stop } =
+      this.programmingPumpForm.value;
+
+if (!fs.existsSync(dir+'modules')){
+
+	fs.mkdirSync(dir+'modules');
+
+}
+
+
+ resolveAfter2Seconds() {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve('resolved');
+    }, 2000);
+  });
+}
+
+async  asyncCall() {
+  console.log('calling');
+  const result = await resolveAfter2Seconds();
+  console.log(result);
+  // expected output: "resolved"
+}
+
+asyncCall();
+
+
+
+
+
+
+var obj = {
+    'Students': [{
+            "name": "Raj",
+             "Age":"15",
+            "RollNumber": "123",
+            "Marks": "99",
+
+        }, {
+            "name": "Aman",
+             "Age":"14",
+            "RollNumber": "223",
+            "Marks": "69",
+           },
+           {
+            "name": "Vivek",
+             "Age":"13",
+            "RollNumber": "253",
+            "Marks": "89",
+           },
+        ]
+};
+
+var newArray = obj.Students.filter( (el)
+{
+  return el.Age >=15 &&
+         el.RollNumber <= 200 &&
+         el.Marks >= 80 ;
+}
+);
+console.log(newArray);
+
+
+
+
+
 */
 
  aprox(num, dec){
@@ -465,7 +533,7 @@ b -> a | mayor -> menor
  jsonSave(json){
 
 	return JSON.stringify(json, null, 4);
-	
+
 }
 
  JSONstr(json){
@@ -512,6 +580,14 @@ b -> a | mayor -> menor
 var min = Math.min( ...arr ),
 var max = Math.max( ...arr );
 */
+
+ range(ini, fin){
+	let list_ = [];
+	for(let i_=ini; i_<=fin; i_++){
+		list_.push(i_);
+	}
+	return list_;
+}
 
 
         }
