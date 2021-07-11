@@ -34,6 +34,8 @@ function logHeader(req, res, data, i, html_head){
 
 function logHeaderApi(req, res, path, html_head){
 
+	generateToken(req);
+
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
 	log('info',
