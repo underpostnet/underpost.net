@@ -10,11 +10,11 @@ export class RestService {
   async getJSON(url){
     return await new Promise((resolve)=>{
       fileGetContents(url).then(json => {
-          console.log(colors.blue("getJSON( "+url+" ) success ->"));
+          // console.log(colors.blue("getJSON( "+url+" ) success ->"));
           resolve(JSON.parse(json));
       }).catch(error => {
-          console.log(colors.blue("getJSON( "+url+" ) error ->"));
-          console.log(error);
+          // console.log(colors.blue("getJSON( "+url+" ) error ->"));
+          // console.log(error);
           resolve(error);
       });
     });
