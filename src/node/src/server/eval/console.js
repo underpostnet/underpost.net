@@ -55,7 +55,12 @@ function log(type, str){
     console.log('-- end undefined log --');
   }
 
-}
+};
+
+function clearLastLine(){
+	process.stdout.moveCursor(0, -1) // up one line
+	process.stdout.clearLine(1) // from cursor to end
+};
 
 // outputs red text
 // console.log(colors.error("this is an error"));

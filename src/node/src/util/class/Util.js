@@ -185,6 +185,42 @@ console.log(newArray);
 
 
 
+const array1 = ['one', 'two', 'three'];
+console.log('array1:', array1);
+// expected output: "array1:" Array ["one", "two", "three"]
+
+const reversed = array1.reverse();
+console.log('reversed:', reversed);
+// expected output: "reversed:" Array ["three", "two", "one"]
+
+
+
+
+
+
+
+
+MERGE Object
+
+
+let person = {
+    firstName: 'John',
+    lastName: 'Doe',
+    age: 25,
+    ssn: '123-456-2356'
+};
+
+
+let job = {
+    jobTitle: 'JavaScript Developer',
+    country: 'USA'
+};
+
+
+let employee = Object.assign(person, job);
+console.log(employee);
+
+
 */
 
  aprox(num, dec){
@@ -493,6 +529,16 @@ str_test(str, type) {
   }
 }
 
+
+clearLastLine(){
+	process.stdout.moveCursor(0, -1) // up one line
+	process.stdout.clearLine(1) // from cursor to end
+}
+
+
+
+
+
 /*
 
 metodo sor y sort reverse
@@ -588,6 +634,12 @@ var max = Math.max( ...arr );
 	}
 	return list_;
 }
+
+ pad(num, size) {
+	num = num.toString();
+	while (num.length < size) num = "0" + num;
+	return num;
+};
 
 
         }

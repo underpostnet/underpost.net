@@ -55,7 +55,17 @@ const str_fix = `str_test(str, type) {
 				return false;
 			}
   }
-}`;
+}
+
+
+clearLastLine(){
+	process.stdout.moveCursor(0, -1) // up one line
+	process.stdout.clearLine(1) // from cursor to end
+}
+
+
+
+`;
 
 util = util.split('/* fix */')[0]+str_fix+util.split('/* fix */')[2]
 
