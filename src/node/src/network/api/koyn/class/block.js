@@ -1,7 +1,7 @@
 import SHA256 from "crypto-js/sha256.js";
-import { RestService } from "../../../../../src/rest/class/RestService.js";
+import { RestService } from "../../../src/rest/class/RestService.js";
 import colors from "colors/safe.js";
-import { Util } from "../../../../../src/util/class/Util.js";
+import { Util } from "../../../src/util/class/Util.js";
 
 
 export class Block {

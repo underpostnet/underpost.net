@@ -3,3 +3,4 @@
 /src/node/src/gen/private
 /src/node/node_modules
 /src/node/package-lock.json
+/src/node/src/network/client/modules/main/private

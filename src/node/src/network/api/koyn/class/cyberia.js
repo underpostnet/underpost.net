@@ -1,6 +1,6 @@
 
-import { Util } from "../../../../../src/util/class/Util.js";
-import { ReadLine } from "../../../../../src/read-line/class/ReadLine.js";
+import { Util } from "../../../src/util/class/Util.js";
+import { ReadLine } from "../../../src/read-line/class/ReadLine.js";
 import fs from "fs";
 import colors from "colors/safe.js";
 import var_dump from 'var_dump';
