@@ -1,0 +1,46 @@
+
+
+.modal-info-attack {
+    transform: translate(-50%, 0);
+    top: 20px;
+    border: 2px solid gray;
+    background: #212021;
+    left: 50%;
+    height: 60px;
+    width: 200px;
+    border-radius: 10px;
+}
+
+
+.modal-info-attack-c1 {
+
+  width: 33.3%;
+  height: 100%;
+  border: 2px solid yellow;
+  left: 0%;
+  top: 0;
+
+}
+
+
+.modal-info-attack-c2 {
+
+  width: 33.3%;
+  height: 100%;
+  border: 2px solid yellow;
+  left: 33.3%;
+  top: 0;
+  cursor: pointer;
+
+}
+
+
+.modal-info-attack-c3 {
+
+  width: 33.3%;
+  height: 100%;
+  border: 2px solid yellow;
+  left: 66.6%;
+  top: 0;
+
+}
