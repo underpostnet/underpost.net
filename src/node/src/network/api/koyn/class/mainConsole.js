@@ -1,5 +1,5 @@
 
-import { Util } from "../../../src/util/class/Util.js";
+import { Util } from "../../../../util/class/Util.js";
 import fs from "fs";
 import colors from "colors/safe.js";
 import var_dump from 'var_dump';

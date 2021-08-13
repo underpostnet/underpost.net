@@ -1,5 +1,5 @@
 import { Block } from "./block.js";
-import { Util } from "../../../../../src/util/class/Util.js";
+import { Util } from "../../../../util/class/Util.js";
 import SHA256 from "crypto-js/sha256.js";
 import fs from "fs";
 import colors from "colors/safe.js";
