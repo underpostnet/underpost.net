@@ -21,13 +21,13 @@
       notifiValidator.loader();
       contentPlayGrid.loader();
       cards.loader();
-      oldGallery.loader();
+      // oldGallery.loader();
     },
     render: async ()=>{
       notifiValidator.render();
       contentPlayGrid.render();
       cards.render();
-      oldGallery.render();
+      // oldGallery.render();
     }
   };
 
