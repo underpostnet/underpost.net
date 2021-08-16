@@ -11,44 +11,61 @@ export class Config {
 
   constructor() {}
 
-  async mainProcess(){
+  async mainProcess(obj){
+
+    /*
+    {
+      dataPathTemplate: './template.json',
+      dataPathSave: './underpost.json'
+    }
+    */
+
+    var data = JSON.parse(fs.readFileSync(obj.dataPathTemplate));
 
     console.log('config init');
 
-    // INCLUIR OPCION RESET VOLVER TODO A NULL
+    data.http_port = parseInt(await new ReadLine().r('http port: '));
+    data.ws_port = parseInt(await new ReadLine().r('ws port: '));
+
+    data.network_user.username = await new ReadLine().r('network user username: ');
+    data.network_user.email = await new ReadLine().r('network user email: ');
+    data.network_user.web = await new ReadLine().r('network user web: ');
+    data.network_user.bio = await new ReadLine().r('network user bio: ');
+
+    await !fs.existsSync(data.dataPath+'keys') ?
+    fs.mkdirSync(data.dataPath+'keys'):null;
+
+    let symmetricPass = await new ReadLine().h('symmetric key password: ');
+    data.symmetricKeys.push(await new Keys().generateSymmetricKeys({
+      passphrase: symmetricPass,
+      path: data.dataPath+'keys'
+    }));
+
+    let asymmetricPass = await new ReadLine().h('asymmetric key password: ');
+    data.asymmetricKeys.push(await new Keys().generateAsymmetricKeys({
+      passphrase: asymmetricPass,
+      path: data.dataPath+'keys'
+    }));
 
     /*
 
-    "http_port": null,
-    ws port
+    TODO:
 
-    "network_user": {
-      "username": null,
-      "email": null,
-      "web": null,
-      "bio": "underpost.net user",
-      "ip": null
-    },
+    Toda interaccion con passphrase debe pedirse in input
+    ( no se alamcena la passphrase )
 
-
-    "keys": {
-      "key_pass": null,
-      "current_key": null
-    },
-
-    "db":{
-      "username":null,
-      "password":null,
-      "host":null,
-      "port":null,
-      "database":null,
-      "key":null,
-      "iv":null
-    },
-
-
+    Habilitar ServerMods ->
+    "api-test.js"
+    "koyn/eval/service.js"
 
     */
+
+    data.secret_session = new Util().getHash();
+
+    await fs.writeFileSync(
+      obj.dataPathSave,
+      new Util().jsonSave(data)
+    );
 
   }
 

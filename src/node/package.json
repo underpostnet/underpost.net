@@ -1,0 +1,39 @@
+{
+  "name": "underpostServer",
+  "description": "underpost.net server",
+  "version": "1.1.0",
+  "main": null,
+  "scripts": {
+    "start": null,
+    "dev": null,
+    "console": null,
+    "update": null
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/underpostnet/underpost.net"
+  },
+  "keywords": [
+    "network",
+    "underpost.net",
+    "game",
+    "cards",
+    "koyn",
+    "blockchain"
+  ],
+  "author": "Francisco Verdugo <fcoverdugoa@underpost.net> (https://underpost.net/)",
+  "license": "MIT",
+  "homepage": "https://underpost.net",
+  "dependencies": {
+    "express": "latest",
+    "nodemon": "latest",
+    "var_dump": "latest",
+    "colors": "latest",
+    "express-session": "latest",
+    "crypto-js": "latest",
+    "file-get-contents": "latest",
+    "ws": "latest",
+    "node-fetch": "latest",
+    "shelljs": "latest"
+  }
+}
