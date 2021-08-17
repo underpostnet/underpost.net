@@ -8,7 +8,7 @@ for(let module_ of data.path[i].mainModules){
 
   let fix = module_.split('/').reverse()[0];
   main_loader_js += fix+'.loader(); ';
-  main_loader_js += fix+'.render(); ';
+  main_render_js += fix+'.render(); ';
 
 }
 
