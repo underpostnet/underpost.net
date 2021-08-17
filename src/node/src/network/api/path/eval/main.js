@@ -1,7 +1,7 @@
 for(let i=0; i<l(data.path);i++){
 	const suburl = data.path[i].url;
   app.get(suburl, function(req, res) {
-		
+
 		let infoHead = logHeader(req, res, data, i, true);
 		let lang = infoHead.lang;
 		let lang_id = infoHead.id;
@@ -20,6 +20,8 @@ for(let i=0; i<l(data.path);i++){
 		h2
 		fonts
 		renderMicrodata
+		main_loader_js
+		main_loader_js
 
 		*/
 
@@ -33,6 +35,9 @@ for(let i=0; i<l(data.path);i++){
 					data.const.token = '`+req.session.token+`';
 					data.const.lang = `+lang_id+`;
 		`);
+
+		mainJs = mainJs.replace('{{LOADER}}', main_loader_js);
+		mainJs = mainJs.replace('{{RENDER}}', main_render_js);
 
 		res.write((`
 

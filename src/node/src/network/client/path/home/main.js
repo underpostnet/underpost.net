@@ -18,16 +18,10 @@
 
   const global = {
     init: async ()=>{
-      notifiValidator.loader();
-      contentPlayGrid.loader();
-      cards.loader();
-      // oldGallery.loader();
+      {{LOADER}}
     },
     render: async ()=>{
-      notifiValidator.render();
-      contentPlayGrid.render();
-      cards.render();
-      // oldGallery.render();
+      {{RENDER}}
     }
   };
 
