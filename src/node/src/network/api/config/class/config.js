@@ -32,7 +32,7 @@ export class Config {
     data.network_user.web = await new ReadLine().r('network user web: ');
     data.network_user.bio = await new ReadLine().r('network user bio: ');
 
-    await !fs.existsSync(data.dataPath+'keys') ?
+    /* await !fs.existsSync(data.dataPath+'keys') ?
     fs.mkdirSync(data.dataPath+'keys'):null;
 
     let symmetricPass = await new ReadLine().h('symmetric key password: ');
@@ -45,7 +45,7 @@ export class Config {
     data.asymmetricKeys.push(await new Keys().generateAsymmetricKeys({
       passphrase: asymmetricPass,
       path: data.dataPath+'keys'
-    }));
+    })); */
 
     /*
 
@@ -61,6 +61,8 @@ export class Config {
     */
 
     data.secret_session = new Util().getHash();
+
+    data.reset = false;
 
     await fs.writeFileSync(
       obj.dataPathSave,

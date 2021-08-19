@@ -641,6 +641,81 @@ var max = Math.max( ...arr );
 	return num;
 };
 
+ checkRut(rut) {
+
+    // Despejar Puntos
+    let valor = (''+rut).replace(/./g,'');
+    // Despejar Guión
+    valor = valor.replace('-','');
+
+    // Aislar Cuerpo y Dígito Verificador
+    let cuerpo = valor.slice(0,-1);
+    let dv = valor.slice(-1).toUpperCase();
+
+    // Formatear RUN
+    // rut.value = cuerpo + '-'+ dv
+
+    // Si no cumple con el mínimo ej. (n.nnn.nnn)
+    if(cuerpo.length < 7) { return { success: false }; }
+
+    // Calcular Dígito Verificador
+    let suma = 0;
+    let multiplo = 2;
+
+    // Para cada dígito del Cuerpo
+    for(let i=1;i<=cuerpo.length;i++) {
+
+        // Obtener su Producto con el Múltiplo Correspondiente
+        let index = multiplo * valor.charAt(cuerpo.length - i);
+
+        // Sumar al Contador General
+        suma = suma + index;
+
+        // Consolidar Múltiplo dentro del rango [2,7]
+        if(multiplo < 7) { multiplo = multiplo + 1; } else { multiplo = 2; }
+
+    }
+
+    // Calcular Dígito Verificador en base al Módulo 11
+    let dvEsperado = 11 - (suma % 11);
+
+    // Casos Especiales (0 y K)
+    dv = (dv == 'K')?10:dv;
+    dv = (dv == 0)?11:dv;
+
+    // Validar que el Cuerpo coincide con su Dígito Verificador
+    if(dvEsperado != dv) { return { success: false }; }
+
+		dv == 10 ? dv = 'k' : null;
+		dv == 11 ? dv =  0  : null;
+
+    // Si todo sale bien, eliminar errores (decretar que es válido)
+    return {
+			success: true,
+			value: (cuerpo+'-'+dv)
+		};
+  }
+
+	// existe attr sea cual sea el valor
+	 existAttr(obj, attr){
+		return obj.hasOwnProperty(attr);
+	}
+
+// Object.keys({data: "asd", jola:33})
+// (2) ["data", "jola"]
+
+   getKeys(obj){
+		return Object.keys(obj);
+	}
+
+	 fusionObj(listObj){
+		let returnObj = {};
+		for(let obj of listObj){
+			returnObj = Object.assign(returnObj, obj);
+		}
+		return returnObj;
+	}
+
 
         }
 

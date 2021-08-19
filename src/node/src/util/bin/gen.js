@@ -18,6 +18,9 @@ util = util.replace("const timer = ms => new Promise(res => setTimeout(res, ms))
 
 `);
 
+
+util = util.replace(`(''+rut).replaceAll('.','');`, `(''+rut).replace(/./g,'');`);
+
 util = util.replace("chr4(){", "function chr4(){");
 
 const str_fix = `str_test(str, type) {
