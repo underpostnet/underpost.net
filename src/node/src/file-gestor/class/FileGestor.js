@@ -23,8 +23,8 @@ export class FileGestor {
 
 
 
-        //- KOYN-KEYS ----------------------------------------------------------
-        case 'koyn-keys':
+        //- symmetricKeys -----------
+        case 'asymmetricKeys':
           function rowKoynKey(file, pathKoyn) {
 
             this.name = file;
@@ -80,7 +80,9 @@ export class FileGestor {
 
     console.log(colors.yellow("\n > "+new Util().tu(obj.title)+' | '+obj.path));
     // table.push({});
-    console.table(table);
+    new Util().l(table) > 0 ?
+    console.table(table):
+    consle.log('Empty Directory');
   }
 
 }
