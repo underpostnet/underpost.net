@@ -82,7 +82,7 @@ export class FileGestor {
     // table.push({});
     new Util().l(table) > 0 ?
     console.table(table):
-    consle.log('Empty Directory');
+    console.log('Empty Directory');
   }
 
 }
