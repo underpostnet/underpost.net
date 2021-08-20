@@ -28,7 +28,7 @@ export class UnderPostManager {
 
         data.underpostClientPath = this.mainDir+'/underpost/underpost-library/';
         data.underpostServerPath = this.mainDir+'/underpost/underpost.net/src/node/src/';
-        data.dataPath = this.mainDir+'/data/');
+        data.dataPath = this.mainDir+'/data/';
 
         data.serverPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/api/';
         data.clientPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/client/';
@@ -79,7 +79,7 @@ export class UnderPostManager {
     };
 
     const updateTemplate = () => {
-      
+
       let mainData = JSON.parse(
         fs.readFileSync(this.mainDir+'/data/underpost.json');
       );
