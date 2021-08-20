@@ -30,7 +30,7 @@ export class UnderPostManager {
         data.staticPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/static/';
 
         fs.writeFileSync(
-          this.mainDir+'/src/app.js',
+          this.mainDir+'/app.js',
           fs.readFileSync(
               this.mainDir+'/underpost/underpost.net/src/node/src/network/api/appServer.js',
               this.charset
