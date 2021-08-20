@@ -113,7 +113,7 @@ export class UnderPostManager {
       ]);
 
       mainData.reset ?
-      mainData = initConfig(mainData) : null ;
+      mainData = await initConfig(mainData) : null ;
 
       fs.writeFileSync(
         this.mainDir+'/data/underpost.json',
