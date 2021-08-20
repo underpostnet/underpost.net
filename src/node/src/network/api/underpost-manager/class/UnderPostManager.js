@@ -14,6 +14,7 @@ export class UnderPostManager {
   constructor(mainDir) {
     this.mainDir = mainDir;
     this.charset = 'utf8';
+    this.forceExit = false;
   }
 
   async init(){
@@ -27,6 +28,14 @@ export class UnderPostManager {
         data.serverPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/api/';
         data.clientPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/client/';
         data.staticPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/static/';
+
+        fs.writeFileSync(
+          this.mainDir+'/src/app.js',
+          fs.readFileSync(
+              this.mainDir+'/underpost/underpost.net/src/node/src/network/api/appServer.js',
+              this.charset
+          ).replace('{{path}}', this.mainDir),
+          this.charset);
 
         for(let module_ of [
         'microdata.json',
@@ -79,7 +88,7 @@ export class UnderPostManager {
       data.secret_session = new Util().getHash();
 
       data.reset = false;
-      forceExit = true;
+      this.forceExit = true;
 
       return data;
 
@@ -131,8 +140,6 @@ export class UnderPostManager {
       fs.readFileSync(this.mainDir+'/underpost/underpost-data-template/underpost.json')
     );
 
-    let forceExit = false;
-
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
@@ -145,20 +152,14 @@ export class UnderPostManager {
       await newTemplate();
     }
 
-    if(forceExit){
-      try {
-        process.exit();
-      }catch(err){
-        console.log(err);
-      }
-    }
+    this.exit();
 
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
   }
 
-  keysGestor(){
+  async keysGestor(){
 
     // await !fs.existsSync(data.dataPath+'keys') ?
     // fs.mkdirSync(data.dataPath+'keys'):null;
@@ -198,6 +199,17 @@ export class UnderPostManager {
     } */
 
 
+  }
+
+
+  exit(){
+    if(this.forceExit){
+      try {
+        process.exit();
+      }catch(err){
+        console.log(err);
+      }
+    }
   }
 
 }
