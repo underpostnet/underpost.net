@@ -148,7 +148,8 @@ export class UnderPostManager {
       await newTemplate();
     }
 
-    process.exit();
+    process._getActiveHandles();
+    process._getActiveRequests();
 
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
