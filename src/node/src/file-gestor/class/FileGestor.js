@@ -3,6 +3,7 @@ import { Util } from "../../util/class/Util.js";
 import fs from "fs";
 import colors from "colors/safe.js";
 import readline from 'readline';
+import path from 'path';
 
 export class FileGestor {
 
@@ -10,6 +11,16 @@ export class FileGestor {
 
   }
 
+  dir(toPath){
+  	switch (toPath) {
+  		case undefined:
+  				return __dirname.replace(/\\/g, '/');
+  			  break;
+  		default:
+  			  return path.join(__dirname, toPath).replace(/\\/g, '/')
+  			  break;
+  	}
+  }
 
   async logReadDirectory(obj){
     let table = [];
