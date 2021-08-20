@@ -143,9 +143,9 @@ export class UnderPostManager {
       mainData = JSON.parse(
         fs.readFileSync(this.mainDir+'/data/underpost.json')
       );
-      updateTemplate();
+      await updateTemplate();
     }else{
-      newTemplate();
+      await newTemplate();
     }
 
     console.log('end');
