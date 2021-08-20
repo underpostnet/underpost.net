@@ -18,12 +18,6 @@ export class UnderPostManager {
 
   async init(){
 
-    await this.setDataTemplate();
-
-  }
-
-  async setDataTemplate(){
-
     const updateDataPaths = data => {
 
         data.underpostClientPath = this.mainDir+'/underpost/underpost-library/';
@@ -47,8 +41,10 @@ export class UnderPostManager {
            );
 
            let type = module_.split('.').reverse()[0];
+
            switch (type) {
              case 'json':
+                 originPath = JSON.parse(originPath);
                  fs.writeFileSync(
                    this.mainDir+'/data/'+module_,
                    new Util().jsonSave(originPath),
@@ -70,33 +66,66 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
-    const newTemplate = () => {
+    const initConfig = async data => {
+
+      data.http_port = parseInt(await new ReadLine().r('http port: '));
+      data.ws_port = parseInt(await new ReadLine().r('ws port: '));
+
+      data.network_user.username = await new ReadLine().r('network user username: ');
+      data.network_user.email = await new ReadLine().r('network user email: ');
+      data.network_user.web = await new ReadLine().r('network user web: ');
+      data.network_user.bio = await new ReadLine().r('network user bio: ');
+
+      data.secret_session = new Util().getHash();
+
+      data.reset = false;
+
+      return data;
+
+    };
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
+    const newTemplate = async () => {
+
+      console.log("newTemplate  ->");
 
       fs.mkdirSync(this.mainDir+'/data');
+
       dataTemplate = updateDataPaths(dataTemplate);
-      console.log('init config');
+      dataTemplate = await initConfig(dataTemplate);
+
+      fs.writeFileSync(
+        this.mainDir+'/data/underpost.json',
+        new Util().jsonSave(dataTemplate),
+        this.charset);
 
     };
 
     const updateTemplate = () => {
 
-      let mainData = JSON.parse(
-        fs.readFileSync(this.mainDir+'/data/underpost.json')
-      );
+      console.log("updateTemplate  ->");
+
       mainData = updateDataPaths(mainData);
       mainData = new Util().fusionObj([
-        mainData, dataTemplate
+        dataTemplate, mainData
       ]);
 
       mainData.reset ?
-      console.log('init config') :
-      console.log('update success') ;
+      mainData = initConfig(mainData) : null ;
+
+      fs.writeFileSync(
+        this.mainDir+'/data/underpost.json',
+        new Util().jsonSave(mainData),
+        this.charset);
 
     };
 
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
+    let mainData = {};
     let dataTemplate = JSON.parse(
       fs.readFileSync(this.mainDir+'/underpost/underpost-data-template/underpost.json')
     );
@@ -104,39 +133,17 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
-    ! fs.existsSync(this.mainDir+'/data') ?
-    newTemplate() :
-    null ;
+    if(fs.existsSync(this.mainDir+'/data')){
+      mainData = JSON.parse(
+        fs.readFileSync(this.mainDir+'/data/underpost.json')
+      );
+      updateTemplate();
+    }else{
+      newTemplate();
+    }
 
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
-
-  }
-
-  async initConfig(){
-
-    var dataSave = JSON.parse(fs.readFileSync(
-      this.mainDir+'/data/underpost.json'
-    ));
-
-    console.log('config init');
-
-    dataSave.http_port = parseInt(await new ReadLine().r('http port: '));
-    dataSave.ws_port = parseInt(await new ReadLine().r('ws port: '));
-
-    dataSave.network_user.username = await new ReadLine().r('network user username: ');
-    dataSave.network_user.email = await new ReadLine().r('network user email: ');
-    dataSave.network_user.web = await new ReadLine().r('network user web: ');
-    dataSave.network_user.bio = await new ReadLine().r('network user bio: ');
-
-    dataSave.secret_session = new Util().getHash();
-
-    dataSave.reset = false;
-
-    await fs.writeFileSync(
-      this.mainDir+'/data/underpost.json',
-      new Util().jsonSave(dataSave)
-    );
 
   }
 
