@@ -98,7 +98,7 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
 
     let dataTemplate = JSON.parse(
-      fs.readFileSync(this.mainDir+'/underpost/underpost-data-template/underpost.json');
+      fs.readFileSync(this.mainDir+'/underpost/underpost-data-template/underpost.json')
     );
 
     //--------------------------------------------------------------------------
