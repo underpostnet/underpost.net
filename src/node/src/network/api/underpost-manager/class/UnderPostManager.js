@@ -103,7 +103,7 @@ export class UnderPostManager {
 
     };
 
-    const updateTemplate = () => {
+    const updateTemplate = async () => {
 
       console.log("updateTemplate  ->");
 
