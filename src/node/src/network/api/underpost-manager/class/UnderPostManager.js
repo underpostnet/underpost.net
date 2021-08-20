@@ -79,6 +79,7 @@ export class UnderPostManager {
       data.secret_session = new Util().getHash();
 
       data.reset = false;
+      forceExit = true;
 
       return data;
 
@@ -130,6 +131,8 @@ export class UnderPostManager {
       fs.readFileSync(this.mainDir+'/underpost/underpost-data-template/underpost.json')
     );
 
+    let forceExit = false;
+
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
@@ -142,10 +145,12 @@ export class UnderPostManager {
       await newTemplate();
     }
 
-    try {
-      process.exit();
-    }catch(err){
-      console.log(err);
+    if(forceExit){
+      try {
+        process.exit();
+      }catch(err){
+        console.log(err);
+      }
     }
 
     //--------------------------------------------------------------------------
