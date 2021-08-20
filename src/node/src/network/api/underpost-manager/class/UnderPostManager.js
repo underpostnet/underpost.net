@@ -81,7 +81,7 @@ export class UnderPostManager {
     const updateTemplate = () => {
 
       let mainData = JSON.parse(
-        fs.readFileSync(this.mainDir+'/data/underpost.json');
+        fs.readFileSync(this.mainDir+'/data/underpost.json')
       );
       mainData = updateDataPaths(mainData);
       mainData = new Util().fusionObj([
