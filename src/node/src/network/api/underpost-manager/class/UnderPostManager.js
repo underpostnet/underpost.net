@@ -11,18 +11,112 @@ import path from "path";
 
 export class UnderPostManager {
 
-  constructor(dataDir) {
-    this.dataDir = dataDir;
+  constructor(mainDir) {
+    this.mainDir = mainDir;
+    this.charset = 'utf8';
   }
 
-  init(){
-    console.log(this.dataDir);
+  async init(){
+
+    await this.setDataTemplate();
+
+  }
+
+  async setDataTemplate(){
+
+    const updateDataPaths = data => {
+
+        data.underpostClientPath = this.mainDir+'/underpost/underpost-library/';
+        data.underpostServerPath = this.mainDir+'/underpost/underpost.net/src/node/src/';
+        data.dataPath = this.mainDir+'/data/');
+
+        data.serverPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/api/';
+        data.clientPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/client/';
+        data.staticPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/static/';
+
+        for(let module_ of [
+        'microdata.json',
+        'serverMods.json',
+        'underpostMods.json',
+        'robots.txt'
+         ]){
+
+           let originPath = fs.readFileSync(
+               this.mainDir+'/underpost/underpost-data-template/'+module_,
+               this.charset
+           );
+
+           let type = module_.split('.').reverse()[0];
+           switch (type) {
+             case 'json':
+                 fs.writeFileSync(
+                   this.mainDir+'/data/'+module_,
+                   new Util().jsonSave(originPath),
+                   this.charset);
+               break;
+             default:
+                 fs.writeFileSync(
+                   this.mainDir+'/data/'+module_,
+                   originPath,
+                   this.charset);
+
+           }
+        }
+
+        return data;
+
+    };
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
+    const newTemplate = () => {
+
+      fs.mkdirSync(this.mainDir+'/data');
+      dataTemplate = updateDataPaths(dataTemplate);
+      console.log('init config');
+
+    };
+
+    const updateTemplate = () => {
+      
+      let mainData = JSON.parse(
+        fs.readFileSync(this.mainDir+'/data/underpost.json');
+      );
+      mainData = updateDataPaths(mainData);
+      mainData = new Util().fusionObj([
+        mainData, dataTemplate
+      ]);
+
+      mainData.reset ?
+      console.log('init config') :
+      console.log('update success') ;
+
+    };
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
+    let dataTemplate = JSON.parse(
+      fs.readFileSync(this.mainDir+'/underpost/underpost-data-template/underpost.json');
+    );
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
+    ! fs.existsSync(this.mainDir+'/data') ?
+    newTemplate() :
+    null ;
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
   }
 
   async initConfig(){
 
     var dataSave = JSON.parse(fs.readFileSync(
-      this.dataDir+'/data/underpost.json'
+      this.mainDir+'/data/underpost.json'
     ));
 
     console.log('config init');
@@ -40,7 +134,7 @@ export class UnderPostManager {
     dataSave.reset = false;
 
     await fs.writeFileSync(
-      this.dataDir+'/data/underpost.json',
+      this.mainDir+'/data/underpost.json',
       new Util().jsonSave(dataSave)
     );
 
