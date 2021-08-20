@@ -100,10 +100,7 @@ export class UnderPostManager {
         this.mainDir+'/data/underpost.json',
         new Util().jsonSave(dataTemplate),
         this.charset);
-
-
-        return;
-
+        
     };
 
     const updateTemplate = async () => {
@@ -122,9 +119,6 @@ export class UnderPostManager {
         this.mainDir+'/data/underpost.json',
         new Util().jsonSave(mainData),
         this.charset);
-
-
-        return;
 
     };
 
@@ -148,8 +142,7 @@ export class UnderPostManager {
       await newTemplate();
     }
 
-    process._getActiveHandles();
-    process._getActiveRequests();
+    return;
 
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
