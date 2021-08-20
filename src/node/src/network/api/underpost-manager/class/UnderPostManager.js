@@ -101,6 +101,9 @@ export class UnderPostManager {
         new Util().jsonSave(dataTemplate),
         this.charset);
 
+
+        return;
+
     };
 
     const updateTemplate = async () => {
@@ -119,6 +122,9 @@ export class UnderPostManager {
         this.mainDir+'/data/underpost.json',
         new Util().jsonSave(mainData),
         this.charset);
+
+
+        return;
 
     };
 
