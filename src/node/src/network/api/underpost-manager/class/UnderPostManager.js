@@ -9,14 +9,14 @@ import colors from "colors/safe.js";
 import var_dump from "var_dump";
 import path from "path";
 
-export class MainConsole {
+export class UnderPostManager {
 
-  constructor(dir) {
-    this.dataDir = dir;
+  constructor(dataDir) {
+    this.dataDir = dataDir;
   }
 
   init(){
-    console.log(path.join(__dirname, '..'));
+    console.log(this.dataDir);
   }
 
   async initConfig(){
