@@ -10,6 +10,8 @@ export class Paint {
 
     console.log(colors.yellow(`
 
+    UNDERpost.net Manager Console v1.0.0
+
     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     @@@@@@@@@@@@@@*  #@@@@@@@@@@@@@   @@@@@@@@@@@@@@@@
@@ -56,9 +58,9 @@ export class Paint {
   }
 
   underpostReset(){
-    console.clear();
-    this.underpostBar();
-    this.underpostBanner();
+    // console.clear();
+    // this.underpostBar();
+    // this.underpostBanner();
     this.underpostBar();
   }
 

@@ -9,16 +9,22 @@ import colors from "colors/safe.js";
 import readline from 'readline';
 import path from 'path';
 
+// agregar arriba en el banenr undeprost.net v1.0.0
+// acambar nomnre a navi
 
-export class Menu {
+export class Navi {
 
   constructor() {
 
   }
 
-  async numOption(obj){
+  async init(obj){
 
     new Paint().underpostView(obj.title);
+
+    if(obj.preView != null){
+      await obj.preView();
+    }
 
     let input = null;
     let index = 1;
@@ -45,7 +51,7 @@ export class Menu {
       if(parseInt(input)==i){
         await obj.options[i-1].fn();
         obj.postMsg = null;
-        await this.numOption(obj);
+        await this.init(obj);
         break;
       }
     }
@@ -55,7 +61,7 @@ export class Menu {
       index: 'error',
       msg: 'option not valid'
     };
-    await this.numOption(obj);
+    await this.init(obj);
 
   }
 

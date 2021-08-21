@@ -3,7 +3,7 @@ import { Util } from "../../../../util/class/Util.js";
 import { Keys } from "../../../../keys/class/Keys.js";
 import { ReadLine } from "../../../../read-line/class/ReadLine.js";
 import { FileGestor } from "../../../../file-gestor/class/FileGestor.js";
-import { Menu } from "../../../../menu/class/Menu.js";
+import { Navi } from "../../../../navi/class/Navi.js";
 import { Paint } from "../../../../paint/class/paint.js";
 
 import fs from "fs";
@@ -18,6 +18,8 @@ export class UnderPostManager {
     this.mainDir = mainDir;
     this.charset = 'utf8';
     this.forceExit = false;
+
+    new Paint().underpostBanner();
 
   }
 
@@ -81,7 +83,7 @@ export class UnderPostManager {
 
     const initConfig = async data => {
 
-      new Paint().underpostView("User Preferences Settings");
+      new Paint().underpostView("Set User Settings");
 
       data.http_port = parseInt(await new ReadLine().r(
         new Paint().underpostInput('http port')));
@@ -100,8 +102,6 @@ export class UnderPostManager {
 
       data.network_user.bio = await new ReadLine().r(
         new Paint().underpostInput('network user bio'));
-
-      data.secret_session = new Util().getHash();
 
       data.reset = false;
       this.forceExit = true;
@@ -123,18 +123,23 @@ export class UnderPostManager {
       dataTemplate = updateDataPaths(dataTemplate);
       dataTemplate = await initConfig(dataTemplate);
 
+      dataTemplate.secret_session = new Util().getHash();
+
       fs.writeFileSync(
         this.mainDir+'/data/underpost.json',
         new Util().jsonSave(dataTemplate),
         this.charset);
 
-      mainData = JSON.parse(new Util().JSONstr(newTemplate));
+      mainData = JSON.parse(new Util().JSONstr(dataTemplate));
 
     };
 
     const updateTemplate = async () => {
 
       new Paint().underpostOption('yellow', ' ', "Update Template ...");
+
+      ! fs.existsSync(this.mainDir+'/data/keys') ?
+      fs.mkdirSync(this.mainDir+'/data/keys') : null;
 
       mainData = updateDataPaths(mainData);
       mainData = new Util().fusionObj([
@@ -149,6 +154,85 @@ export class UnderPostManager {
         new Util().jsonSave(mainData),
         this.charset);
 
+    };
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
+    const symmetricKeysGestor = async () => {
+      await new Navi().init({
+        title: 'Symmetric Keys Gestor',
+        preView: async () => {
+          console.log(' > keys view testing...');
+        },
+        options: [
+          {
+            text: 'Create Key',
+            fn: async ()=>{
+
+            }
+          },
+          {
+            text: 'Delete Key',
+            fn: async ()=>{
+
+            }
+          },
+          {
+            text: 'View Key',
+            fn: async ()=>{
+
+            }
+          },
+          {
+            text: 'Back Keys Manager',
+            fn: async ()=>{
+              await keysManager();
+            }
+          },
+          {
+            text: 'Exit',
+            fn: async ()=>{
+              this.forceExit = true;
+              this.exit();
+            }
+          }
+        ]
+      });
+    };
+
+    const keysManager = async () => {
+      await new Navi().init({
+        title: 'Keys Manager',
+        preView: null,
+        options: [
+          {
+            text: 'Symmetric Keys Gestor',
+            fn: async ()=>{
+              await symmetricKeysGestor();
+            }
+          },
+          {
+            text: 'Asymmetric Keys Gestor',
+            fn: async ()=>{
+
+            }
+          },
+          {
+            text: 'Back Main Console Menu',
+            fn: async ()=>{
+              await this.init();
+            }
+          },
+          {
+            text: 'Exit',
+            fn: async ()=>{
+              this.forceExit = true;
+              this.exit();
+            }
+          }
+        ]
+      });
     };
 
     //--------------------------------------------------------------------------
@@ -180,18 +264,25 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
-    await new Menu().numOption({
-      title: 'UNDERpost.net Manager Console v1.1.0',
+    await new Navi().init({
+      title: 'Main Console Menu',
+      preView: null,
       options: [
         {
-          text: 'set user settings',
+          text: 'Set User Settings',
           fn: async ()=>{
             mainData.reset = true;
             await updateTemplate();
           }
         },
         {
-          text: 'exit',
+          text: 'Keys Manager',
+          fn: async ()=>{
+            await keysManager();
+          }
+        },
+        {
+          text: 'Exit',
           fn: async ()=>{
             this.forceExit = true;
             this.exit();
