@@ -79,15 +79,25 @@ export class UnderPostManager {
 
     const initConfig = async data => {
 
-      new Paint().underpostOption('', "User Preferences Settings :");
+      new Paint().underpostOption('yellow', ' ', "User Preferences Settings: ");
 
-      data.http_port = parseInt(await new ReadLine().r('http port: '));
-      data.ws_port = parseInt(await new ReadLine().r('ws port: '));
+      data.http_port = parseInt(await new ReadLine().r(
+        new Paint().underpostInput('http port')));
 
-      data.network_user.username = await new ReadLine().r('network user username: ');
-      data.network_user.email = await new ReadLine().r('network user email: ');
-      data.network_user.web = await new ReadLine().r('network user web: ');
-      data.network_user.bio = await new ReadLine().r('network user bio: ');
+      data.ws_port = parseInt(await new ReadLine().r(
+        new Paint().underpostInput('port')));
+
+      data.network_user.username = await new ReadLine().r(
+        new Paint().underpostInput('network user username'));
+
+      data.network_user.email = await new ReadLine().r(
+        new Paint().underpostInput('network user email'));
+
+      data.network_user.web = await new ReadLine().r(
+        new Paint().underpostInput('network user web'));
+
+      data.network_user.bio = await new ReadLine().r(
+        new Paint().underpostInput('network user bio'));
 
       data.secret_session = new Util().getHash();
 
@@ -103,9 +113,10 @@ export class UnderPostManager {
 
     const newTemplate = async () => {
 
-      new Paint().underpostOption('', "Install Template ...");
+      new Paint().underpostOption('yellow', ' ', "Install Template ...");
 
-      fs.mkdirSync(this.mainDir+'/data');
+      ! fs.existsSync(this.mainDir+'/data') ?
+      fs.mkdirSync(this.mainDir+'/data') : null;
 
       dataTemplate = updateDataPaths(dataTemplate);
       dataTemplate = await initConfig(dataTemplate);
@@ -119,7 +130,7 @@ export class UnderPostManager {
 
     const updateTemplate = async () => {
 
-      new Paint().underpostOption('', "Update Template ...");
+      new Paint().underpostOption('yellow', ' ', "Update Template ...");
 
       mainData = updateDataPaths(mainData);
       mainData = new Util().fusionObj([
@@ -147,18 +158,25 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
-    if(fs.existsSync(this.mainDir+'/data')){
-      mainData = JSON.parse(
-        fs.readFileSync(this.mainDir+'/data/underpost.json')
-      );
-      await updateTemplate();
+    if(
+      fs.existsSync(this.mainDir+'/data')
+      &&
+      fs.existsSync(this.mainDir+'/data/underpost.json')
+    ){
+
+        mainData = JSON.parse(
+          fs.readFileSync(this.mainDir+'/data/underpost.json')
+        );
+        await updateTemplate();
+
     }else{
       await newTemplate();
     }
 
-    new Menu().numOption({
+    await new Menu().numOption({
       title: 'UNDERpost.net Manager Console v1.1.0',
-      options: ['update', 'user setting']
+      options: ['update system', 'set user info', 'reset system', 'exit'],
+      postMsg: null
     });
 
     this.exit();

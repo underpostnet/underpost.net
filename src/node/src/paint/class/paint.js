@@ -49,9 +49,9 @@ export class Paint {
 
   }
 
-  underpostOption(ind, content){
+  underpostOption(color, ind, content){
 
-    console.log(colors.yellow(' '+ind+' > '+content));
+    console.log(colors[color](' '+ind+' > '+content));
 
   }
 
@@ -60,6 +60,18 @@ export class Paint {
     this.underpostBar();
     console.log(colors.yellow(' '+title));
     this.underpostBar();
+
+  }
+
+  underpostError(msg){
+
+    console.log(colors.red(' error > '+msg));
+
+  }
+
+  underpostInput(text){
+
+    return '   > '+text+': ';
 
   }
 
