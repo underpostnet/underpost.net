@@ -14,9 +14,11 @@ import path from "path";
 export class UnderPostManager {
 
   constructor(mainDir) {
+
     this.mainDir = mainDir;
     this.charset = 'utf8';
     this.forceExit = false;
+
   }
 
   async init(){
@@ -79,13 +81,13 @@ export class UnderPostManager {
 
     const initConfig = async data => {
 
-      new Paint().underpostOption('yellow', ' ', "User Preferences Settings: ");
+      new Paint().underpostView("User Preferences Settings");
 
       data.http_port = parseInt(await new ReadLine().r(
         new Paint().underpostInput('http port')));
 
       data.ws_port = parseInt(await new ReadLine().r(
-        new Paint().underpostInput('port')));
+        new Paint().underpostInput('ws port')));
 
       data.network_user.username = await new ReadLine().r(
         new Paint().underpostInput('network user username'));
@@ -125,6 +127,8 @@ export class UnderPostManager {
         this.mainDir+'/data/underpost.json',
         new Util().jsonSave(dataTemplate),
         this.charset);
+
+      mainData = JSON.parse(new Util().JSONstr(newTemplate));
 
     };
 
@@ -173,9 +177,27 @@ export class UnderPostManager {
       await newTemplate();
     }
 
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
+
     await new Menu().numOption({
       title: 'UNDERpost.net Manager Console v1.1.0',
-      options: ['update system', 'set user info', 'reset system', 'exit'],
+      options: [
+        {
+          text: 'set user settings',
+          fn: async ()=>{
+            mainData.reset = true;
+            await updateTemplate();
+          }
+        },
+        {
+          text: 'exit',
+          fn: async ()=>{
+            this.forceExit = true;
+            this.exit();
+          }
+        }
+      ],
       postMsg: null
     });
 
