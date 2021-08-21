@@ -3,6 +3,8 @@ import { Util } from "../../../../util/class/Util.js";
 import { Keys } from "../../../../keys/class/Keys.js";
 import { ReadLine } from "../../../../read-line/class/ReadLine.js";
 import { FileGestor } from "../../../../file-gestor/class/FileGestor.js";
+import { Menu } from "../../../../menu/class/Menu.js";
+import { Paint } from "../../../../paint/class/paint.js";
 
 import fs from "fs";
 import colors from "colors/safe.js";
@@ -77,6 +79,8 @@ export class UnderPostManager {
 
     const initConfig = async data => {
 
+      new Paint().underpostOption('', "User Preferences Settings :");
+
       data.http_port = parseInt(await new ReadLine().r('http port: '));
       data.ws_port = parseInt(await new ReadLine().r('ws port: '));
 
@@ -99,7 +103,7 @@ export class UnderPostManager {
 
     const newTemplate = async () => {
 
-      console.log("newTemplate  ->");
+      new Paint().underpostOption('', "Install Template ...");
 
       fs.mkdirSync(this.mainDir+'/data');
 
@@ -115,7 +119,7 @@ export class UnderPostManager {
 
     const updateTemplate = async () => {
 
-      console.log("updateTemplate  ->");
+      new Paint().underpostOption('', "Update Template ...");
 
       mainData = updateDataPaths(mainData);
       mainData = new Util().fusionObj([
@@ -151,6 +155,11 @@ export class UnderPostManager {
     }else{
       await newTemplate();
     }
+
+    new Menu().numOption({
+      title: 'UNDERpost.net Manager Console v1.1.0',
+      options: ['update', 'user setting']
+    });
 
     this.exit();
 
