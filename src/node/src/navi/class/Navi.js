@@ -20,10 +20,14 @@ export class Navi {
 
   async init(obj){
 
+    if(obj.preTitle != null){
+      await obj.preTitle();
+    }
+
     new Paint().underpostTextBotbar(obj.title);
 
-    if(obj.preView != null){
-      await obj.preView();
+    if(obj.postTitle != null){
+      await obj.postTitle();
     }
 
     let input = null;

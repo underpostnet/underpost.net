@@ -163,7 +163,7 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
 
     const KEYS = {
-      create: async () => {
+      createSymmetric: async () => {
 
         let tempData = JSON.parse(fs.readFileSync(
           this.mainDir+'/data/underpost.json',
@@ -175,6 +175,8 @@ export class UnderPostManager {
         );
 
         new Paint().underpostOption('yellow', ' ', 'Generating Keys ...');
+
+        new Paint().underpostBar();
 
         tempData.symmetricKeys.push(await new Keys().generateSymmetricKeys({
           passphrase: symmetricPass,
@@ -194,15 +196,21 @@ export class UnderPostManager {
 
     const symmetricKeysGestor = async () => {
       await new Navi().init({
+        preTitle: null,
         title: 'Symmetric Keys Gestor',
-        preView: async () => {
-          console.log('test preView');
+        postTitle: async () => {
+          await new FileGestor().logReadDirectory({
+              path: this.mainDir+'/data/keys/symmetric',
+              recursiveFolder: true,
+              displayFolder: false,
+              type: 'keys'
+          });
         },
         options: [
           {
             text: 'Create Key',
             fn: async ()=>{
-              await KEYS.create();
+              await KEYS.createSymmetric();
             }
           },
           {
@@ -236,8 +244,9 @@ export class UnderPostManager {
 
     const keysManager = async () => {
       await new Navi().init({
+        preTitle: null,
         title: 'Keys Manager',
-        preView: null,
+        postTitle: null,
         options: [
           {
             text: 'Symmetric Keys Gestor',
@@ -269,10 +278,12 @@ export class UnderPostManager {
     };
 
     const mainConsoleMenu = async () => {
-      await this.underpostActiveUserLog();
       await new Navi().init({
+        preTitle: async ()=>{
+          await this.underpostActiveUserLog();
+        },
         title: 'Main Console Menu',
-        preView: null,
+        postTitle: null,
         options: [
           {
             text: 'Set User Settings',

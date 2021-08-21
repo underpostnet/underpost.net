@@ -61,17 +61,17 @@ export class Keys {
 
     let time = (+ new Date());
 
-    await !fs.existsSync(obj.path+'/symmetrict') ?
-    fs.mkdirSync(obj.path+'/symmetrict'):null;
+    await !fs.existsSync(obj.path+'/symmetric') ?
+    fs.mkdirSync(obj.path+'/symmetric'):null;
 
-    await !fs.existsSync(obj.path+'/symmetrict/'+time) ?
-    fs.mkdirSync(obj.path+'/symmetrict/'+time):null;
-
-    await fs.writeFileSync(
-      obj.path+'/symmetrict/'+time+'/key.json', new Util().JSONstr(key.toString()));
+    await !fs.existsSync(obj.path+'/symmetric/'+time) ?
+    fs.mkdirSync(obj.path+'/symmetric/'+time):null;
 
     await fs.writeFileSync(
-      obj.path+'/symmetrict/'+time+'/iv.json', new Util().JSONstr(iv.toString()));
+      obj.path+'/symmetric/'+time+'/key.json', new Util().JSONstr(key.toString()));
+
+    await fs.writeFileSync(
+      obj.path+'/symmetric/'+time+'/iv.json', new Util().JSONstr(iv.toString()));
 
     return time;
 
@@ -97,16 +97,16 @@ export class Keys {
 
         let time = (+ new Date());
 
-        await !fs.existsSync(obj.path+'/asymmetrict') ?
-        fs.mkdirSync(obj.path+'/asymmetrict'):null;
+        await !fs.existsSync(obj.path+'/asymmetric') ?
+        fs.mkdirSync(obj.path+'/asymmetric'):null;
 
-        await !fs.existsSync(obj.path+'/asymmetrict/'+time) ?
-        fs.mkdirSync(obj.path+'/asymmetrict/'+time):null;
+        await !fs.existsSync(obj.path+'/asymmetric/'+time) ?
+        fs.mkdirSync(obj.path+'/asymmetric/'+time):null;
 
-        await fs.writeFileSync(obj.path+'/asymmetrict/'+time+'/private.pem'
+        await fs.writeFileSync(obj.path+'/asymmetric/'+time+'/private.pem'
         , privateKey);
 
-        await fs.writeFileSync(obj.path+'/asymmetrict/'+time+'/public.pem'
+        await fs.writeFileSync(obj.path+'/asymmetric/'+time+'/public.pem'
         , publicKey);
 
         return time;
