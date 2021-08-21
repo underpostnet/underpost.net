@@ -25,6 +25,10 @@ export class UnderPostManager {
 
   async init(){
 
+    //--------------------------------------------------------------------------
+    // BASE
+    //--------------------------------------------------------------------------
+
     const updateDataPaths = data => {
 
         data.underpostClientPath = this.mainDir+'/underpost/underpost-library/';
@@ -117,12 +121,10 @@ export class UnderPostManager {
 
       new Paint().underpostOption('yellow', ' ', "Install Template ...");
 
-      ! fs.existsSync(this.mainDir+'/data') ?
-      fs.mkdirSync(this.mainDir+'/data') : null;
-
+      await this.dataFolderCheck();
       dataTemplate = updateDataPaths(dataTemplate);
-      dataTemplate = await initConfig(dataTemplate);
 
+      dataTemplate = await initConfig(dataTemplate);
       dataTemplate.secret_session = new Util().getHash();
 
       fs.writeFileSync(
@@ -138,14 +140,12 @@ export class UnderPostManager {
 
       new Paint().underpostOption('yellow', ' ', "Update Template ...");
 
-      ! fs.existsSync(this.mainDir+'/data/keys') ?
-      fs.mkdirSync(this.mainDir+'/data/keys') : null;
-
+      await this.dataFolderCheck();
       mainData = updateDataPaths(mainData);
+
       mainData = new Util().fusionObj([
         dataTemplate, mainData
       ]);
-
       mainData.reset ?
       mainData = await initConfig(mainData) : null ;
 
@@ -157,19 +157,50 @@ export class UnderPostManager {
     };
 
     //--------------------------------------------------------------------------
+    // KEYS FUNCTIONS
+    //--------------------------------------------------------------------------
+
+    const KEYS = {
+      create: async () => {
+
+        let tempData = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/underpost.json',
+          this.charset
+        ));
+
+        let symmetricPass = await new ReadLine().r(
+          new Paint().underpostInput('symmetric key password')
+        );
+
+        new Paint().underpostOption('yellow', ' ', 'Generating Keys ...');
+
+        tempData.symmetricKeys.push(await new Keys().generateSymmetricKeys({
+          passphrase: symmetricPass,
+          path: this.mainDir+'/data/keys'
+        }));
+
+        fs.writeFileSync(this.mainDir+'/data/underpost.json',
+        new Util().jsonSave(tempData),
+        this.charset);
+
+      }
+    };
+
+    //--------------------------------------------------------------------------
+    // NAVI
     //--------------------------------------------------------------------------
 
     const symmetricKeysGestor = async () => {
       await new Navi().init({
         title: 'Symmetric Keys Gestor',
         preView: async () => {
-          console.log(' > keys view testing...');
+          console.log('test preView');
         },
         options: [
           {
             text: 'Create Key',
             fn: async ()=>{
-
+              await KEYS.create();
             }
           },
           {
@@ -235,7 +266,38 @@ export class UnderPostManager {
       });
     };
 
+    const mainConsoleMenu = async () => {
+      await new Navi().init({
+        title: 'Main Console Menu',
+        preView: null,
+        options: [
+          {
+            text: 'Set User Settings',
+            fn: async ()=>{
+              mainData.reset = true;
+              await updateTemplate();
+            }
+          },
+          {
+            text: 'Keys Manager',
+            fn: async ()=>{
+              await keysManager();
+            }
+          },
+          {
+            text: 'Exit',
+            fn: async ()=>{
+              this.forceExit = true;
+              this.exit();
+            }
+          }
+        ],
+        postMsg: null
+      });
+    };
+
     //--------------------------------------------------------------------------
+    // INIT
     //--------------------------------------------------------------------------
 
     let mainData = {};
@@ -264,33 +326,7 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
-    await new Navi().init({
-      title: 'Main Console Menu',
-      preView: null,
-      options: [
-        {
-          text: 'Set User Settings',
-          fn: async ()=>{
-            mainData.reset = true;
-            await updateTemplate();
-          }
-        },
-        {
-          text: 'Keys Manager',
-          fn: async ()=>{
-            await keysManager();
-          }
-        },
-        {
-          text: 'Exit',
-          fn: async ()=>{
-            this.forceExit = true;
-            this.exit();
-          }
-        }
-      ],
-      postMsg: null
-    });
+    await mainConsoleMenu();
 
     this.exit();
 
@@ -299,48 +335,15 @@ export class UnderPostManager {
 
   }
 
-  async keysGestor(){
+  async dataFolderCheck(){
 
-    // await !fs.existsSync(data.dataPath+'keys') ?
-    // fs.mkdirSync(data.dataPath+'keys'):null;
+    ! fs.existsSync(this.mainDir+'/data') ?
+    fs.mkdirSync(this.mainDir+'/data') : null;
 
-    console.log(colors.yellow
-               ("---------------------------"));
-    console.log("       KEY GESTOR");
-    console.log(colors.yellow
-               ("---------------------------"));
-    console.log("1 > Create symmetric Key");
-    console.log("2 > Create asymmetric Key");
-    console.log("3 > exit");
-    console.log(colors.yellow
-               ("---------------------------"));
-
-    /* never save real password */
-
-    /* let option = new ReadLine().r("Enter option: ");
-
-    switch (option) {
-      case 1:
-          let symmetricPass = await new ReadLine().h('symmetric key password: ');
-          data.symmetricKeys.push(await new Keys().generateSymmetricKeys({
-            passphrase: symmetricPass,
-            path: data.dataPath+'keys'
-          }));
-        break;
-      case 2:
-        let asymmetricPass = await new ReadLine().h('asymmetric key password: ');
-        data.asymmetricKeys.push(await new Keys().generateAsymmetricKeys({
-          passphrase: asymmetricPass,
-          path: data.dataPath+'keys'
-        }));
-        break;
-      default:
-        console.log("invalid option");
-    } */
-
+    ! fs.existsSync(this.mainDir+'/data/keys') ?
+    fs.mkdirSync(this.mainDir+'/data/keys') : null;
 
   }
-
 
   exit(){
     if(this.forceExit){
