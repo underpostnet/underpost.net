@@ -61,11 +61,10 @@ export class Paint {
     // console.clear();
     // this.underpostBar();
     // this.underpostBanner();
-    this.underpostBar();
+    // this.underpostBar();
   }
 
-  underpostView(title){
-    this.underpostReset();
+  underpostTextBotbar(title){
     this.underpostOption('yellow', ' ', title);
     this.underpostBar();
   }

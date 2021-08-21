@@ -87,7 +87,7 @@ export class UnderPostManager {
 
     const initConfig = async data => {
 
-      new Paint().underpostView("Set User Settings");
+      new Paint().underpostTextBotbar("Set User Settings");
 
       data.http_port = parseInt(await new ReadLine().r(
         new Paint().underpostInput('http port')));
@@ -107,6 +107,8 @@ export class UnderPostManager {
       data.network_user.bio = await new ReadLine().r(
         new Paint().underpostInput('network user bio'));
 
+      new Paint().underpostBar();
+
       data.reset = false;
       this.forceExit = true;
 
@@ -119,7 +121,7 @@ export class UnderPostManager {
 
     const newTemplate = async () => {
 
-      new Paint().underpostOption('yellow', ' ', "Install Template ...");
+      new Paint().underpostTextBotbar("Install Template ...");
 
       await this.dataFolderCheck();
       dataTemplate = updateDataPaths(dataTemplate);
@@ -138,7 +140,7 @@ export class UnderPostManager {
 
     const updateTemplate = async () => {
 
-      new Paint().underpostOption('yellow', ' ', "Update Template ...");
+      new Paint().underpostTextBotbar("Update Template ...");
 
       await this.dataFolderCheck();
       mainData = updateDataPaths(mainData);
@@ -267,6 +269,7 @@ export class UnderPostManager {
     };
 
     const mainConsoleMenu = async () => {
+      await this.underpostActiveUserLog();
       await new Navi().init({
         title: 'Main Console Menu',
         preView: null,
@@ -342,6 +345,24 @@ export class UnderPostManager {
 
     ! fs.existsSync(this.mainDir+'/data/keys') ?
     fs.mkdirSync(this.mainDir+'/data/keys') : null;
+
+  }
+
+  async underpostActiveUserLog(){
+
+    let tempData = JSON.parse(fs.readFileSync(
+      this.mainDir+'/data/underpost.json',
+      this.charset
+    ));
+
+    new Paint().underpostTextBotbar('Active user data');
+    new Paint().underpostOption('yellow', 'username  ', tempData.network_user.username);
+    new Paint().underpostOption('yellow', 'email     ', tempData.network_user.email);
+    new Paint().underpostOption('yellow', 'web       ', tempData.network_user.web);
+    new Paint().underpostOption('yellow', 'bio       ', tempData.network_user.bio);
+    new Paint().underpostOption('yellow', 'http port ', tempData.http_port);
+    new Paint().underpostOption('yellow', 'ws port   ', tempData.ws_port);
+    new Paint().underpostBar();
 
   }
 

@@ -20,7 +20,7 @@ export class Navi {
 
   async init(obj){
 
-    new Paint().underpostView(obj.title);
+    new Paint().underpostTextBotbar(obj.title);
 
     if(obj.preView != null){
       await obj.preView();
@@ -46,6 +46,7 @@ export class Navi {
       new Paint().underpostInput('select option')
     ));
 
+    new Paint().underpostBar();
 
     for(let i of new Util().range(1, new Util().l(obj.options))){
       if(parseInt(input)==i){
