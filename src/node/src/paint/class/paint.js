@@ -31,6 +31,8 @@ export class Paint {
 
       `));
 
+    this.underpostBar();
+    
   }
 
   underpostBar(){

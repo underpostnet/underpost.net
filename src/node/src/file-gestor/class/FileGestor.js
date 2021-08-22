@@ -43,10 +43,10 @@ export class FileGestor {
             if(this.type=='pem' || this.type=='json'){
               let date = pathKoyn.split('/').reverse()[0];
               this.date = new Date(parseInt(date)).toLocaleString();
-              this.timestamp = date;
+              // this.timestamp = date;
             }else{
               this.date = new Date(parseInt(file.split('.')[0])).toLocaleString();
-              this.timestamp = file.split('.')[0];
+              // this.timestamp = file.split('.')[0];
             }
 
 
@@ -95,8 +95,27 @@ export class FileGestor {
       empty = true ;
     }
 
-    empty ? console.log('Empty Directory') : null;
+    empty ?
+    ((()=>{
+      new Paint().underpostBar();
+      new Paint().underpostTextBotbar('Empty Directory');
+    })()) : null;
 
+  }
+
+
+  async deleteFolderRecursive(path) {
+  if( fs.existsSync(path) ) {
+      fs.readdirSync(path).forEach(function(file) {
+        var curPath = path + "/" + file;
+          if(fs.lstatSync(curPath).isDirectory()) { // recurse
+              deleteFolderRecursive(curPath);
+          } else { // delete file
+              fs.unlinkSync(curPath);
+          }
+      });
+      fs.rmdirSync(path);
+    }
   }
 
 }

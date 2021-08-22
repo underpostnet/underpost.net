@@ -174,6 +174,8 @@ export class UnderPostManager {
           new Paint().underpostInput('symmetric key password')
         );
 
+        new Paint().underpostBar();
+
         new Paint().underpostOption('yellow', ' ', 'Generating Keys ...');
 
         new Paint().underpostBar();
@@ -187,6 +189,67 @@ export class UnderPostManager {
         new Util().jsonSave(tempData),
         this.charset);
 
+        return async () => {
+          new Paint().underpostOption('yellow', 'success', 'create key '+
+          tempData.symmetricKeys[new Util().l(tempData.symmetricKeys)-1]);
+          new Paint().underpostBar();
+        }
+
+      },
+      delete: async (type) => {
+
+        let tempData = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/underpost.json',
+          this.charset
+        ));
+
+        let indexKey =
+        parseInt(await new ReadLine().r(
+          new Paint().underpostInput('index key')
+        ));
+
+        new Paint().underpostBar();
+
+        let fixKeysArr = [];
+        let indexKeyReal = 0;
+        for(let key_time of tempData[type]){
+          fixKeysArr.push({date: key_time, index: indexKeyReal});
+          fixKeysArr.push({date: key_time, index: indexKeyReal});
+          indexKeyReal++;
+        }
+
+        // console.log('delete -> ');
+        // console.log(fixKeysArr[indexKey]);
+
+        if(fixKeysArr[indexKey]!=undefined){
+          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+          let timeStampDel = JSON.parse(new Util().JSONstr(
+            fixKeysArr[indexKey].date
+          ));
+
+          tempData[type].splice(fixKeysArr[indexKey].index, 1);
+
+          fs.writeFileSync(this.mainDir+'/data/underpost.json',
+          new Util().jsonSave(tempData),
+          this.charset);
+
+          await new FileGestor().deleteFolderRecursive(
+            this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'+timeStampDel
+          );
+
+          return async () => {
+            new Paint().underpostOption('yellow', 'success', 'Delete key folder '+timeStampDel);
+            new Paint().underpostBar();
+          }
+          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        }else{
+          return async () => {
+            new Paint().underpostOption('red', 'error', 'invalid index key');
+            new Paint().underpostBar();
+          }
+        }
+
+
       }
     };
 
@@ -194,7 +257,7 @@ export class UnderPostManager {
     // NAVI
     //--------------------------------------------------------------------------
 
-    const symmetricKeysGestor = async () => {
+    const symmetricKeysGestor = async (postTitleFn) => {
       await new Navi().init({
         preTitle: null,
         title: 'Symmetric Keys Gestor',
@@ -205,18 +268,25 @@ export class UnderPostManager {
               displayFolder: false,
               type: 'keys'
           });
+          if(postTitleFn!=null){
+            await postTitleFn();
+          }
         },
         options: [
           {
             text: 'Create Key',
             fn: async ()=>{
-              await KEYS.createSymmetric();
+              await symmetricKeysGestor(
+                await KEYS.createSymmetric()
+              );
             }
           },
           {
             text: 'Delete Key',
             fn: async ()=>{
-
+              await symmetricKeysGestor(
+                await KEYS.delete('symmetricKeys')
+              );
             }
           },
           {
@@ -251,7 +321,7 @@ export class UnderPostManager {
           {
             text: 'Symmetric Keys Gestor',
             fn: async ()=>{
-              await symmetricKeysGestor();
+              await symmetricKeysGestor(null);
             }
           },
           {
