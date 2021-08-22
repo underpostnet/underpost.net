@@ -89,7 +89,7 @@ export class FileGestor {
     ) : empty = true;
 
     if(!empty){
-      new Paint().underpostOption('white', '', obj.path);
+      new Paint().underpostOption('white', ' ', obj.path);
       new Util().l(table) > 0 ?
       console.table(table) :
       empty = true ;
@@ -97,7 +97,7 @@ export class FileGestor {
 
     empty ?
     ((()=>{
-      new Paint().underpostBar();
+      // new Paint().underpostBar();
       new Paint().underpostTextBotbar('Empty Directory');
     })()) : null;
 

@@ -163,15 +163,15 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
 
     const KEYS = {
-      createSymmetric: async () => {
+      create: async (type) => {
 
         let tempData = JSON.parse(fs.readFileSync(
           this.mainDir+'/data/underpost.json',
           this.charset
         ));
 
-        let symmetricPass = await new ReadLine().r(
-          new Paint().underpostInput('symmetric key password')
+        let keyPass = await new ReadLine().r(
+          new Paint().underpostInput('key password')
         );
 
         new Paint().underpostBar();
@@ -180,10 +180,25 @@ export class UnderPostManager {
 
         new Paint().underpostBar();
 
-        tempData.symmetricKeys.push(await new Keys().generateSymmetricKeys({
-          passphrase: symmetricPass,
-          path: this.mainDir+'/data/keys'
-        }));
+        switch (type) {
+          case 'symmetricKeys':
+            tempData[type].push(await new Keys().generateSymmetricKeys({
+              passphrase: keyPass,
+              path: this.mainDir+'/data/keys'
+            }));
+            break;
+          case 'asymmetricKeys':
+            tempData[type].push(await new Keys().generateAsymmetricKeys({
+              passphrase: keyPass,
+              path: this.mainDir+'/data/keys'
+            }));
+            break;
+          default:
+            return async () => {
+              new Paint().underpostOption('red', 'error', 'not valid key type');
+              new Paint().underpostBar();
+            }
+        }
 
         fs.writeFileSync(this.mainDir+'/data/underpost.json',
         new Util().jsonSave(tempData),
@@ -191,7 +206,7 @@ export class UnderPostManager {
 
         return async () => {
           new Paint().underpostOption('yellow', 'success', 'create key '+
-          tempData.symmetricKeys[new Util().l(tempData.symmetricKeys)-1]);
+          tempData[type][new Util().l(tempData[type])-1]);
           new Paint().underpostBar();
         }
 
@@ -277,7 +292,7 @@ export class UnderPostManager {
             text: 'Create Key',
             fn: async ()=>{
               await symmetricKeysGestor(
-                await KEYS.createSymmetric()
+                await KEYS.create('symmetricKeys')
               );
             }
           },
@@ -286,6 +301,62 @@ export class UnderPostManager {
             fn: async ()=>{
               await symmetricKeysGestor(
                 await KEYS.delete('symmetricKeys')
+              );
+            }
+          },
+          {
+            text: 'View Key',
+            fn: async ()=>{
+
+            }
+          },
+          {
+            text: 'Back Keys Manager',
+            fn: async ()=>{
+              await keysManager();
+            }
+          },
+          {
+            text: 'Exit',
+            fn: async ()=>{
+              this.forceExit = true;
+              this.exit();
+            }
+          }
+        ]
+      });
+    };
+
+
+    const asymmetricKeysGestor = async (postTitleFn) => {
+      await new Navi().init({
+        preTitle: null,
+        title: 'Asymmetric Keys Gestor',
+        postTitle: async () => {
+          await new FileGestor().logReadDirectory({
+              path: this.mainDir+'/data/keys/asymmetric',
+              recursiveFolder: true,
+              displayFolder: false,
+              type: 'keys'
+          });
+          if(postTitleFn!=null){
+            await postTitleFn();
+          }
+        },
+        options: [
+          {
+            text: 'Create Key',
+            fn: async ()=>{
+              await asymmetricKeysGestor(
+                await KEYS.create('asymmetricKeys')
+              );
+            }
+          },
+          {
+            text: 'Delete Key',
+            fn: async ()=>{
+              await asymmetricKeysGestor(
+                await KEYS.delete('asymmetricKeys')
               );
             }
           },
@@ -327,7 +398,7 @@ export class UnderPostManager {
           {
             text: 'Asymmetric Keys Gestor',
             fn: async ()=>{
-
+              await asymmetricKeysGestor(null);
             }
           },
           {
