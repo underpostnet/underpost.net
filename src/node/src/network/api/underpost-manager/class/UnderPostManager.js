@@ -3,6 +3,7 @@ import { Util } from "../../../../util/class/Util.js";
 import { Keys } from "../../../../keys/class/Keys.js";
 import { ReadLine } from "../../../../read-line/class/ReadLine.js";
 import { FileGestor } from "../../../../file-gestor/class/FileGestor.js";
+import { RestService } from "../../../../rest/class/restService.js";
 import { Navi } from "../../../../navi/class/Navi.js";
 import { Paint } from "../../../../paint/class/paint.js";
 
@@ -265,6 +266,106 @@ export class UnderPostManager {
         }
 
 
+      },
+      view: async (type) => {
+
+        let tempData = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/underpost.json',
+          this.charset
+        ));
+
+        let indexKey =
+        parseInt(await new ReadLine().r(
+          new Paint().underpostInput('index key')
+        ));
+
+        new Paint().underpostBar();
+
+        let fixKeysArr = [];
+        let indexKeyReal = 0;
+        for(let key_time of tempData[type]){
+          fixKeysArr.push({date: key_time, index: indexKeyReal});
+          fixKeysArr.push({date: key_time, index: indexKeyReal});
+          indexKeyReal++;
+        }
+
+        // console.log('delete -> ');
+        // console.log(fixKeysArr[indexKey]);
+
+        if(fixKeysArr[indexKey]!=undefined){
+          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+          let timeStampKey = JSON.parse(new Util().JSONstr(
+            fixKeysArr[indexKey].date
+          ));
+
+          switch (type) {
+            case "symmetricKeys":
+                let iv = await new RestService().
+                getJSON(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
+                +timeStampKey+'/iv.json');
+                let key = await new RestService().
+                getJSON(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
+                +timeStampKey+'/key.json');
+              return async () => {
+                new Paint().underpostOption('white', ' ', 'Symmetric Key Selected');
+                function rowKey(obj){
+                  this.index = obj.index;
+                  this.path = obj.path;
+                  this.date = new Date(parseInt(obj.path.split('/')[1])).toLocaleString();
+                  this.iv = obj.iv;
+                  this.key = obj.key;
+                }
+                console.table(
+                  new rowKey({
+                    iv: iv,
+                    key: key,
+                    path: '/'+timeStampKey,
+                    index: indexKey
+                  })
+                );
+                new Paint().underpostBar();
+              }
+              break;
+            case "asymmetricKeys":
+              let publicKey = await new RestService().
+              getRawContent(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
+              +timeStampKey+'/public.pem');
+              let privateKey = await new RestService().
+              getRawContent(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
+              +timeStampKey+'/private.pem');
+              return async () => {
+                new Paint().underpostOption('white', ' ', 'Asymmetric Key Selected');
+                console.log('\n'+colors.green(publicKey));
+                console.log(colors.green(privateKey));
+                function rowKey(obj){
+                  this.index = obj.index;
+                  this.path = obj.path;
+                  this.date = new Date(parseInt(obj.path.split('/')[1])).toLocaleString();
+                }
+                console.table(
+                  new rowKey({
+                    path: '/'+timeStampKey,
+                    index: indexKey
+                  })
+                );
+                new Paint().underpostBar();
+              }
+              break;
+            default:
+              return async () => {
+                new Paint().underpostOption('red', 'error', 'invalid type key');
+                new Paint().underpostBar();
+              }
+
+          }
+          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        }else{
+          return async () => {
+            new Paint().underpostOption('red', 'error', 'invalid index key');
+            new Paint().underpostBar();
+          }
+        }
+
       }
     };
 
@@ -307,7 +408,9 @@ export class UnderPostManager {
           {
             text: 'View Key',
             fn: async ()=>{
-
+              await symmetricKeysGestor(
+                await KEYS.view('symmetricKeys')
+              );
             }
           },
           {
@@ -363,7 +466,9 @@ export class UnderPostManager {
           {
             text: 'View Key',
             fn: async ()=>{
-
+              await asymmetricKeysGestor(
+                await KEYS.view('asymmetricKeys')
+              );
             }
           },
           {

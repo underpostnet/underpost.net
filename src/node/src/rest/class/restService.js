@@ -20,4 +20,17 @@ export class RestService {
     });
   }
 
+  async getRawContent(path){
+    return await new Promise((resolve)=>{
+      fileGetContents(path).then(content => {
+          // console.log(colors.blue("getJSON( "+url+" ) success ->"));
+          resolve(content);
+      }).catch(error => {
+          // console.log(colors.blue("getJSON( "+url+" ) error ->"));
+          // console.log(error);
+          resolve(error);
+      });
+    });
+  }
+
 }
