@@ -18,6 +18,10 @@ new BlockChain({
     blocksToUndermine: null,
     zerosConstDifficulty: null,
     rewardAddress: "APOJA7S8ASNA9S8WE",
+    // blockChainDataPath: 'c:/dd/underpost.net/src/node/apps/underpost/data/blockchain',
+    // blockChainDataPath: '../data/blockchain',
+    blockChainDataPath: null,
+    charset: 'utf8'
   },
   rewardConfig: {
     intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */

@@ -15,6 +15,19 @@ export class Block {
 
     }
 
+    async setValues(obj){
+
+      this.node = obj.node;
+      this.block = obj.block;
+      this.hash = obj.hash;
+      this.nonce = obj.nonce;
+
+      obj.dataGenesis ?
+      this.dataGenesis = obj.dataGenesis :
+      null;
+
+    }
+
     calculateHash() {
       switch (this.block.index) {
         case 0:

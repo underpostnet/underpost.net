@@ -716,6 +716,97 @@ var max = Math.max( ...arr );
 		return returnObj;
 	}
 
+	/*
+
+	var a = [
+		{
+		  a:23,
+		  b:10
+		},
+		{
+		  a:24,
+		  b:11
+		},
+		{
+		  a:24,
+		  b:8
+		},
+		{
+		  a:23,
+		  b:26
+		},
+		{
+		  a:8,
+		  b:21
+		}
+	];
+
+*/
+
+	 uniqueArray(arr){
+		return arr.filter( (item, pos) => {
+		    return arr.indexOf(item) == pos;
+		});
+	}
+
+	 getAttrArrayFromArray(attr, arr){
+		let arrReturn = [];
+		for(let obj_ of arr){
+			arrReturn.push(obj_[attr]);
+		}
+		return arrReturn;
+	}
+
+	 uniqueAttrArray(attr, arr){
+		let arrReturn = [];
+		for(let obj_ of arr){
+			arrReturn.push(obj_[attr]);
+		}
+		return arrReturn.filter( (item, pos) => {
+				return arrReturn.indexOf(item) == pos;
+		});
+	}
+
+	 orderArrayFromAttrInt(arr, attr, type){
+		let arr_index_order = [];
+		for(let obj_ of arr){
+			arr_index_order.push(obj_[attr]);
+		}
+		// type -> true asc
+		// type-> false desc
+		if(type){
+			arr_index_order = arr_index_order.sort((a, b)=> {
+			      return a - b;
+			});
+		}else {
+			arr_index_order = arr_index_order.sort((a, b)=> {
+			      return b - a;
+			});
+		}
+		let returnArr = [];
+		let banIndex = [];
+		for(let index_ of arr_index_order){
+			let ind_=0;
+			for(let obj_ of arr){
+				let found_index = false;
+				for(let test_index of banIndex){
+					if(test_index==ind_){
+						found_index = true;
+					}
+				}
+				if(!found_index){
+					if(obj_[attr]==index_){
+						returnArr.push(obj_);
+						banIndex.push(ind_);
+						break;
+					}
+				}
+				ind_++;
+			}
+		}
+		return returnArr;
+	}
+
 
         }
 

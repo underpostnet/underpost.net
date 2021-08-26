@@ -478,6 +478,12 @@ export class UnderPostManager {
             }
           },
           {
+            text: 'List All Keys',
+            fn: async ()=>{
+              await asymmetricKeysGestor(null);
+            }
+          },
+          {
             text: 'Exit',
             fn: async ()=>{
               this.forceExit = true;
