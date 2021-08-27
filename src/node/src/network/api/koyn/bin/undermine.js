@@ -16,11 +16,13 @@ new BlockChain({
   dataGenesisHashGeneration: 'khrónos',
   userConfig: {
     blocksToUndermine: null,
+    bridgeUrl: 'http://localhost:3001/koyn/chain',
+    // bridgeUrl: null,
     zerosConstDifficulty: null,
     rewardAddress: "APOJA7S8ASNA9S8WE",
-    // blockChainDataPath: 'c:/dd/underpost.net/src/node/apps/underpost/data/blockchain',
+    blockChainDataPath: 'c:/dd/underpost.net/src/node/apps/underpost/data/blockchain',
     // blockChainDataPath: '../data/blockchain',
-    blockChainDataPath: null,
+    // blockChainDataPath: null,
     charset: 'utf8'
   },
   rewardConfig: {

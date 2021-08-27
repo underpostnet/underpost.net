@@ -1,6 +1,7 @@
 import { Block } from "./block.js";
 import { Util } from "../../../../util/class/Util.js";
 import { ReadLine } from "../../../../read-line/class/ReadLine.js";
+import { RestService } from "../../../../rest/class/restService.js";
 import SHA256 from "crypto-js/sha256.js";
 import fs from "fs";
 import colors from "colors/safe.js";
@@ -43,18 +44,49 @@ export class BlockChain {
 
 	async setCurrentChain(){
 
+		const setBlockClass = async (arr, rest) => {
+
+			this.chain = arr;
+			let indexBlock = 0;
+			for(let block of this.chain){
+				this.chain[indexBlock] = new Block();
+				await this.chain[indexBlock].setValues(block);
+				indexBlock++;
+			}
+
+			rest ?
+			((()=>{
+				console.log(colors.yellow(' > GET BRIDGE CHAIN'));
+				this.saveChain(this.userConfig.blockChainDataPath);
+			})())  :
+			console.log(colors.yellow(' > GET LOCAL CHAIN')) ;
+
+		};
+
+		const setValidateChain = async () => {
+
+			let bridgeChain = await new RestService().getJSON(
+				this.userConfig.bridgeUrl+'/'+this.generation
+			);
+
+			let localChain = JSON.parse(fs.readFileSync(
+				(this.userConfig.blockChainDataPath+'/generation-'+this.generation+'/chain.json'),
+				this.userConfig.charset
+			));
+
+			new Util().l(bridgeChain) > new Util().l(localChain) ?
+			await setBlockClass(bridgeChain, true) :
+			await setBlockClass(localChain, false)  ;
+
+		};
+
 		this.userConfig.blockChainDataPath == null ?
-		this.chain = [] :
-		this.chain = JSON.parse(fs.readFileSync(
-			(this.userConfig.blockChainDataPath+'/generation-'+this.generation+'/chain.json'),
-			this.userConfig.charset
-		));
-		let indexBlock = 0;
-		for(let block of this.chain){
-			this.chain[indexBlock] = new Block();
-			await this.chain[indexBlock].setValues(block);
-			indexBlock++;
-		}
+		this.chain = [] : this.userConfig.bridgeUrl == null ?
+		this.chain = [] : await setValidateChain() ;
+
+
+
+
 		this.totalBlockObjetive = new Util().l(this.chain)+this.userConfig.blocksToUndermine;
 
 	}
@@ -98,11 +130,17 @@ export class BlockChain {
 		// console.log(colors.yellow('rewardConfig BlockChain ->'));
 		// console.log(this.rewardConfig);
 
+		this.userConfig.blockChainDataPath == null ?
 		fs.writeFileSync(
 	    '../data/rewardConfig.json',
 	    new Util().jsonSave(this.rewardConfig),
 	    this.userConfig.charset
-	  );
+	  ) :
+		fs.writeFileSync(
+	    this.userConfig.blockChainDataPath+'/generation-'+this.generation+'/rewardConfig.json',
+	    new Util().jsonSave(this.rewardConfig),
+	    this.userConfig.charset
+	  ) ;
 
 	}
 
@@ -377,7 +415,13 @@ export class BlockChain {
 					})
 			}
 		}
-		this.generateJSON();
+		switch (this.userConfig.blockChainDataPath) {
+			case null:
+					this.saveChain('../data/blockchain');
+				break;
+			default:
+				  this.saveChain(this.userConfig.blockChainDataPath);
+		}
 	}
 
 	calculateCurrentRewardDelivered(){
@@ -427,7 +471,13 @@ export class BlockChain {
 		if((this.latestBlock().block.index==(this.totalBlockObjetive-1))
 			&& (this.userConfig.zerosConstDifficulty!=null) ){
 
-			let pathZeros = '../data/zeros-test/'+this.userConfig.zerosConstDifficulty+'.json';
+			let pathZeros;
+			this.userConfig.blockChainDataPath == null ?
+			pathZeros =
+			'../data/zeros-test/'+this.userConfig.zerosConstDifficulty+'.json' :
+			pathZeros =
+			this.userConfig.blockChainDataPath+'/zeros-test/'+this.userConfig.zerosConstDifficulty+'.json';
+
 			let currentZerosData = [];
 			if (fs.existsSync(pathZeros)){
 				currentZerosData =  JSON.parse(
@@ -449,37 +499,27 @@ export class BlockChain {
 		}
 	}
 
-	generateJSON(){
+	saveChain(path_save){
 
 		this.hashGeneration = SHA256(
 			new Util().JSONstr(this.chain)
 		).toString();
 
-		const saveChain = (path_save) => {
-			! fs.existsSync(path_save+'/generation-'+this.generation) ?
-			fs.mkdirSync(path_save+'/generation-'+this.generation) :
-			null;
+		! fs.existsSync(path_save+'/generation-'+this.generation) ?
+		fs.mkdirSync(path_save+'/generation-'+this.generation) :
+		null;
 
-			fs.writeFileSync(
-				path_save+'/generation-'+this.generation+'/chain.json',
-				new Util().jsonSave(this.chain),
-				this.userConfig.charset
-			);
+		fs.writeFileSync(
+			path_save+'/generation-'+this.generation+'/chain.json',
+			new Util().jsonSave(this.chain),
+			this.userConfig.charset
+		);
 
-			fs.writeFileSync(
-				path_save+'/generation-'+this.generation+'/hash',
-				this.hashGeneration,
-				this.userConfig.charset
-			);
-		}
-
-		switch (this.userConfig.blockChainDataPath) {
-			case null:
-					saveChain('../data/blockchain');
-				break;
-			default:
-				  saveChain(this.userConfig.blockChainDataPath);
-		}
+		fs.writeFileSync(
+			path_save+'/generation-'+this.generation+'/hash',
+			this.hashGeneration,
+			this.userConfig.charset
+		);
 
 	}
 

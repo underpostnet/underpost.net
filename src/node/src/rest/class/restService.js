@@ -1,6 +1,7 @@
 
 import fileGetContents from "file-get-contents";
 import colors from "colors/safe.js";
+import fetch from 'node-fetch';
 // const fileGetContents = require('file-get-contents');
 
 export class RestService {
@@ -29,6 +30,18 @@ export class RestService {
           // console.log(colors.blue("getJSON( "+url+" ) error ->"));
           // console.log(error);
           resolve(error);
+      });
+    });
+  }
+
+  async postJSON(url, data){
+    return await new Promise((resolve)=>{
+      fetch(url, {
+              method: 'post',
+              body:    JSON.stringify(data),
+              headers: { 'Content-Type': 'application/json' },
+      }).then(res => res.json()).then(json => {
+        resolve(json);
       });
     });
   }
