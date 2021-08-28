@@ -39,15 +39,11 @@ new BlockChain({
 }).mainProcess({
   paths: [
     {
-      url: 'http://localhost:3001/koyn',
+      url: 'http://localhost:3001/koyn/sign',
       type: 'App'
     },
     {
-      url: 'http://localhost:3001/cards',
-      type: 'App'
-    },
-    {
-      url: 'http://localhost:91/transactions',
+      url: 'http://localhost:3001/koyn/transactions',
       type: 'Transaction'
     }
   ]

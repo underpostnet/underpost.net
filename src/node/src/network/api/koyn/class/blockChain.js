@@ -33,7 +33,6 @@ export class BlockChain {
 			},
 			obj.rewardConfig
 		);
-		this.setRewardConfig();
 
 		obj.userConfig.blocksToUndermine == null ?
 		this.userConfig.blocksToUndermine =
@@ -74,11 +73,21 @@ export class BlockChain {
 				this.userConfig.charset
 			));
 
-			new Util().l(bridgeChain) > new Util().l(localChain) ?
+			new Util().l(bridgeChain) >= new Util().l(localChain) ?
 			await setBlockClass(bridgeChain, true) :
-			await setBlockClass(localChain, false)  ;
+			await setBlockClass(localChain, false) ;
 
 		};
+
+
+		if(!fs.existsSync(this.userConfig.blockChainDataPath+'/generation-'+this.generation)){
+			fs.mkdirSync(this.userConfig.blockChainDataPath+'/generation-'+this.generation);
+			fs.writeFileSync(
+				this.userConfig.blockChainDataPath+'/generation-'+this.generation+'/chain.json',
+				new Util().jsonSave([]),
+				this.userConfig.charset
+			);
+		}
 
 		this.userConfig.blockChainDataPath == null ?
 		this.chain = [] : this.userConfig.bridgeUrl == null ?
@@ -91,7 +100,7 @@ export class BlockChain {
 
 	}
 
-	setRewardConfig(){
+	async setRewardConfig(){
 
 		for(let i of new Util().range(0, this.rewardConfig.totalEra)){
 
@@ -398,6 +407,7 @@ export class BlockChain {
 
 	async mainProcess(obj){
 		await this.setCurrentChain();
+		await this.setRewardConfig();
 		for(let i=0; i<(this.userConfig.blocksToUndermine); i++){
 			switch (new Util().l(this.chain)) {
 				case 0:
@@ -504,10 +514,6 @@ export class BlockChain {
 		this.hashGeneration = SHA256(
 			new Util().JSONstr(this.chain)
 		).toString();
-
-		! fs.existsSync(path_save+'/generation-'+this.generation) ?
-		fs.mkdirSync(path_save+'/generation-'+this.generation) :
-		null;
 
 		fs.writeFileSync(
 			path_save+'/generation-'+this.generation+'/chain.json',

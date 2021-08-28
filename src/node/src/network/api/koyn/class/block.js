@@ -52,6 +52,9 @@ export class Block {
 
     async mineBlock(obj) {
 
+      this.block = Object.assign(this.block, obj.blockConfig);
+      obj.blockConfig.index == 0 ? this.dataGenesis = obj.dataGenesis: null;
+
       this.node = Object.assign(
         {
           dataApp: await this.setData(
@@ -71,9 +74,6 @@ export class Block {
           rewardAddress: obj.rewardAddress
         }
       );
-
-      this.block = Object.assign(this.block, obj.blockConfig);
-      obj.blockConfig.index == 0 ? this.dataGenesis = obj.dataGenesis: null;
 
       console.log(colors.magenta('Mining Block '+this.block.index+' ...'));
 
@@ -129,11 +129,26 @@ export class Block {
       let storage = [];
       for(let path of paths){
         console.log(colors.green('GET DATA  | '+new Date().toLocaleString()+' | url:'+path.url));
-        storage.push({
-          type: path.type,
-          url: path.url,
-          data: await new RestService().getJSON(path.url)
-        });
+        switch (path.type) {
+          case "App":
+            storage.push({
+              type: path.type,
+              url: path.url,
+              sign: await new RestService().getRawContent(path.url+'/'+this.block.generation)
+            });
+            break;
+          case "Transaction":
+            storage.push({
+              type: path.type,
+              url: path.url,
+              data: await new RestService().getJSON(path.url+'/'+this.block.generation)
+            });
+            break;
+          default:
+            storage.push({
+              error: "not valid type:"+path.type
+            });
+        }
       }
       return storage;
     }
