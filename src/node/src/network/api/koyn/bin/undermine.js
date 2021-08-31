@@ -23,6 +23,8 @@ new BlockChain({
     blockChainDataPath: 'c:/dd/underpost.net/src/node/apps/underpost/data/blockchain',
     // blockChainDataPath: '../data/blockchain',
     // blockChainDataPath: null,
+    maxErrorAttempts: 5,
+    delayErrorAttempts: 1000,
     charset: 'utf8'
   },
   rewardConfig: {
@@ -39,11 +41,11 @@ new BlockChain({
 }).mainProcess({
   paths: [
     {
-      url: 'http://localhost:3001/koyn/sign',
+      url: 'http://localhost:3001/koyn',
       type: 'App'
     },
     {
-      url: 'http://localhost:3001/koyn/transactions',
+      url: 'http://localhost:3001/koyn',
       type: 'Transaction'
     }
   ]

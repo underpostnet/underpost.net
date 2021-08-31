@@ -40,8 +40,14 @@ export class RestService {
               method: 'post',
               body:    JSON.stringify(data),
               headers: { 'Content-Type': 'application/json' },
-      }).then(res => res.json()).then(json => {
-        resolve(json);
+      }).then(res => {
+            res.json().then(json => {
+                  resolve(json);
+            }).catch(error => {
+                  resolve(error);
+            });
+      }).catch(error => {
+            resolve(error);
       });
     });
   }

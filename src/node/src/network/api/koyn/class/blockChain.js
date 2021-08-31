@@ -387,6 +387,9 @@ export class BlockChain {
 		this.calculateCurrentRewardDelivered();
 		this.calculateZerosAvgTimeBlock();
 		console.log(colors.cyan('validator-status:'+this.checkValid()));
+		console.log(colors.cyan('check-last-app-sign:'
+		+ await this.validateSignAppNode(this.latestBlock().node.dataApp)));
+		// put bridge block
 	}
 
 	checkValid() {
@@ -399,6 +402,38 @@ export class BlockChain {
 			}
 
 			if (currentBlock.block.previousHash !== previousBlock.hash) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	async validateSignAppNode(blockNode){
+		for(let signObj of blockNode){
+			let countAttempts = 0;
+			const attempt = async () => {
+				console.log(colors.yellow("init-validate-sign"));
+				console.log(colors.yellow("url:"+signObj.url));
+				console.log(colors.yellow("attempt:"+(countAttempts+1)));
+				let signResult = await new RestService().postJSON(
+							signObj.url+'/validate', {
+							sign: signObj.sign,
+							generation: parseInt(this.generation)
+				});
+				if(new Util().existAttr(signResult, 'errno')){
+					console.log(colors.red("error validate sign"));
+					countAttempts++;
+					if(countAttempts < this.userConfig.maxErrorAttempts){
+						await new Util().timer(this.userConfig.delayErrorAttempts);
+						return await attempt();
+					}else{
+						return false;
+					}
+				}else{
+					return signResult;
+				}
+			};
+			if(!await attempt()){
 				return false;
 			}
 		}

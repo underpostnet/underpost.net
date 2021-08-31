@@ -134,14 +134,14 @@ export class Block {
             storage.push({
               type: path.type,
               url: path.url,
-              sign: await new RestService().getRawContent(path.url+'/'+this.block.generation)
+              sign: await new RestService().getRawContent(path.url+'/sign/'+this.block.generation)
             });
             break;
           case "Transaction":
             storage.push({
               type: path.type,
               url: path.url,
-              data: await new RestService().getJSON(path.url+'/'+this.block.generation)
+              data: await new RestService().getJSON(path.url+'/transactions/'+this.block.generation)
             });
             break;
           default:

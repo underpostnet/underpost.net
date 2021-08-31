@@ -291,17 +291,9 @@ loop(1000);
 
  isJSON(str) {
 	try {
-
-
-
 		JSON.parse(str);
-
 	} catch (e) {
-
-		console.log(e);
-
 		return false;
-
 	}
 	return true;
 }
@@ -793,6 +785,15 @@ var max = Math.max( ...arr );
 				}
 				ind_++;
 			}
+		}
+		return returnArr;
+	}
+
+
+	 arrJoin(arr){
+		returnArr = [];
+		for(let arr_ of arr){
+			returnArr = returnArr.concat(arr_);
 		}
 		return returnArr;
 	}
