@@ -24,7 +24,7 @@ new BlockChain({
     // blockChainDataPath: '../data/blockchain',
     // blockChainDataPath: null,
     maxErrorAttempts: 5,
-    delayErrorAttempts: 1000,
+    RESTdelay: 1000,
     charset: 'utf8'
   },
   rewardConfig: {

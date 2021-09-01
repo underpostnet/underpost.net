@@ -13,45 +13,54 @@ export class BlockChain {
 
 		this.generation = obj.generation;
 
-		this.version = obj.version;
-
 		this.userConfig = obj.userConfig;
 
-		this.setPreviousHahsGeneration(obj.pathPreviousHashGeneration);
+		! obj.validatorMode ? ((()=>{
 
-		this.difficultyConfig = obj.difficultyConfig;
+			this.version = obj.version;
 
-		this.rewardConfig = Object.assign(
-			{
-				era: [],
-				reward: [],
-				blocks: [],
-				rewardPerBlock: [],
-				rewardCurrencyPerBlock: [],
-				sumBlocks: 0,
-				sumReward: 0
-			},
-			obj.rewardConfig
-		);
+			this.setPreviousHahsGeneration(obj.pathPreviousHashGeneration);
 
-		obj.userConfig.blocksToUndermine == null ?
-		this.userConfig.blocksToUndermine =
-		( obj.rewardConfig.totalEra + 1 )
-		: null;
+			this.difficultyConfig = obj.difficultyConfig;
 
+			this.rewardConfig = Object.assign(
+				{
+					era: [],
+					reward: [],
+					blocks: [],
+					rewardPerBlock: [],
+					rewardCurrencyPerBlock: [],
+					sumBlocks: 0,
+					sumReward: 0
+				},
+				obj.rewardConfig
+			);
+
+			obj.userConfig.blocksToUndermine == null ?
+			this.userConfig.blocksToUndermine =
+			( obj.rewardConfig.totalEra + 1 )
+			: null;
+
+		})()) : null ;
+
+	}
+
+
+	async setNewChainAndBlockClass(arr){
+		this.chain = arr;
+		let indexBlock = 0;
+		for(let block of this.chain){
+			this.chain[indexBlock] = new Block();
+			await this.chain[indexBlock].setValues(block);
+			indexBlock++;
+		}
 	}
 
 	async setCurrentChain(){
 
 		const setBlockClass = async (arr, rest) => {
 
-			this.chain = arr;
-			let indexBlock = 0;
-			for(let block of this.chain){
-				this.chain[indexBlock] = new Block();
-				await this.chain[indexBlock].setValues(block);
-				indexBlock++;
-			}
+			await this.setNewChainAndBlockClass(arr);
 
 			rest ?
 			((()=>{
@@ -210,7 +219,7 @@ export class BlockChain {
 	}
 
 	latestBlock() {
-		return this.chain[this.chain.length - 1];
+		return new Util().getLastElement(this.chain);
 	}
 
   calculateReward(){
@@ -233,14 +242,20 @@ export class BlockChain {
 			case 0:
 				return genereteHashsKoyn(this.rewardConfig.rewardCurrencyPerBlock[0]);
 			default:
-				let indexBlock = this.latestBlock().block.index+1;
-				for(let i of new Util().range(1, this.rewardConfig.totalEra)){
-					if((this.rewardConfig.blocks[i-1]<=indexBlock)&&(indexBlock<this.rewardConfig.blocks[i])){
-						return genereteHashsKoyn(this.rewardConfig.rewardCurrencyPerBlock[i]);
-					}
-				}
+				return genereteHashsKoyn(this.getRewardToIndexBlock(this.latestBlock(), this.rewardConfig, true));
 		}
   }
+
+	getRewardToIndexBlock(block, rewardConfig, next){
+		let indexBlock = null;
+		next ? indexBlock = block.block.index+1 : indexBlock = block.block.index ;
+		for(let i of new Util().range(1, rewardConfig.totalEra)){
+			if((rewardConfig.blocks[i-1]<=indexBlock)&&(indexBlock<rewardConfig.blocks[i])){
+				return rewardConfig.rewardCurrencyPerBlock[i];
+			}
+		}
+		return 0;
+	}
 
   calculateDifficulty(){
 
@@ -378,6 +393,7 @@ export class BlockChain {
 	}
 
 	async addBlock(obj) {
+
 		console.log('\n---------------------------------------');
 		console.log(colors.yellow('NEW BLOCK | '+new Date().toLocaleString()));
 		console.log(obj.blockConfig);
@@ -386,16 +402,77 @@ export class BlockChain {
     this.chain.push(block);
 		this.calculateCurrentRewardDelivered();
 		this.calculateZerosAvgTimeBlock();
-		console.log(colors.cyan('validator-status:'+this.checkValid()));
-		console.log(colors.cyan('check-last-app-sign:'
-		+ await this.validateSignAppNode(this.latestBlock().node.dataApp)));
-		// put bridge block
+
+		let globalValidate = await this.globalValidateChain();
+		globalValidate.hashValidate == true
+		&&
+		globalValidate.signValidate == true
+		&&
+		globalValidate.rewardValidate == true
+		? console.log('propagate ->') : null;
+		// await this.startBlockPropagation()
+
+	}
+
+	async globalValidateChain(chain){
+
+		let hashValidate = false;
+		let signValidate = false;
+		let rewardValidate = false;
+
+	 // siempre los sing comprobar cyberia en true el promedio de  tiempo es
+	 // digamos 10 min, poca carga para el servidor
+	 // centrar en cyberia la moneda el hash
+
+		if(chain != undefined){
+				await this.setNewChainAndBlockClass(chain);
+				signValidate = true;
+				rewardValidate = true;
+				for(let block of this.chain){
+					if(! await this.validateSignAppNode(block.node.dataApp, true)){
+						signValidate = false;
+					}
+					if(! this.validateRewardBlock(block)){
+						rewardValidate = false;
+					}
+				}
+		}else{
+			 signValidate =
+			 await this.validateSignAppNode(this.latestBlock().node.dataApp, false);
+			 rewardValidate =
+			 this.validateRewardBlock(this.latestBlock());
+		}
+		hashValidate = this.checkValid();
+
+		// validate reward with genesis
+
+		// validate transactions
+
+		console.log(colors.cyan('validator-status:'+hashValidate));
+		console.log(colors.cyan('check-app-sign:'+signValidate));
+		console.log(colors.cyan('reward-block-validate:'+rewardValidate));
+
+		return { hashValidate, signValidate, rewardValidate };
+	}
+
+	async startBlockPropagation(){
+		const bridgePropagation = async () => {
+			return await new RestService().postJSON(
+						this.userConfig.bridgeUrl+'/block',
+						this.latestBlock()
+			);
+		};
+		console.log(colors.cyan('bridge-propagation-status:'+await bridgePropagation()));
 	}
 
 	checkValid() {
 		for (let i = 1; i < new Util().l(this.chain); i++) {
 			const currentBlock = this.chain[i];
 			const previousBlock = this.chain[i - 1];
+
+			if(currentBlock.block.index!=i || previousBlock.block.index!=(i -1)){
+				return false;
+			}
 
 			if (currentBlock.hash !== currentBlock.calculateHash()) {
 				return false;
@@ -408,23 +485,26 @@ export class BlockChain {
 		return true;
 	}
 
-	async validateSignAppNode(blockNode){
+	async validateSignAppNode(blockNode, allBlockValidate){
 		for(let signObj of blockNode){
 			let countAttempts = 0;
 			const attempt = async () => {
-				console.log(colors.yellow("init-validate-sign"));
-				console.log(colors.yellow("url:"+signObj.url));
-				console.log(colors.yellow("attempt:"+(countAttempts+1)));
+				// console.log(colors.yellow("init-validate-sign"));
+				// console.log(colors.yellow("url:"+signObj.url));
+				// console.log(colors.yellow("attempt:"+(countAttempts+1)));
 				let signResult = await new RestService().postJSON(
 							signObj.url+'/validate', {
 							sign: signObj.sign,
-							generation: parseInt(this.generation)
+							generation: parseInt(this.generation),
+							allValidate: allBlockValidate
 				});
-				if(new Util().existAttr(signResult, 'errno')){
+				// console.log("signResult ->");
+				// console.log(signResult);
+				if(signResult!==true && signResult!==false){
 					console.log(colors.red("error validate sign"));
 					countAttempts++;
 					if(countAttempts < this.userConfig.maxErrorAttempts){
-						await new Util().timer(this.userConfig.delayErrorAttempts);
+						await new Util().timer(this.userConfig.RESTdelay);
 						return await attempt();
 					}else{
 						return false;
@@ -438,6 +518,40 @@ export class BlockChain {
 			}
 		}
 		return true;
+	}
+
+	validateRewardBlock(block){
+
+		if(block.block.index == 0){
+			return true;
+		}
+
+		let rewardConfig = this.chain[0].dataGenesis.rewardConfig;
+
+		if(block.block.index>=new Util().getLastElement(rewardConfig.blocks)
+		&& block.block.reward.totalValue == 0){
+			return true;
+		}else if(block.block.index<new Util().getLastElement(rewardConfig.blocks)
+		&& block.block.reward.totalValue == 0){
+			// console.log("test 1 ->");
+			return false;
+		}
+
+		let valueHashKoyn = new Util().l(block.block.reward.hashs);
+
+		if(valueHashKoyn!=block.block.reward.totalValue){
+			// console.log("test 2 ->");
+			return false;
+		}
+
+		// reward: { totalValue: 0, hashs: [] },
+		if(this.getRewardToIndexBlock(block, rewardConfig, false)!=valueHashKoyn){
+			// console.log("test 3 ->");
+			return false;
+		}
+
+		return true;
+
 	}
 
 	async mainProcess(obj){
