@@ -82,7 +82,9 @@ export class BlockChain {
 				this.userConfig.charset
 			));
 
-			new Util().l(bridgeChain) >= new Util().l(localChain) ?
+			new Util().l(bridgeChain) > new Util().l(localChain) &&
+			this.equalValidate(localChain, bridgeChain)
+			?
 			await setBlockClass(bridgeChain, true) :
 			await setBlockClass(localChain, false) ;
 
@@ -409,8 +411,7 @@ export class BlockChain {
 		globalValidate.signValidate == true
 		&&
 		globalValidate.rewardValidate == true
-		? console.log('propagate ->') : null;
-		// await this.startBlockPropagation()
+		? await this.startBlockPropagation() : null;
 
 	}
 
@@ -456,13 +457,16 @@ export class BlockChain {
 	}
 
 	async startBlockPropagation(){
+		console.log('propagate ->');
 		const bridgePropagation = async () => {
 			return await new RestService().postJSON(
 						this.userConfig.bridgeUrl+'/block',
 						this.latestBlock()
 			);
 		};
-		console.log(colors.cyan('bridge-propagation-status:'+await bridgePropagation()));
+		console.log(colors.cyan('bridge-propagation-status:'));
+		console.log(await bridgePropagation());
+		await new ReadLine().r('stop');
 	}
 
 	checkValid() {
@@ -482,6 +486,26 @@ export class BlockChain {
 				return false;
 			}
 		}
+		return true;
+	}
+
+	equalValidate(localChain, bridgeChain){
+		let shortChain = [];
+		let longChain = [];
+		if(new Util().l(bridgeChain) > new Util().l(localChain)){
+			shortChain = localChain;
+			longChain = bridgeChain;
+		}else{
+			shortChain = bridgeChain;
+			longChain = localChain;
+		}
+		for(let i=0; i< new Util().l(shortChain); i++){
+			if(! new Util().objEq(shortChain[i], longChain[i])){
+				console.log(colors.cyan('equal-validate-chain:'+false))
+				return false;
+			}
+		};
+		console.log(colors.cyan('equal-validate-chain:'+true))
 		return true;
 	}
 

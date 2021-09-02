@@ -221,6 +221,11 @@ let employee = Object.assign(person, job);
 console.log(employee);
 
 .pop() -> devuelve ultimo elemento de arreglo y lo elimina
+Array.from([1, 2, 3], x => x + x) -> Array [2, 4, 6]
+
+obj.paths.filter((el)=>{
+              return (el.type=='Transaction')
+            }) -> devuelve elemento en base a condicion
 
 
 */
@@ -828,6 +833,26 @@ var max = Math.max( ...arr );
     return Object.keys(y).every(i => { return p.indexOf(i) !== -1; }) &&
         p.every(i => { return objEq(x[i], y[i]); });
 	}
+
+	 decimalAdjust(type, value, exp) {
+		// https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+    // Si el exp no está definido o es cero...
+    if (typeof exp === 'undefined' || +exp === 0) {
+      return Math[type](value);
+    }
+    value = +value;
+    exp = +exp;
+    // Si el valor no es un número o el exp no es un entero...
+    if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+      return NaN;
+    }
+    // Shift
+    value = value.toString().split('e');
+    value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+    // Shift back
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+  }
 
 
         }
