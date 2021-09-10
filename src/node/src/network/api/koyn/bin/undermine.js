@@ -15,8 +15,9 @@ new BlockChain({
   pathPreviousHashGeneration: null,
   dataGenesisHashGeneration: 'khrónos',
   userConfig: {
-    blocksToUndermine: null,
-    bridgeUrl: 'http://localhost:3001/koyn/chain',
+    blocksToUndermine: 1,
+    propagateBlock: true,
+    bridgeUrl: 'http://localhost:3001/koyn',
     // bridgeUrl: null,
     zerosConstDifficulty: null,
     rewardAddress: "APOJA7S8ASNA9S8WE",

@@ -227,6 +227,10 @@ obj.paths.filter((el)=>{
               return (el.type=='Transaction')
             }) -> devuelve elemento en base a condicion
 
+[1,2,3].forEach(element => console.log(element));
+
+number validator ->
+isNaN("asd")
 
 */
 
@@ -340,6 +344,14 @@ loop(1000);
 	new Date().getDay()+'-'+new Date().getMonth()+'-'+new Date().getFullYear();
 
 	new Date().getHours()+':'+new Date().getMinutes()+':'+new Date().getSeconds()+':'+ new Date().getMilliseconds();
+
+	roundTime(time){
+    let current_time = new Date(time);
+    current_time.setMinutes(0);
+    current_time.setMilliseconds(0);
+    current_time.setSeconds(0);
+    return current_time.getTime();
+  }
 
 	*/
 
@@ -569,6 +581,17 @@ b -> a | mayor -> menor
 
 }
 
+ getSizeJSON(obj){
+	const size_ = new TextEncoder().encode(JSON.stringify(obj)).length;
+	const kiloBytes_ = size_ / 1024;
+	const megaBytes_ = kiloBytes_ / 1024;
+	return {
+		size: size_,
+		kiloBytes: kiloBytes_,
+		megaBytes: megaBytes_
+	}
+}
+
  jsonLog(json){
 
 	console.log(JSON.stringify(json, null, 4));
@@ -707,6 +730,56 @@ var max = Math.max( ...arr );
 		return Object.keys(obj);
 	}
 
+	/*
+
+		getAllKeys({
+			a: "a",
+			b: { a_a: "a_a"}
+		});
+
+	*/
+
+	 getAllKeys(obj, numbers_){
+					let allListKeys = [];
+					const listKeys_ = obj_ => {
+						Object.keys(obj_).forEach( key_ => {
+							if(numbers_){
+								allListKeys.push(key_);
+							}else{
+								if(isNaN(key_)){
+									allListKeys.push(key_);
+								}
+							}
+							if(typeof(obj_[key_])=='object'){
+								listKeys_(obj_[key_]);
+							}
+						});
+					};
+					listKeys_(obj);
+					return allListKeys;
+	}
+
+/*
+
+.slice(index, pos) > 0  pos != 0
+.slice(pos, index) < 0  index != 0
+
+*/
+
+	 iterateKeys(obj, fn){
+		for(let key_ of Object.keys(obj)){
+			fn(key_, obj[key_]);
+		}
+	}
+
+	 isLen(obj){
+		return obj.hasOwnProperty("length");
+	}
+
+	 isObj(obj){
+		return (typeof(obj)=='object');
+	}
+
 	 fusionObj(listObj){
 		let returnObj = {};
 		for(let obj of listObj){
@@ -831,7 +904,7 @@ var max = Math.max( ...arr );
     // recursive object equality check
     var p = Object.keys(x);
     return Object.keys(y).every(i => { return p.indexOf(i) !== -1; }) &&
-        p.every(i => { return objEq(x[i], y[i]); });
+        p.every(i => { return this.objEq(x[i], y[i]); });
 	}
 
 	 decimalAdjust(type, value, exp) {
@@ -853,6 +926,14 @@ var max = Math.max( ...arr );
     value = value.toString().split('e');
     return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
   }
+
+	 validateIP(ipaddress){
+		 if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress))
+		  {
+		    return true;
+		  }
+		return false;
+		}
 
 
         }

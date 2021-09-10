@@ -74,7 +74,7 @@ export class BlockChain {
 		const setValidateChain = async () => {
 
 			let bridgeChain = await new RestService().getJSON(
-				this.userConfig.bridgeUrl+'/'+this.generation
+				this.userConfig.bridgeUrl+'/chain/'+this.generation
 			);
 
 			let localChain = JSON.parse(fs.readFileSync(
@@ -406,12 +406,11 @@ export class BlockChain {
 		this.calculateZerosAvgTimeBlock();
 
 		let globalValidate = await this.globalValidateChain();
-		globalValidate.hashValidate == true
+		globalValidate.global == true
 		&&
-		globalValidate.signValidate == true
-		&&
-		globalValidate.rewardValidate == true
-		? await this.startBlockPropagation() : null;
+		this.userConfig.propagateBlock == true
+		? await this.startBlockPropagation() :
+		console.log(colors.cyan('off propagate block'));
 
 	}
 
@@ -420,6 +419,8 @@ export class BlockChain {
 		let hashValidate = false;
 		let signValidate = false;
 		let rewardValidate = false;
+		let keysValidate = false;
+		let typeValidate = 'last-validate-block';
 
 	 // siempre los sing comprobar cyberia en true el promedio de  tiempo es
 	 // digamos 10 min, poca carga para el servidor
@@ -429,6 +430,8 @@ export class BlockChain {
 				await this.setNewChainAndBlockClass(chain);
 				signValidate = true;
 				rewardValidate = true;
+				keysValidate = true;
+				typeValidate = 'all-validate-block';
 				for(let block of this.chain){
 					if(! await this.validateSignAppNode(block.node.dataApp, true)){
 						signValidate = false;
@@ -436,12 +439,17 @@ export class BlockChain {
 					if(! this.validateRewardBlock(block)){
 						rewardValidate = false;
 					}
+					if(! this.validateKeysBlock(block)){
+						keysValidate = false;
+					}
 				}
 		}else{
 			 signValidate =
 			 await this.validateSignAppNode(this.latestBlock().node.dataApp, false);
 			 rewardValidate =
 			 this.validateRewardBlock(this.latestBlock());
+			 keysValidate =
+			 this.validateKeysBlock(this.latestBlock());
 		}
 		hashValidate = this.checkValid();
 
@@ -449,24 +457,59 @@ export class BlockChain {
 
 		// validate transactions
 
+		console.log(colors.magenta('type-validate:'+typeValidate));
 		console.log(colors.cyan('validator-status:'+hashValidate));
 		console.log(colors.cyan('check-app-sign:'+signValidate));
 		console.log(colors.cyan('reward-block-validate:'+rewardValidate));
+		console.log(colors.cyan('keys-validate:'+keysValidate));
 
-		return { hashValidate, signValidate, rewardValidate };
+		return { hashValidate, signValidate, rewardValidate, keysValidate,
+		global: ( hashValidate   &&
+							signValidate   &&
+							rewardValidate &&
+							keysValidate) };
+	}
+
+	validateKeysBlock(block){
+
+		if(block.block.index!=0){
+
+			let blockTemplate = new Util().fusionObj([this.chain[0]]);
+			delete blockTemplate.dataGenesis;
+
+			let keysTemplate = new Util().uniqueArray(
+				new Util().getAllKeys(blockTemplate)
+			);
+
+			let keysBlock = new Util().uniqueArray(
+				new Util().getAllKeys(block)
+			);
+
+			// console.log("keysTemplate");
+			// console.log(keysTemplate);
+			// console.log("keysBlock");
+			// console.log(keysBlock);
+
+			return new Util().objEq(keysTemplate, keysBlock);
+
+		}else{
+			return true;
+		}
+
 	}
 
 	async startBlockPropagation(){
-		console.log('propagate ->');
+		console.log(colors.magenta('progagate block ...'));
 		const bridgePropagation = async () => {
+			// console.log("bridgePropagation ->");
+			// console.log(this.latestBlock());
 			return await new RestService().postJSON(
-						this.userConfig.bridgeUrl+'/block',
+						this.userConfig.bridgeUrl+'/chain/block',
 						this.latestBlock()
 			);
 		};
 		console.log(colors.cyan('bridge-propagation-status:'));
 		console.log(await bridgePropagation());
-		await new ReadLine().r('stop');
 	}
 
 	checkValid() {
@@ -501,15 +544,16 @@ export class BlockChain {
 		}
 		for(let i=0; i< new Util().l(shortChain); i++){
 			if(! new Util().objEq(shortChain[i], longChain[i])){
-				console.log(colors.cyan('equal-validate-chain:'+false))
+				console.log(colors.cyan('equal-validate-chain:'+false));
 				return false;
 			}
 		};
-		console.log(colors.cyan('equal-validate-chain:'+true))
+		console.log(colors.cyan('equal-validate-chain:'+true));
 		return true;
 	}
 
 	async validateSignAppNode(blockNode, allBlockValidate){
+		if(this.userConfig.bridgeUrl!=null){
 		for(let signObj of blockNode){
 			let countAttempts = 0;
 			const attempt = async () => {
@@ -542,6 +586,7 @@ export class BlockChain {
 			}
 		}
 		return true;
+		}else{ return true }
 	}
 
 	validateRewardBlock(block){
@@ -581,7 +626,7 @@ export class BlockChain {
 	async mainProcess(obj){
 		await this.setCurrentChain();
 		await this.setRewardConfig();
-		for(let i=0; i<(this.userConfig.blocksToUndermine); i++){
+		for(let i=1; i<=(this.userConfig.blocksToUndermine); i++){
 			switch (new Util().l(this.chain)) {
 				case 0:
 					await this.addBlock({
@@ -589,21 +634,39 @@ export class BlockChain {
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig(),
 						dataGenesis: this.genesisBlockChainConfig()
-					})
+					});
+					break;
 				default:
 					await this.addBlock({
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig()
-					})
+					});
 			}
 		}
-		switch (this.userConfig.blockChainDataPath) {
-			case null:
-					this.saveChain('../data/blockchain');
-				break;
-			default:
-				  this.saveChain(this.userConfig.blockChainDataPath);
+		await this.endProcessSaveChain();
+	}
+
+	async endProcessSaveChain(){
+		let globaSaveValidate = await this.globalValidateChain(this.chain);
+		console.log(colors.cyan('global-save-validate ->'));
+		console.log(globaSaveValidate);
+
+		if( globaSaveValidate.global == true ){
+			try{
+				switch (this.userConfig.blockChainDataPath) {
+					case null:
+							this.saveChain('../data/blockchain');
+						break;
+					default:
+						  this.saveChain(this.userConfig.blockChainDataPath);
+				}
+				console.log(colors.cyan("success > save chain"));
+			}catch(err){
+				console.log(colors.red("error > save chain"));
+			}
+		}else{
+			console.log(colors.red("error > corrupt chain"));
 		}
 	}
 

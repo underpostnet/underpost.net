@@ -6,6 +6,8 @@ import { FileGestor } from "../../../../file-gestor/class/FileGestor.js";
 import { RestService } from "../../../../rest/class/restService.js";
 import { Navi } from "../../../../navi/class/Navi.js";
 import { Paint } from "../../../../paint/class/paint.js";
+import { WSclient } from "../../../../network/api/koyn/class/wsClient.js";
+import { BlockChain } from "../../../../network/api/koyn/class/blockChain.js"
 
 import fs from "fs";
 import colors from "colors/safe.js";
@@ -18,13 +20,17 @@ export class UnderPostManager {
 
     this.mainDir = mainDir;
     this.charset = 'utf8';
-    this.forceExit = false;
+
 
     new Paint().underpostBanner();
 
   }
 
   async init(){
+
+    // test area
+    // await new RestService().getIP();
+    // return;
 
     //--------------------------------------------------------------------------
     // BASE
@@ -52,6 +58,7 @@ export class UnderPostManager {
         'microdata.json',
         'serverMods.json',
         'underpostMods.json',
+        'blockchain-config.json',
         'robots.txt'
          ]){
 
@@ -111,7 +118,7 @@ export class UnderPostManager {
       new Paint().underpostBar();
 
       data.reset = false;
-      this.forceExit = true;
+
 
       return data;
 
@@ -373,6 +380,61 @@ export class UnderPostManager {
     // NAVI
     //--------------------------------------------------------------------------
 
+    const koynBlockChain = async () => {
+      await new Navi().init({
+        preTitle: null,
+        title: 'Koλn BlockChain Manager',
+        postTitle: null,
+        options: [
+          {
+            text: 'test',
+            fn: async ()=>{
+
+
+
+                let ip = await new RestService().getIP();
+
+                let blockChainConfig = JSON.parse(fs.readFileSync(
+                    this.mainDir+'/data/blockchain-config.json',
+                    this.charset
+                ));
+
+                let tempData = JSON.parse(fs.readFileSync(
+                  this.mainDir+'/data/underpost.json',
+                  this.charset
+                ));
+
+                let resp = await new RestService().postJSON(
+                  blockChainConfig.constructor.userConfig.bridgeUrl+'/node/ip',
+                  new Util().fusionObj([
+                    {
+                      generation: parseInt(blockChainConfig.constructor.generation),
+                      ip: ip,
+                      ws_port: tempData.ws_port,
+                      http_port: tempData.http_port
+                    },
+                    tempData.network_user
+                  ])
+                );
+
+
+                console.log("resp");
+                console.log(resp);
+
+                this.wsBridge != undefined ? this.wsBridge.close() : null;
+                this.wsBridge = new WSclient(blockChainConfig.network.wsBridgeServer);
+                this.wsBridge.onMsg(async data => {
+
+                  console.log(" wsBridge.onMsg ->");
+                  console.log(JSON.parse(data));
+
+                });
+            }
+          }
+        ]
+      });
+    };
+
     const symmetricKeysGestor = async (postTitleFn) => {
       await new Navi().init({
         preTitle: null,
@@ -422,7 +484,7 @@ export class UnderPostManager {
           {
             text: 'Exit',
             fn: async ()=>{
-              this.forceExit = true;
+
               this.exit();
             }
           }
@@ -486,7 +548,7 @@ export class UnderPostManager {
           {
             text: 'Exit',
             fn: async ()=>{
-              this.forceExit = true;
+
               this.exit();
             }
           }
@@ -521,7 +583,7 @@ export class UnderPostManager {
           {
             text: 'Exit',
             fn: async ()=>{
-              this.forceExit = true;
+
               this.exit();
             }
           }
@@ -551,9 +613,15 @@ export class UnderPostManager {
             }
           },
           {
+            text: 'Koλn BlockChain Manager',
+            fn: async ()=>{
+              await koynBlockChain();
+            }
+          },
+          {
             text: 'Exit',
             fn: async ()=>{
-              this.forceExit = true;
+
               this.exit();
             }
           }
@@ -630,12 +698,10 @@ export class UnderPostManager {
   }
 
   exit(){
-    if(this.forceExit){
-      try {
-        process.exit();
-      }catch(err){
-        console.log(err);
-      }
+    try {
+      process.exit();
+    }catch(err){
+      // console.log(err);
     }
   }
 
