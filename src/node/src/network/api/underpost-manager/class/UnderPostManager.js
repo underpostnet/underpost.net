@@ -382,6 +382,61 @@ export class UnderPostManager {
           }
         }
 
+      },
+      activate: async type => {
+
+        let tempData = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/underpost.json',
+          this.charset
+        ));
+
+        let indexKey =
+        parseInt(await new ReadLine().r(
+          new Paint().underpostInput('index key')
+        ));
+
+        new Paint().underpostBar();
+
+        let fixKeysArr = [];
+        let indexKeyReal = 0;
+        for(let key_time of tempData[type]){
+          fixKeysArr.push({date: key_time, index: indexKeyReal});
+          fixKeysArr.push({date: key_time, index: indexKeyReal});
+          indexKeyReal++;
+        }
+
+        // console.log('delete -> ');
+        // console.log(fixKeysArr[indexKey]);
+
+        if(fixKeysArr[indexKey]!=undefined){
+          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+          let timeStampKey = JSON.parse(new Util().JSONstr(
+            fixKeysArr[indexKey].date
+          ));
+
+          tempData[('active_'+type.split('Keys')[0]+'_public_key')]
+          =
+          timeStampKey;
+
+          fs.writeFileSync(this.mainDir+'/data/underpost.json',
+          new Util().jsonSave(tempData),
+          this.charset);
+
+          return async () => {
+            new Paint().underpostOption(
+              'yellow', 'success', 'Activate key:'+timeStampKey+
+              ' index:'+indexKey
+            );
+            new Paint().underpostBar();
+          }
+          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+        }else{
+          return async () => {
+            new Paint().underpostOption('red', 'error', 'invalid index key');
+            new Paint().underpostBar();
+          }
+        }
+
       }
     };
 
@@ -416,7 +471,6 @@ export class UnderPostManager {
                   new Util().fusionObj([
                     {
                       generation: parseInt(blockChainConfig.constructor.generation),
-                      ip: tempData.network_user.ip,
                       ws_port: tempData.ws_port,
                       http_port: tempData.http_port
                     },
@@ -436,6 +490,19 @@ export class UnderPostManager {
                   console.log(JSON.parse(data));
 
                 });
+            }
+          },
+          {
+            text: 'Back Main Console Menu',
+            fn: async ()=>{
+              await this.init();
+            }
+          },
+          {
+            text: 'Exit',
+            fn: async ()=>{
+
+              this.exit();
             }
           }
         ]
@@ -458,6 +525,14 @@ export class UnderPostManager {
           }
         },
         options: [
+          {
+            text: 'Activate Current Symmetric Public Key',
+            fn: async ()=>{
+              await symmetricKeysGestor(
+                await KEYS.activate('symmetricKeys')
+              );
+            }
+          },
           {
             text: 'Create Key',
             fn: async ()=>{
@@ -516,6 +591,14 @@ export class UnderPostManager {
           }
         },
         options: [
+          {
+            text: 'Activate Current Asymmetric Public Key',
+            fn: async ()=>{
+              await asymmetricKeysGestor(
+                await KEYS.activate('asymmetricKeys')
+              );
+            }
+          },
           {
             text: 'Create Key',
             fn: async ()=>{
@@ -696,13 +779,15 @@ export class UnderPostManager {
     ));
 
     new Paint().underpostTextBotbar('Active user data');
-    new Paint().underpostOption('yellow', 'ip        ', tempData.network_user.ip);
-    new Paint().underpostOption('yellow', 'username  ', tempData.network_user.username);
-    new Paint().underpostOption('yellow', 'email     ', tempData.network_user.email);
-    new Paint().underpostOption('yellow', 'web       ', tempData.network_user.web);
-    new Paint().underpostOption('yellow', 'bio       ', tempData.network_user.bio);
-    new Paint().underpostOption('yellow', 'http port ', tempData.http_port);
-    new Paint().underpostOption('yellow', 'ws port   ', tempData.ws_port);
+    new Paint().underpostOption('yellow', 'username              ', tempData.network_user.username);
+    new Paint().underpostOption('yellow', 'email                 ', tempData.network_user.email);
+    new Paint().underpostOption('yellow', 'web                   ', tempData.network_user.web);
+    new Paint().underpostOption('yellow', 'bio                   ', tempData.network_user.bio);
+    new Paint().underpostOption('yellow', 'Symmetric Key Active  ', tempData.active_symmetric_public_key);
+    new Paint().underpostOption('yellow', 'Asymmetric Key Active ', tempData.active_asymmetric_public_key);
+    new Paint().underpostOption('yellow', 'ip                    ', tempData.network_user.ip);
+    new Paint().underpostOption('yellow', 'http port             ', tempData.http_port);
+    new Paint().underpostOption('yellow', 'ws port               ', tempData.ws_port);
     new Paint().underpostBar();
 
   }
