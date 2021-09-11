@@ -2,6 +2,21 @@
 import { Util } from "../../util/class/Util.js";
 import colors from "colors/safe.js";
 
+/*
+
+black
+red
+green
+yellow
+blue
+magenta
+cyan
+white
+gray
+grey
+
+*/
+
 export class Paint {
 
   constructor(){}
@@ -32,7 +47,7 @@ export class Paint {
       `));
 
     this.underpostBar();
-    
+
   }
 
   underpostBar(){

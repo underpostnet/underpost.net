@@ -156,6 +156,15 @@ export class UnderPostManager {
       mainData = new Util().fusionObj([
         dataTemplate, mainData
       ]);
+
+      // check network_user obj
+      if(!new Util().objEq(dataTemplate.network_user, mainData.network_user)){
+        mainData.network_user = new Util().fusionObj([
+          dataTemplate.network_user,
+          mainData.network_user
+        ]);
+      }
+
       mainData.reset ?
       mainData = await initConfig(mainData) : null ;
 
@@ -390,9 +399,7 @@ export class UnderPostManager {
             text: 'test',
             fn: async ()=>{
 
-
-
-                let ip = await new RestService().getIP();
+                await this.networkUpdateStatus();
 
                 let blockChainConfig = JSON.parse(fs.readFileSync(
                     this.mainDir+'/data/blockchain-config.json',
@@ -409,7 +416,7 @@ export class UnderPostManager {
                   new Util().fusionObj([
                     {
                       generation: parseInt(blockChainConfig.constructor.generation),
-                      ip: ip,
+                      ip: tempData.network_user.ip,
                       ws_port: tempData.ws_port,
                       http_port: tempData.http_port
                     },
@@ -681,12 +688,15 @@ export class UnderPostManager {
 
   async underpostActiveUserLog(){
 
+    await this.networkUpdateStatus();
+
     let tempData = JSON.parse(fs.readFileSync(
       this.mainDir+'/data/underpost.json',
       this.charset
     ));
 
     new Paint().underpostTextBotbar('Active user data');
+    new Paint().underpostOption('yellow', 'ip        ', tempData.network_user.ip);
     new Paint().underpostOption('yellow', 'username  ', tempData.network_user.username);
     new Paint().underpostOption('yellow', 'email     ', tempData.network_user.email);
     new Paint().underpostOption('yellow', 'web       ', tempData.network_user.web);
@@ -703,6 +713,33 @@ export class UnderPostManager {
     }catch(err){
       // console.log(err);
     }
+  }
+
+  async networkUpdateStatus(){
+    return await new Promise(async resolve => {
+      let tempData = JSON.parse(fs.readFileSync(
+        this.mainDir+'/data/underpost.json',
+        this.charset
+      ));
+      let current_ip = tempData.network_user.ip;
+      let new_ip = await new RestService().getIP();
+      if( (current_ip!=new_ip) && new Util().validateIP(new_ip) ){
+        try{
+          tempData.network_user.ip = new_ip;
+          fs.writeFileSync(
+            this.mainDir+'/data/underpost.json',
+            new Util().jsonSave(tempData),
+            this.charset);
+          new Paint().underpostOption('cyan', ' ', 'ip updated');
+          resolve(true);
+        }catch(err){
+          console.log(err);
+          new Paint().underpostOption('red', ' ', 'error ip updated');
+          resolve(false);
+        }
+      }
+      resolve(false);
+    });
   }
 
 }

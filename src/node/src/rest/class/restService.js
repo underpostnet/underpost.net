@@ -103,4 +103,12 @@ export class RestService {
     });
   }
 
+  infoReq(req){
+    return {
+      ip: (req.headers['x-forwarded-for'] || req.connection.remoteAddress),
+      host: req.headers.host,
+      lang: req.acceptsLanguages()
+    }
+  }
+
 }
