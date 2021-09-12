@@ -440,6 +440,153 @@ export class UnderPostManager {
       }
     };
 
+    const BCmanager = {
+       initMineBlock: async ()=>{
+         await this.networkUpdateStatus();
+
+         let blockChainConfig = JSON.parse(fs.readFileSync(
+             this.mainDir+'/data/blockchain-config.json',
+             this.charset
+         ));
+
+         let tempData = JSON.parse(fs.readFileSync(
+           this.mainDir+'/data/underpost.json',
+           this.charset
+         ));
+
+         let resp = await new RestService().postJSON(
+           blockChainConfig.constructor.userConfig.bridgeUrl+'/node/ip',
+           new Util().fusionObj([
+             {
+               generation: parseInt(blockChainConfig.constructor.generation),
+               ws_port: tempData.ws_port,
+               http_port: tempData.http_port
+             },
+             tempData.network_user
+           ])
+         );
+         new Paint().underpostOption('yellow', ' ', 'bridge rest connection');
+         console.log(resp);
+
+         if( resp.status == true ){
+
+           var stop = false;
+           var publicKey = await new ReadLine().r('public key:');
+
+           new Paint().underpostOption('yellow', ' ', 'starting bridge ws connection...');
+
+           this.wsBridge != undefined ? this.wsBridge.close() : null;
+           this.wsBridge = new WSclient(blockChainConfig.network.wsBridgeServer);
+
+           new Paint().underpostOption('yellow', 'ws host', this.wsBridge.host_name);
+
+           let endBlockChainProcess = await new Promise(async resolve => {
+
+             let blockChainProcess = new BlockChain({
+               generation: blockChainConfig.constructor.generation,
+               version: '0.0.0',
+               hashGeneration: null,
+               // pathPreviousHashGeneration: '../data/blockchain/generation-0/hash',
+               pathPreviousHashGeneration: null,
+               dataGenesisHashGeneration: 'khrónos',
+               userConfig: {
+                 blocksToUndermine: 1,
+                 propagateBlock: true,
+                 bridgeUrl: blockChainConfig.constructor.userConfig.bridgeUrl,
+                 // bridgeUrl: null,
+                 zerosConstDifficulty: null,
+                 rewardAddress: publicKey,
+                 blockChainDataPath: this.mainDir+'/data/blockchain',
+                 // blockChainDataPath: '../data/blockchain',
+                 // blockChainDataPath: null,
+                 maxErrorAttempts: 5,
+                 RESTdelay: 1000,
+                 charset: 'utf8'
+               },
+               rewardConfig: {
+                 intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */
+                 totalEra: 9,
+                 hashesPerCurrency: 10,
+                 upTruncFactor: 15
+               },
+               difficultyConfig: {
+                 hashRateSeconds: 6000,
+                 intervalSecondsTime: 10,
+                 intervalCalculateDifficulty: 10
+               }
+             });
+
+             this.wsBridge.onOpen(async data => {
+
+               new Paint().underpostOption('yellow', ' ', 'success bridge ws connection');
+               new Paint().underpostOption('yellow', ' ', 'init mine block process');
+
+               let statusBlockChainProcess = await blockChainProcess.mainProcess({
+                 paths: [
+                   {
+                     url: 'http://localhost:3001/koyn',
+                     type: 'App'
+                   },
+                   {
+                     url: 'http://localhost:3001/koyn',
+                     type: 'Transaction'
+                   }
+                 ]
+               }, stop);
+
+               if(!stop){
+                 resolve({
+                   status: statusBlockChainProcess,
+                   block:
+                   blockChainProcess.latestBlock() == undefined ?
+                   null : blockChainProcess.latestBlock()
+                 });
+               }
+
+             });
+
+             this.wsBridge.onMsg(async data => {
+
+               try{
+                 // console.log(" wsBridge.onMsg ->");
+                 // console.log(JSON.parse(data));
+                 let newBlock = JSON.parse(data);
+                 if( (newBlock.state == 'new-block') ){
+                   if(newBlock.data.node.rewardAddress!=publicKey){
+                     stop = true;
+                     resolve({
+                       status: false,
+                       block: newBlock.data
+                     });
+                   }else{
+                     // console.log('auto send block');
+                     new Paint().underpostOption('cyan','success', 'wsBridge: propagate Block');
+                   }
+
+                 }
+               }catch(err){
+
+                 new Paint().underpostOption('red','error', 'wsBridge: corrupt ws Object');
+
+               }
+
+             });
+
+           });
+
+           new Paint().underpostOption('yellow', ' ', 'End Mine Process Result:');
+           console.log(endBlockChainProcess);
+
+         } else {
+
+           new Paint().underpostOption('red', ' ', 'Failed bridge rest connection');
+
+         }
+
+
+       }
+    };
+
     //--------------------------------------------------------------------------
     // NAVI
     //--------------------------------------------------------------------------
@@ -453,43 +600,7 @@ export class UnderPostManager {
           {
             text: 'test',
             fn: async ()=>{
-
-                await this.networkUpdateStatus();
-
-                let blockChainConfig = JSON.parse(fs.readFileSync(
-                    this.mainDir+'/data/blockchain-config.json',
-                    this.charset
-                ));
-
-                let tempData = JSON.parse(fs.readFileSync(
-                  this.mainDir+'/data/underpost.json',
-                  this.charset
-                ));
-
-                let resp = await new RestService().postJSON(
-                  blockChainConfig.constructor.userConfig.bridgeUrl+'/node/ip',
-                  new Util().fusionObj([
-                    {
-                      generation: parseInt(blockChainConfig.constructor.generation),
-                      ws_port: tempData.ws_port,
-                      http_port: tempData.http_port
-                    },
-                    tempData.network_user
-                  ])
-                );
-
-
-                console.log("resp");
-                console.log(resp);
-
-                this.wsBridge != undefined ? this.wsBridge.close() : null;
-                this.wsBridge = new WSclient(blockChainConfig.network.wsBridgeServer);
-                this.wsBridge.onMsg(async data => {
-
-                  console.log(" wsBridge.onMsg ->");
-                  console.log(JSON.parse(data));
-
-                });
+              await BCmanager.initMineBlock();
             }
           },
           {

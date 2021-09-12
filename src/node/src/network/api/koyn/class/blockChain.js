@@ -394,23 +394,25 @@ export class BlockChain {
 
 	}
 
-	async addBlock(obj) {
+	async addBlock(obj, stop) {
 
 		console.log('\n---------------------------------------');
 		console.log(colors.yellow('NEW BLOCK | '+new Date().toLocaleString()));
 		console.log(obj.blockConfig);
     let block = new Block();
-		await block.mineBlock(obj);
-    this.chain.push(block);
-		this.calculateCurrentRewardDelivered();
-		this.calculateZerosAvgTimeBlock();
+		let blockSuccess = await block.mineBlock(obj, stop);
+    if(blockSuccess == true){
+			this.chain.push(block);
+			this.calculateCurrentRewardDelivered();
+			this.calculateZerosAvgTimeBlock();
 
-		let globalValidate = await this.globalValidateChain();
-		globalValidate.global == true
-		&&
-		this.userConfig.propagateBlock == true
-		? await this.startBlockPropagation() :
-		console.log(colors.cyan('off propagate block'));
+			let globalValidate = await this.globalValidateChain();
+			globalValidate.global == true
+			&&
+			this.userConfig.propagateBlock == true
+			? await this.startBlockPropagation() :
+			console.log(colors.cyan('off propagate block'));
+		}
 
 	}
 
@@ -623,7 +625,7 @@ export class BlockChain {
 
 	}
 
-	async mainProcess(obj){
+	async mainProcess(obj, stop){
 		await this.setCurrentChain();
 		await this.setRewardConfig();
 		for(let i=1; i<=(this.userConfig.blocksToUndermine); i++){
@@ -634,40 +636,45 @@ export class BlockChain {
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig(),
 						dataGenesis: this.genesisBlockChainConfig()
-					});
+					}, stop);
 					break;
 				default:
 					await this.addBlock({
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig()
-					});
+					}, stop);
 			}
 		}
-		await this.endProcessSaveChain();
+		return await this.endProcessSaveChain();
 	}
 
 	async endProcessSaveChain(){
-		let globaSaveValidate = await this.globalValidateChain(this.chain);
-		console.log(colors.cyan('global-save-validate ->'));
-		console.log(globaSaveValidate);
+		return await new Promise(async resolve => {
+			let globaSaveValidate = await this.globalValidateChain(this.chain);
+			console.log(colors.cyan('global-save-validate ->'));
+			console.log(globaSaveValidate);
 
-		if( globaSaveValidate.global == true ){
-			try{
-				switch (this.userConfig.blockChainDataPath) {
-					case null:
-							this.saveChain('../data/blockchain');
-						break;
-					default:
-						  this.saveChain(this.userConfig.blockChainDataPath);
+			if( globaSaveValidate.global == true ){
+				try{
+					switch (this.userConfig.blockChainDataPath) {
+						case null:
+								this.saveChain('../data/blockchain');
+							break;
+						default:
+							  this.saveChain(this.userConfig.blockChainDataPath);
+					}
+					console.log(colors.cyan("success > save chain"));
+					resolve(true);
+				}catch(err){
+					console.log(colors.red("error > save chain"));
+					resolve(false);
 				}
-				console.log(colors.cyan("success > save chain"));
-			}catch(err){
-				console.log(colors.red("error > save chain"));
+			}else{
+				console.log(colors.red("error > corrupt chain"));
+				resolve(false);
 			}
-		}else{
-			console.log(colors.red("error > corrupt chain"));
-		}
+		});
 	}
 
 	calculateCurrentRewardDelivered(){

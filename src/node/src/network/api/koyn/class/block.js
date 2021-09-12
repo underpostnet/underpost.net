@@ -50,7 +50,7 @@ export class Block {
       }
     }
 
-    async mineBlock(obj) {
+    async mineBlock(obj, stop) {
 
       this.block = Object.assign(this.block, obj.blockConfig);
       obj.blockConfig.index == 0 ? this.dataGenesis = obj.dataGenesis: null;
@@ -118,10 +118,15 @@ export class Block {
     		this.hash = this.calculateHash();
         // console.log(this.hash);
         logStat(false);
+        if(stop){
+          console.log(colors.red("Stop Mining Block"));
+          return false;
+        }
     	}
       logStat(true);
 
       console.log(this);
+      return true;
 
     }
 
