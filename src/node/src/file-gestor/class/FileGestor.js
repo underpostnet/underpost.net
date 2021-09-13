@@ -5,6 +5,7 @@ import fs from "fs";
 import colors from "colors/safe.js";
 import readline from 'readline';
 import path from 'path';
+import mime from 'mime';
 
 export class FileGestor {
 
@@ -117,5 +118,35 @@ export class FileGestor {
       fs.rmdirSync(path);
     }
   }
+
+   getDataFile(dir, json){
+     if(! fs.existsSync(dir) ){
+       return { error: "ENOENT, no such file or directory" };
+     }
+     let bufferFile = fs.readFileSync(dir);
+     try{
+       if(!json){
+         return {
+           name: dir.split('/').pop(),
+           mimeType: mime.getType(dir),
+           buffer: bufferFile,
+           base64: bufferFile.toString('base64'),
+           source: 'data:'+mime.getType(dir)+';base64,'+bufferFile.toString('base64'),
+           raw: bufferFile.toString()
+         }
+       }else{
+         return {
+           name: dir.split('/').pop(),
+           mimeType: mime.getType(dir),
+           buffer: bufferFile,
+           base64: bufferFile.toString('base64'),
+           json: Buffer.from(bufferFile.toString('base64'), 'base64').toString(),
+           obj: JSON.parse(bufferFile.toString())
+         }
+       }
+     }catch(err){
+       return { error: err }
+     }
+   }
 
 }

@@ -24,7 +24,10 @@ util = util.replace(`(''+rut).replaceAll('.','');`, `(''+rut).replace(/./g,'');`
 util = util.replace("chr4(){", "function chr4(){");
 
 util = util.replace('p.every(i => { return objEq(x[i], y[i]); });',
-'p.every(i => { return this.objEq(x[i], y[i]); });')
+'p.every(i => { return this.objEq(x[i], y[i]); });');
+
+util = util.replace('obj.hasOwnProperty(attr);',
+`Object.prototype.hasOwnProperty.call(obj, attr)`);
 
 const str_fix = `str_test(str, type) {
   if(type=='charLength') {

@@ -28,10 +28,6 @@ export class UnderPostManager {
 
   async init(){
 
-    // test area
-    // await new RestService().getIP();
-    // return;
-
     //--------------------------------------------------------------------------
     // BASE
     //--------------------------------------------------------------------------
@@ -437,6 +433,41 @@ export class UnderPostManager {
           }
         }
 
+      },
+      getKeyContent: async (type, timestamp) => {
+        type = type.split('Keys')[0];
+        switch (type) {
+          case "symmetric":
+            return {
+              iv: new FileGestor().getDataFile(
+              this.mainDir+'/data/keys/'
+              +type+
+              '/'+timestamp+'/iv.json', true),
+              key: new FileGestor().getDataFile(
+              this.mainDir+'/data/keys/'
+              +type+
+              '/'+timestamp+'/key.json', true)
+            }
+          case "asymmetric":
+            return {
+              public: new FileGestor().getDataFile(
+              this.mainDir+'/data/keys/'
+              +type+
+              '/'+timestamp+'/public.pem'),
+              private: new FileGestor().getDataFile(
+              this.mainDir+'/data/keys/'
+              +type+
+              '/'+timestamp+'/private.pem')
+            }
+          default:
+            new Paint().underpostOption('red', 'error', 'invalid type key');
+            new Paint().underpostBar();
+            return undefined;
+
+        }
+
+
+
       }
     };
 
@@ -471,7 +502,26 @@ export class UnderPostManager {
          if( resp.status == true ){
 
            var stop = false;
-           var publicKey = await new ReadLine().r('public key:');
+           // var publicKey = await new ReadLine().r('public key:');
+
+           let asymmetricKeyData = await KEYS.getKeyContent(
+             "asymmetricKeys",
+              tempData.active_asymmetric_public_key
+            );
+            // console.log("asymmetricKeyData ->");
+            // console.log(asymmetricKeyData);
+            let errorPublic = new Util().existAttr(asymmetricKeyData.public, "error");
+            // console.log(errorPublic);
+            let errorPrivate = new Util().existAttr(asymmetricKeyData.private, "error");
+            // console.log(errorPrivate);
+
+           if(errorPrivate ||  errorPublic){
+             new Paint().underpostOption('red','error', 'invalid assymetric key active: '
+             +tempData.active_asymmetric_public_key);
+             return;
+           }
+
+           var publicKey = asymmetricKeyData.public.base64;
 
            new Paint().underpostOption('yellow', ' ', 'starting bridge ws connection...');
 
@@ -576,6 +626,12 @@ export class UnderPostManager {
 
            new Paint().underpostOption('yellow', ' ', 'End Mine Process Result:');
            console.log(endBlockChainProcess);
+           new Paint().underpostOption('yellow', ' ', 'Reward Address:');
+           console.log(
+             Buffer.from(
+               endBlockChainProcess.block.node.rewardAddress, 'base64'
+             ).toString()
+           );
 
          } else {
 
@@ -834,6 +890,23 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
     // INIT
     //--------------------------------------------------------------------------
+
+    //--------------------------------------------------------------------------
+    // TEST AREA
+
+    // await new RestService().getIP();
+
+    // let symmetricKeyData = await KEYS.getKeyContent("symmetricKeys", 1629759130448);
+    // console.log("symmetricKeyData ->");
+    // console.log(symmetricKeyData);
+
+    // let asymmetricKeyData = await KEYS.getKeyContent("asymmetricKeys", 1629659881247);
+    // console.log("asymmetricKeyData ->");
+    // console.log(asymmetricKeyData);
+
+    // return;
+    //--------------------------------------------------------------------------
+
 
     let mainData = {};
     let dataTemplate = JSON.parse(

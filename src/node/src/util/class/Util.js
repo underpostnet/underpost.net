@@ -720,7 +720,7 @@ var max = Math.max( ...arr );
 
 	// existe attr sea cual sea el valor
 	 existAttr(obj, attr){
-		return obj.hasOwnProperty(attr);
+		return Object.prototype.hasOwnProperty.call(obj, attr)
 	}
 
 // Object.keys({data: "asd", jola:33})

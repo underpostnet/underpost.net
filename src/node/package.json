@@ -34,6 +34,7 @@
     "file-get-contents": "latest",
     "ws": "latest",
     "node-fetch": "latest",
-    "shelljs": "latest"
+    "shelljs": "latest",
+    "mime": "latest"
   }
 }
