@@ -951,6 +951,9 @@ export class UnderPostManager {
     ! fs.existsSync(this.mainDir+'/data/keys') ?
     fs.mkdirSync(this.mainDir+'/data/keys') : null;
 
+    ! fs.existsSync(this.mainDir+'/data/blockchain') ?
+    fs.mkdirSync(this.mainDir+'/data/blockchain') : null;
+
   }
 
   async underpostActiveUserLog(){
