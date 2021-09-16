@@ -501,7 +501,6 @@ export class UnderPostManager {
 
          if( resp.status == true ){
 
-           var stop = false;
            // var publicKey = await new ReadLine().r('public key:');
 
            let asymmetricKeyData = await KEYS.getKeyContent(
@@ -521,6 +520,22 @@ export class UnderPostManager {
              return;
            }
 
+
+           // input difficultyConfig
+           // let input_hash_rate_seconds = 6000;
+           // let input_interval_seconds_time = 10;
+           let input_hash_rate_seconds = 400000;
+           let input_interval_seconds_time = 10;
+           /*let new_hrs = await new ReadLine().r('Hash Rate Seconds: ');
+           let new_ist = await new ReadLine().r('Interval Seconds Time: ');
+           if(!isNaN(new_hrs)){
+             input_hash_rate_seconds = parseInt(new_hrs);
+           }
+           if(!isNaN(new_ist)){
+             input_interval_seconds_time = parseInt(new_ist);
+           }*/
+
+
            var publicKey = asymmetricKeyData.public.base64;
 
            new Paint().underpostOption('yellow', ' ', 'starting bridge ws connection...');
@@ -530,9 +545,13 @@ export class UnderPostManager {
 
            new Paint().underpostOption('yellow', 'ws host', this.wsBridge.host_name);
 
-           let endBlockChainProcess = await new Promise(async resolve => {
 
-             let blockChainProcess = new BlockChain({
+           //-------------------------------------------------------------------
+           //-------------------------------------------------------------------
+
+           let BCP = await new Promise(async resolve => {
+
+             var blockChainProcess = new BlockChain({
                generation: blockChainConfig.constructor.generation,
                version: '0.0.0',
                hashGeneration: null,
@@ -543,7 +562,7 @@ export class UnderPostManager {
                  blocksToUndermine: 1,
                  propagateBlock: true,
                  bridgeUrl: blockChainConfig.constructor.userConfig.bridgeUrl,
-                 // bridgeUrl: null,
+                 intervalBridgeMonitoring: 1000,
                  zerosConstDifficulty: null,
                  rewardAddress: publicKey,
                  blockChainDataPath: this.mainDir+'/data/blockchain',
@@ -560,18 +579,21 @@ export class UnderPostManager {
                  upTruncFactor: 15
                },
                difficultyConfig: {
-                 hashRateSeconds: 6000,
-                 intervalSecondsTime: 10,
+                 hashRateSeconds: input_hash_rate_seconds,
+                 intervalSecondsTime: input_interval_seconds_time,
                  intervalCalculateDifficulty: 10
                }
              });
 
+             //-------------------------------------------------------------------
+             // INIT BlockChain Process -> resolve(status, block)
+             //-------------------------------------------------------------------
+
              this.wsBridge.onOpen(async data => {
 
                new Paint().underpostOption('yellow', ' ', 'success bridge ws connection');
-               new Paint().underpostOption('yellow', ' ', 'init mine block process');
-
-               let statusBlockChainProcess = await blockChainProcess.mainProcess({
+               
+               resolve(await blockChainProcess.mainProcess({
                  paths: [
                    {
                      url: 'http://localhost:3001/koyn',
@@ -582,54 +604,24 @@ export class UnderPostManager {
                      type: 'Transaction'
                    }
                  ]
-               }, stop);
-
-               if(!stop){
-                 resolve({
-                   status: statusBlockChainProcess,
-                   block:
-                   blockChainProcess.latestBlock() == undefined ?
-                   null : blockChainProcess.latestBlock()
-                 });
-               }
+               }, this.wsBridge));
 
              });
 
-             this.wsBridge.onMsg(async data => {
-
-               try{
-                 // console.log(" wsBridge.onMsg ->");
-                 // console.log(JSON.parse(data));
-                 let newBlock = JSON.parse(data);
-                 if( (newBlock.state == 'new-block') ){
-                   if(newBlock.data.node.rewardAddress!=publicKey){
-                     stop = true;
-                     resolve({
-                       status: false,
-                       block: newBlock.data
-                     });
-                   }else{
-                     // console.log('auto send block');
-                     new Paint().underpostOption('cyan','success', 'wsBridge: propagate Block');
-                   }
-
-                 }
-               }catch(err){
-
-                 new Paint().underpostOption('red','error', 'wsBridge: corrupt ws Object');
-
-               }
-
-             });
+             //-------------------------------------------------------------------
+             //-------------------------------------------------------------------
 
            });
 
+           //-------------------------------------------------------------------
+           //-------------------------------------------------------------------
+
            new Paint().underpostOption('yellow', ' ', 'End Mine Process Result:');
-           console.log(endBlockChainProcess);
+           console.log(BCP);
            new Paint().underpostOption('yellow', ' ', 'Reward Address:');
            console.log(
              Buffer.from(
-               endBlockChainProcess.block.node.rewardAddress, 'base64'
+               BCP.block.node.rewardAddress, 'base64'
              ).toString()
            );
 

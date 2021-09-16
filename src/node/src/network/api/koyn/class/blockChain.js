@@ -394,26 +394,62 @@ export class BlockChain {
 
 	}
 
-	async addBlock(obj, stop) {
+	async addBlock(obj, ws) {
 
 		console.log('\n---------------------------------------');
 		console.log(colors.yellow('NEW BLOCK | '+new Date().toLocaleString()));
 		console.log(obj.blockConfig);
-    let block = new Block();
-		let blockSuccess = await block.mineBlock(obj, stop);
-    if(blockSuccess == true){
-			this.chain.push(block);
-			this.calculateCurrentRewardDelivered();
-			this.calculateZerosAvgTimeBlock();
+    this.newBlock = new Block();
+
+		let blockProcess = await this.newBlock.mineBlock(
+			obj,
+			ws,
+			this.userConfig.intervalBridgeMonitoring);
+
+    if(blockProcess.status == true){
 
 			let globalValidate = await this.globalValidateChain();
-			globalValidate.global == true
-			&&
-			this.userConfig.propagateBlock == true
-			? await this.startBlockPropagation() :
-			console.log(colors.cyan('off propagate block'));
+
+			if(globalValidate.global == true
+				&&
+				this.userConfig.propagateBlock == false){
+					this.endAddProcessBlock();
+					return blockProcess;
+			}
+
+			if(globalValidate.global == true
+				&&
+				this.userConfig.propagateBlock == true){
+
+				let propagationStatus = await this.startBlockPropagation();
+				if(propagationStatus == true){
+					this.endAddProcessBlock();
+					return blockProcess;
+				}else{
+					console.log(colors.red('wsBridge Rejected Block'));
+					blockProcess.status = false;
+					return blockProcess;
+				}
+
+			}
+
+			console.log(colors.red('Invalid last Block'));
+			blockProcess.status = false;
+			return blockProcess;
+
+		}else{
+
+			console.log(colors.red('disrupted mine block process'));
+			return blockProcess;
+
 		}
 
+	}
+
+	endAddProcessBlock(){
+		this.chain.push(this.newBlock);
+		this.calculateCurrentRewardDelivered();
+		this.calculateZerosAvgTimeBlock();
 	}
 
 	async globalValidateChain(chain){
@@ -445,17 +481,16 @@ export class BlockChain {
 						keysValidate = false;
 					}
 				}
+				hashValidate = this.checkValid();
 		}else{
 			 signValidate =
-			 await this.validateSignAppNode(this.latestBlock().node.dataApp, false);
+			 await this.validateSignAppNode(this.newBlock.node.dataApp, false);
 			 rewardValidate =
-			 this.validateRewardBlock(this.latestBlock());
+			 this.validateRewardBlock(this.newBlock);
 			 keysValidate =
-			 this.validateKeysBlock(this.latestBlock());
+			 this.validateKeysBlock(this.newBlock);
+			 hashValidate = this.checkValid(this.newBlock);
 		}
-		hashValidate = this.checkValid();
-
-		// validate reward with genesis
 
 		// validate transactions
 
@@ -507,14 +542,36 @@ export class BlockChain {
 			// console.log(this.latestBlock());
 			return await new RestService().postJSON(
 						this.userConfig.bridgeUrl+'/chain/block',
-						this.latestBlock()
+						this.clearBlock(
+							new Util().newInstance(this.newBlock)
+						)
 			);
 		};
 		console.log(colors.cyan('bridge-propagation-status:'));
-		console.log(await bridgePropagation());
+		let result = await bridgePropagation();
+		console.log(result);
+		return result.global;
 	}
 
-	checkValid() {
+	clearBlock(obj){
+		/*if(new Util().existAttr(obj, "stop")){
+			delete obj.stop;
+		}*/
+		return obj;
+	}
+
+	clearChain(){
+		let auxChain = [];
+		for(let block of this.chain){
+			auxChain.push(this.clearBlock(new Util().newInstance(block)));
+		}
+		return auxChain;
+	}
+
+	checkValid(block) {
+		if(block!=undefined){
+			this.chain.push(block);
+		}
 		for (let i = 1; i < new Util().l(this.chain); i++) {
 			const currentBlock = this.chain[i];
 			const previousBlock = this.chain[i - 1];
@@ -530,6 +587,9 @@ export class BlockChain {
 			if (currentBlock.block.previousHash !== previousBlock.hash) {
 				return false;
 			}
+		}
+		if(block!=undefined){
+			this.chain.pop();
 		}
 		return true;
 	}
@@ -625,35 +685,38 @@ export class BlockChain {
 
 	}
 
-	async mainProcess(obj, stop){
+	async mainProcess(obj, ws){
 		await this.setCurrentChain();
 		await this.setRewardConfig();
+		let statusMainProcess = null;
 		for(let i=1; i<=(this.userConfig.blocksToUndermine); i++){
 			switch (new Util().l(this.chain)) {
 				case 0:
-					await this.addBlock({
+					statusMainProcess = await this.addBlock({
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig(),
 						dataGenesis: this.genesisBlockChainConfig()
-					}, stop);
+					}, ws);
+					if(statusMainProcess.status == false){return statusMainProcess;}
 					break;
 				default:
-					await this.addBlock({
+					statusMainProcess = await this.addBlock({
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig()
-					}, stop);
+					}, ws);
+					if(statusMainProcess.status == false){return statusMainProcess;}
 			}
 		}
-		return await this.endProcessSaveChain();
+		return await this.endProcessSaveChain(statusMainProcess);
 	}
 
-	async endProcessSaveChain(){
+	async endProcessSaveChain(statusMainProcess){
 		return await new Promise(async resolve => {
+			// console.log(colors.magenta('global-save-validate ->'));
 			let globaSaveValidate = await this.globalValidateChain(this.chain);
-			console.log(colors.cyan('global-save-validate ->'));
-			console.log(globaSaveValidate);
+			// console.log(globaSaveValidate);
 
 			if( globaSaveValidate.global == true ){
 				try{
@@ -664,15 +727,18 @@ export class BlockChain {
 						default:
 							  this.saveChain(this.userConfig.blockChainDataPath);
 					}
-					console.log(colors.cyan("success > save chain"));
-					resolve(true);
+					console.log(colors.magenta("success > save chain"));
+					resolve(statusMainProcess);
 				}catch(err){
+					// console.log(err);
+					statusMainProcess.status = false;
 					console.log(colors.red("error > save chain"));
-					resolve(false);
+					resolve(statusMainProcess);
 				}
 			}else{
+				statusMainProcess.status = false;
 				console.log(colors.red("error > corrupt chain"));
-				resolve(false);
+				resolve(statusMainProcess);
 			}
 		});
 	}
@@ -760,7 +826,7 @@ export class BlockChain {
 
 		fs.writeFileSync(
 			path_save+'/generation-'+this.generation+'/chain.json',
-			new Util().jsonSave(this.chain),
+			new Util().jsonSave(this.clearChain()),
 			this.userConfig.charset
 		);
 

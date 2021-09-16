@@ -9,16 +9,25 @@ export class WSclient {
     // console.log(this);
   }
 
-  onMsg(fn){
-    this.connection.on('message', data => {
-      fn(data);
+  async onMsg(fn){
+    this.connection.on('message',async data => {
+      await fn(data);
     });
   }
 
-  onOpen(fn){
-    this.connection.on('open', data => {
-      fn(data);
+  async onOpen(fn){
+    this.connection.on('open', async data => {
+      await fn(data);
     });
+  }
+
+  async send(msg){
+    this.connection.send(msg);
+  }
+
+  async reset(){
+    this.connection.close();
+    this.connection = new WebSocket(this.host_name);
   }
 
   close(){
