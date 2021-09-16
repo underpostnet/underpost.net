@@ -106,7 +106,7 @@ export class Block {
                   m_ = 0;
                   h_++;
                 }
-                timer_ = current_;
+                timer_ = new Util().newInstance(current_);
                 new Util().clearLastLine();
                 console.log(colors.magenta(
                   'time:'+
@@ -119,10 +119,10 @@ export class Block {
               }
             };
 
-
+            var onWsMsgController = 0;
             const monitoringBridge = async () => {
               if(current_-timer_monitoring_>interval){
-                timer_monitoring_ = current_;
+                timer_monitoring_ = new Util().newInstance(current_);
                 return await new Promise( async wsResolve => {
                   let fromHash = new Util().getHash();
                   ws.send(new Util().JSONstr({
@@ -133,47 +133,60 @@ export class Block {
                       generation: this.block.generation
                     }
                   }));
-
+                  const idOnMsg = new Util().newInstance(onWsMsgController);
                   ws.onMsg(async data => {
                     // console.log(" wsBridge.onMsg ->");
+                    // console.log();
+                    // console.log(idOnMsg);
+                    // console.log(onWsMsgController);
+                    if(idOnMsg==onWsMsgController){
 
 
-                    let responseWsObj = JSON.parse(data);
-                    // console.log(responseWsObj);
-                    if(
-                      (responseWsObj.state == "get-last-block")
-                      &&
-                      (responseWsObj.to == fromHash)
-                      &&
-                      (responseWsObj.from == "server")
-                    ){
+                                          let responseWsObj = JSON.parse(data);
+                                          // console.log(responseWsObj);
+                                          // console.log(" test ->");
+                                          if(
+                                            (responseWsObj.state == "get-last-block")
+                                            &&
+                                            (responseWsObj.to == fromHash)
+                                            &&
+                                            (responseWsObj.from == "server")
+                                          ){
+                                            onWsMsgController++;
+                                            if(
 
-                      if(
+                                              (responseWsObj.data.block.index >= this.block.index)
+                                              &&
+                                              (responseWsObj.data.node.rewardAddress != this.node.rewardAddress)
 
-                        (responseWsObj.data.block.index >= this.block.index)
-                        &&
-                        (responseWsObj.data.node.rewardAddress != this.node.rewardAddress)
-
-                      ){
-                        await ws.reset();
-                        await ws.onOpen(async data => {
-                          wsResolve({
-                            status: false,
-                            block: responseWsObj.data
-                          });
-                        });
-                        return;
-                      }else {
-                        await ws.reset();
-                        await ws.onOpen(async data => {
-                          wsResolve({
-                            status: true,
-                            block: null
-                          });
-                        });
-                        return;
-                      }
+                                            ){
+                                              /*await ws.reset();
+                                              await ws.onOpen(async data => {
+                                              });*/
+                                              wsResolve({
+                                                status: false,
+                                                block: responseWsObj.data
+                                              });
+                                              return;
+                                            }else {
+                                              /*await ws.reset();
+                                              await ws.onOpen(async data => {
+                                              });*/
+                                              wsResolve({
+                                                status: true,
+                                                block: null
+                                              });
+                                              return;
+                                            }
+                                          }
+                    }else{
+                      wsResolve({
+                        status: true,
+                        block: null
+                      });
                     }
+
+
                   });
 
 
