@@ -119,7 +119,7 @@ export class Block {
               }
             };
 
-            var onWsMsgController = 0;
+            //var onWsMsgController = 0;
             const monitoringBridge = async () => {
               if(current_-timer_monitoring_>interval){
                 timer_monitoring_ = new Util().newInstance(current_);
@@ -133,13 +133,14 @@ export class Block {
                       generation: this.block.generation
                     }
                   }));
-                  const idOnMsg = new Util().newInstance(onWsMsgController);
+                  //const idOnMsg = new Util().newInstance(onWsMsgController);
+                  try {
                   ws.onMsg(async data => {
-                    // console.log(" wsBridge.onMsg ->");
-                    // console.log();
+                    //console.log(" wsBridge.onMsg ->");
+                    // new Paint().underpostOption('yellow', ' ', 'wsBridge on Monitoring status');
                     // console.log(idOnMsg);
                     // console.log(onWsMsgController);
-                    if(idOnMsg==onWsMsgController){
+                    //if(idOnMsg==onWsMsgController){
 
 
                                           let responseWsObj = JSON.parse(data);
@@ -152,7 +153,10 @@ export class Block {
                                             &&
                                             (responseWsObj.from == "server")
                                           ){
-                                            onWsMsgController++;
+                                            // onWsMsgController++;
+
+
+                                            ws.clearEvent("message");
                                             if(
 
                                               (responseWsObj.data.block.index >= this.block.index)
@@ -179,15 +183,26 @@ export class Block {
                                               return;
                                             }
                                           }
-                    }else{
+                    /*}else{
                       wsResolve({
                         status: true,
                         block: null
                       });
-                    }
+                    }*/
 
 
                   });
+                  }catch(err){
+                    console.log(colors.red("error > Corrup wsBridge monitoring Object"));
+                    console.log();
+                    wsResolve({
+                      status: true,
+                      block: null
+                    });
+                    await ws.clearEvent("message");
+                    return;
+
+                  }
 
 
                 });

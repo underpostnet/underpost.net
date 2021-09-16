@@ -30,6 +30,15 @@ export class WSclient {
     this.connection = new WebSocket(this.host_name);
   }
 
+  async clearEvent(type){
+    /*
+    "message"
+    "close"
+    "open"
+    */
+    this.connection.removeEventListener(type, this.handleSocketMessage);
+  }
+
   close(){
     return this.connection.close();
   }
