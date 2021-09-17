@@ -81,7 +81,7 @@ export class Keys {
       try {
         const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',
         {
-                modulusLength: 4096,
+                modulusLength: 4096/8,
                 namedCurve: 'secp256k1',
                 publicKeyEncoding: {
                     type: 'spki',

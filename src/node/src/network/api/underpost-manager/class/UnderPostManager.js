@@ -592,7 +592,7 @@ export class UnderPostManager {
              this.wsBridge.onOpen(async data => {
 
                new Paint().underpostOption('yellow', ' ', 'success bridge ws connection');
-               
+
                resolve(await blockChainProcess.mainProcess({
                  paths: [
                    {
@@ -632,6 +632,14 @@ export class UnderPostManager {
          }
 
 
+       },
+       clearChain: async ()=>{
+         fs.writeFileSync(
+           this.mainDir+'/data/blockchain/generation-0/chain.json',
+           "[]",
+           this.charset);
+          new Paint().underpostOption('yellow', 'success', 'Clear Chain Generation 0');
+          new Paint().underpostBar();
        }
     };
 
@@ -646,9 +654,23 @@ export class UnderPostManager {
         postTitle: null,
         options: [
           {
-            text: 'test',
+            text: 'Start Mining Processes',
             fn: async ()=>{
-              await BCmanager.initMineBlock();
+              let blocks = await new ReadLine().r(
+                new Paint().underpostInput('Number of Blocks to Mine'));
+              if(!isNaN(blocks)){
+                for(let i_=0; i_<blocks;i_++){
+                  await BCmanager.initMineBlock();
+                }
+              }else{
+                  new Paint().underpostOption('red', 'error', 'not valid number')
+              }
+            }
+          },
+          {
+            text: 'Clear Chain',
+            fn: async ()=>{
+              await BCmanager.clearChain();
             }
           },
           {

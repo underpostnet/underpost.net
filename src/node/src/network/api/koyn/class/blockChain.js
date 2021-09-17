@@ -73,14 +73,18 @@ export class BlockChain {
 
 		const setValidateChain = async () => {
 
-			let bridgeChain = await new RestService().getJSON(
-				this.userConfig.bridgeUrl+'/chain/'+this.generation
-			);
-
 			let localChain = JSON.parse(fs.readFileSync(
 				(this.userConfig.blockChainDataPath+'/generation-'+this.generation+'/chain.json'),
 				this.userConfig.charset
 			));
+
+			let bridgeChain = localChain.concat(await new RestService().getJSON(
+				this.userConfig.bridgeUrl+'/chain/'+this.generation
+				+'/'+new Util().l(localChain)+'/last'
+			));
+
+			console.log(colors.yellow("difference length chain bridge:"+
+			(bridgeChain.length-localChain.length)));
 
 			new Util().l(bridgeChain) > new Util().l(localChain) &&
 			this.equalValidate(localChain, bridgeChain)

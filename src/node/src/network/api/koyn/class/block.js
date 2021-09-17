@@ -193,7 +193,7 @@ export class Block {
 
                   });
                   }catch(err){
-                    console.log(colors.red("error > Corrup wsBridge monitoring Object"));
+                    console.log(colors.red("error > Corrupt wsBridge monitoring Object"));
                     console.log();
                     wsResolve({
                       status: true,
