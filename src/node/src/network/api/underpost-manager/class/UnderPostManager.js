@@ -643,9 +643,83 @@ export class UnderPostManager {
        }
     };
 
+    const WALLET = {
+
+    };
+
     //--------------------------------------------------------------------------
     // NAVI
     //--------------------------------------------------------------------------
+
+    const koynWallet = async () => {
+      await new Navi().init({
+        preTitle: null,
+        title: 'Koλn Wallet',
+        postTitle: null,
+        options: [
+          {
+            text: 'Share Current Asymmetric Key to Cyberia Pull Public Key',
+            fn: async () => {
+
+
+              let tempData = JSON.parse(fs.readFileSync(
+                this.mainDir+'/data/underpost.json',
+                this.charset
+              ));
+
+              let asymmetricKeyData = await KEYS.getKeyContent(
+                "asymmetricKeys",
+                 tempData.active_asymmetric_public_key
+              );
+
+              let blockChainConfig = JSON.parse(fs.readFileSync(
+                  this.mainDir+'/data/blockchain-config.json',
+                  this.charset
+              ));
+
+              let errorPublic = new Util().existAttr(asymmetricKeyData.public, "error");
+              // console.log(errorPublic);
+              let errorPrivate = new Util().existAttr(asymmetricKeyData.private, "error");
+              // console.log(errorPrivate);
+
+             if(errorPrivate ||  errorPublic){
+               new Paint().underpostOption('red','error', 'invalid assymetric key active: '
+               +tempData.active_asymmetric_public_key);
+               return;
+             }
+
+             let resp = await new RestService().postJSON(
+               blockChainConfig.constructor.userConfig.bridgeUrl+'/node/public-key',
+               new Util().fusionObj([
+                 {
+                   base64PublicKey: asymmetricKeyData.public.base64,
+                   generation: parseInt(blockChainConfig.constructor.generation)
+                 },
+                 tempData.network_user
+               ])
+             );
+             new Paint().underpostOption('yellow', ' ', 'koyn pull public key response');
+             console.log(resp);
+
+
+            }
+          },
+          {
+            text: 'Back Koλn BlockChain Manager',
+            fn: async ()=>{
+              await koynBlockChain();
+            }
+          },
+          {
+            text: 'Exit',
+            fn: async ()=>{
+
+              this.exit();
+            }
+          }
+        ]
+      });
+    };
 
     const koynBlockChain = async () => {
       await new Navi().init({
@@ -665,6 +739,12 @@ export class UnderPostManager {
               }else{
                   new Paint().underpostOption('red', 'error', 'not valid number')
               }
+            }
+          },
+          {
+            text: 'wallet',
+            fn: async ()=>{
+              await koynWallet();
             }
           },
           {
