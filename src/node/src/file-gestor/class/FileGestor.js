@@ -132,7 +132,8 @@ export class FileGestor {
            buffer: bufferFile,
            base64: bufferFile.toString('base64'),
            source: 'data:'+mime.getType(dir)+';base64,'+bufferFile.toString('base64'),
-           raw: bufferFile.toString()
+           raw: bufferFile.toString(),
+           genesis_dir: dir
          }
        }else{
          return {
@@ -141,7 +142,8 @@ export class FileGestor {
            buffer: bufferFile,
            base64: bufferFile.toString('base64'),
            json: Buffer.from(bufferFile.toString('base64'), 'base64').toString(),
-           obj: JSON.parse(bufferFile.toString())
+           obj: JSON.parse(bufferFile.toString()),
+           genesis_dir: dir
          }
        }
      }catch(err){

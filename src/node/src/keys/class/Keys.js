@@ -4,7 +4,8 @@ import crypto from "crypto";
 import path from "path";
 import colors from "colors/safe.js";
 import cryptoJs from "crypto-js";
-import { Util } from "../../util/class/Util.js"
+import { Util } from "../../util/class/Util.js";
+import SHA256 from "crypto-js/sha256.js";
 
 export class Keys {
 
@@ -81,7 +82,7 @@ export class Keys {
       try {
         const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',
         {
-                modulusLength: 4096/8,
+                modulusLength: 4096/4,
                 namedCurve: 'secp256k1',
                 publicKeyEncoding: {
                     type: 'spki',
@@ -117,6 +118,60 @@ export class Keys {
 
       }
 
+  }
+
+  encryptStringWithRsaPrivateKey(toEncrypt, relativeOrAbsolutePathToPrivateKey, passphrase) {
+      let absolutePath = path.resolve(relativeOrAbsolutePathToPrivateKey);
+      let privateKey = fs.readFileSync(absolutePath, "utf8");
+      let buffer = Buffer.from(toEncrypt);
+      let encrypted = crypto.privateEncrypt({
+          key: privateKey.toString(),
+          passphrase: passphrase,
+      }, buffer);
+      return encrypted.toString("base64");
+  }
+
+  decryptStringWithRsaPublicKey(toDecrypt, relativeOrAbsolutePathtoPublicKey) {
+      let absolutePath = path.resolve(relativeOrAbsolutePathtoPublicKey);
+      let publicKey = fs.readFileSync(absolutePath, "utf8");
+      let buffer = Buffer.from(toDecrypt, "base64");
+      const decrypted = crypto.publicDecrypt(publicKey, buffer);
+      return decrypted.toString("utf8");
+  }
+
+  generateAsymetricFromSign(privateDirPem, publicBase64, passphrase, data){
+    let dataContent = new Util().fusionObj([
+      data,
+      {
+        base64PublicKey: publicBase64
+      }
+    ]);
+    return {
+      data: dataContent,
+      sign: this.encryptStringWithRsaPrivateKey(
+        SHA256(
+        new Util().JSONstr(dataContent)
+        ).toString(),
+        privateDirPem,
+        passphrase
+      )
+    }
+  }
+
+  validateAsymmetricFromSign(obj, lengthBase64, publicDirPem){
+    // 364
+    try {
+      let dataSha = SHA256(JSONstr(obj.data)).toString();
+      let decrSign = this.decryptStringWithRsaPublicKey(
+        obj.sign,
+        publicDirPem
+      );
+      return ((decrSign==dataSha)&&(obj.data.base64PublicKey.length==lengthBase64));
+    }catch(err){
+      console.log("validateAsymmetricFromSign(obj, length, publicDirPem) error ->");
+      console.log(err);
+      return false;
+    }
   }
 
 

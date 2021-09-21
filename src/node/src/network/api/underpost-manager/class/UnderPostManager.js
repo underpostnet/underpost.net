@@ -7,7 +7,8 @@ import { RestService } from "../../../../rest/class/restService.js";
 import { Navi } from "../../../../navi/class/Navi.js";
 import { Paint } from "../../../../paint/class/paint.js";
 import { WSclient } from "../../../../network/api/koyn/class/wsClient.js";
-import { BlockChain } from "../../../../network/api/koyn/class/blockChain.js"
+import { BlockChain } from "../../../../network/api/koyn/class/blockChain.js";
+import SHA256 from "crypto-js/sha256.js";
 
 import fs from "fs";
 import colors from "colors/safe.js";
@@ -20,6 +21,7 @@ export class UnderPostManager {
 
     this.mainDir = mainDir;
     this.charset = 'utf8';
+    this.poolPublickey = [];
 
 
     new Paint().underpostBanner();
@@ -183,7 +185,7 @@ export class UnderPostManager {
           this.charset
         ));
 
-        let keyPass = await new ReadLine().r(
+        let keyPass = await new ReadLine().h(
           new Paint().underpostInput('key password')
         );
 
@@ -644,7 +646,75 @@ export class UnderPostManager {
     };
 
     const WALLET = {
+      getPoolPublicKey: async () => {
 
+        let tempData = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/underpost.json',
+          this.charset
+        ));
+
+        let asymmetricKeyData = await KEYS.getKeyContent(
+          "asymmetricKeys",
+           tempData.active_asymmetric_public_key
+        );
+
+        let blockChainConfig = JSON.parse(fs.readFileSync(
+            this.mainDir+'/data/blockchain-config.json',
+            this.charset
+        ));
+
+        let errorPublic = new Util().existAttr(asymmetricKeyData.public, "error");
+        // console.log(errorPublic);
+        let errorPrivate = new Util().existAttr(asymmetricKeyData.private, "error");
+        // console.log(errorPrivate);
+
+       if(errorPrivate ||  errorPublic){
+         new Paint().underpostOption('red','error', 'invalid assymetric key active: '
+         +tempData.active_asymmetric_public_key);
+         return;
+       }
+
+       let dataPost = new Util().fusionObj([
+         {
+           generation: parseInt(blockChainConfig.constructor.generation),
+           lastUpdate: (+ new Date())
+         },
+         tempData.network_user
+       ]);
+
+       new Paint().underpostOption("yellow", " ", "current asymmetric public key");
+       console.log(asymmetricKeyData.public.raw);
+
+       let passphrase = await new ReadLine().h(
+         new Paint().underpostInput("Enter passphrase current asymmetric public key")
+       );
+
+       let resp = {success: false};
+       try {
+         resp = await new RestService().postJSON(
+           blockChainConfig.constructor.userConfig.bridgeUrl+'/node/public-key',
+           new Keys().generateAsymetricFromSign(
+             asymmetricKeyData.private.genesis_dir,
+             asymmetricKeyData.public.base64,
+             passphrase,
+             dataPost
+           )
+         );
+       }catch(err){
+         console.log(err);
+         new Paint().underpostOption('red','error', 'invalid assymetric passphrase');
+         return;
+       }
+
+       if(resp.success == true){
+         new Paint().underpostOption('yellow', ' ', 'koyn pool public key response');
+         console.log(resp.data);
+         this.poolPublickey = resp.data;
+       }else{
+         new Paint().underpostOption('red', 'error', resp.data);
+       }
+
+      }
     };
 
     //--------------------------------------------------------------------------
@@ -658,49 +728,14 @@ export class UnderPostManager {
         postTitle: null,
         options: [
           {
-            text: 'Share Current Asymmetric Key to Cyberia Pull Public Key',
+            text: 'Share Current Asymmetric Public Key and get Public Key Pool',
             fn: async () => {
-
-
-              let tempData = JSON.parse(fs.readFileSync(
-                this.mainDir+'/data/underpost.json',
-                this.charset
-              ));
-
-              let asymmetricKeyData = await KEYS.getKeyContent(
-                "asymmetricKeys",
-                 tempData.active_asymmetric_public_key
-              );
-
-              let blockChainConfig = JSON.parse(fs.readFileSync(
-                  this.mainDir+'/data/blockchain-config.json',
-                  this.charset
-              ));
-
-              let errorPublic = new Util().existAttr(asymmetricKeyData.public, "error");
-              // console.log(errorPublic);
-              let errorPrivate = new Util().existAttr(asymmetricKeyData.private, "error");
-              // console.log(errorPrivate);
-
-             if(errorPrivate ||  errorPublic){
-               new Paint().underpostOption('red','error', 'invalid assymetric key active: '
-               +tempData.active_asymmetric_public_key);
-               return;
-             }
-
-             let resp = await new RestService().postJSON(
-               blockChainConfig.constructor.userConfig.bridgeUrl+'/node/public-key',
-               new Util().fusionObj([
-                 {
-                   base64PublicKey: asymmetricKeyData.public.base64,
-                   generation: parseInt(blockChainConfig.constructor.generation)
-                 },
-                 tempData.network_user
-               ])
-             );
-             new Paint().underpostOption('yellow', ' ', 'koyn pull public key response');
-             console.log(resp);
-
+              await WALLET.getPoolPublicKey();
+            }
+          },
+          {
+            text: '??',
+            fn: async ()=>{
 
             }
           },
