@@ -146,7 +146,7 @@ export class PublicKeyManager {
       new Util().jsonSave(this.pool),
       this.charset);
 
-    new Paint().underpostOption('yellow', 'error', 'success get bridge public keys');
+    new Paint().underpostOption('yellow', 'success', 'get bridge public keys');
     if(new Util().l(updates_keys)>0){
       new Paint().underpostOption('yellow', ' ', 'updated keys:');
       this.viewPool(updates_keys.map(x=>x.data));
@@ -233,6 +233,72 @@ export class PublicKeyManager {
        new Paint().underpostOption('red', 'error', resp.data);
        return [];
      }
+
+   }
+
+   async addPublicKey(){
+    try{
+      let inputBase64PublicKey = await new ReadLine().r(
+        new Paint().underpostInput("Enter Base64 Sign Public Key")
+      );
+      new Paint().underpostOption('yellow', ' ', 'Base64 decode Obj:');
+
+      let test_key = new Keys()
+        .getJSONAsymmetricPublicKeySignFromBase64(inputBase64PublicKey);
+
+      console.log(test_key);
+
+      let validate_sign_key = true;
+      let id_file_key = new Util().getHash();
+      fs.writeFileSync(
+        this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem',
+        Buffer.from(test_key.data.base64PublicKey, 'base64').toString(),
+        this.charset
+      );
+      if(
+        ! new Keys().validateAsymmetricFromSign(
+        test_key,
+        364,
+        this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem')
+      ){
+        validate_sign_key = false;
+      }
+      fs.unlinkSync(this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem');
+
+      if(validate_sign_key){
+
+
+        let foundKey = false;
+        let ind_ = 0;
+        for(let key of this.pool){
+          if(key.data.base64PublicKey==test_key.data.base64PublicKey){
+            foundKey = true;
+            this.pool[ind_]=test_key;
+            new Paint().underpostOption('cyan', 'success', 'updated sign public key');
+            break;
+          }
+          ind_++;
+        }
+        if(!foundKey){
+          this.pool.push(test_key);
+          new Paint().underpostOption('cyan', 'success', 'add sign public key');
+        }
+
+        fs.writeFileSync(
+          this.pathPool,
+          new Util().jsonSave(this.pool),
+          this.charset);
+
+      }else{
+        new Paint().underpostOption('red', 'error', 'failed validate sign key');
+      }
+
+    }catch(err){
+      console.log(err);
+      new Paint().underpostOption('red', 'error', 'failed add Public Key');
+    }
+
+
 
    }
 

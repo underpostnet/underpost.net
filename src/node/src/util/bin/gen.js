@@ -29,6 +29,18 @@ util = util.replace('p.every(i => { return objEq(x[i], y[i]); });',
 util = util.replace('obj.hasOwnProperty(attr);',
 `Object.prototype.hasOwnProperty.call(obj, attr)`);
 
+util = util + `
+
+copy(data) {
+  clipboardy.writeSync(data);
+}
+
+paste(data) {
+  return clipboardy.readSync();
+}
+
+`;
+
 const str_fix = `str_test(str, type) {
   if(type=='charLength') {
       if( str.length >= 8 ) {
@@ -79,6 +91,8 @@ clearLastLine(){
 util = util.split('/* fix */')[0]+str_fix+util.split('/* fix */')[2]
 
 util = `
+
+        import clipboardy from 'clipboardy';
 
         export class Util {
 

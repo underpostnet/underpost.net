@@ -36,6 +36,7 @@
     "node-fetch": "latest",
     "shelljs": "latest",
     "mime": "latest",
-    "read": "latest"
+    "read": "latest",
+    "clipboardy": "latest"
   }
 }

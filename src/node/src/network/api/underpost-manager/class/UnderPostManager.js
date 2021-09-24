@@ -97,23 +97,36 @@ export class UnderPostManager {
 
       new Paint().underpostTextBotbar("Set User Settings");
 
+      let max_chars = 100;
+      new Paint().underpostOption('yellow', 'warning', 'input max characters: '+max_chars);
+
       data.http_port = parseInt(await new ReadLine().r(
         new Paint().underpostInput('http port')));
+      data.http_port > 9999999 ? data.http_port = null : null;
 
       data.ws_port = parseInt(await new ReadLine().r(
         new Paint().underpostInput('ws port')));
+      data.ws_port > 9999999 ? data.ws_port = null : null;
 
       data.network_user.username = await new ReadLine().r(
         new Paint().underpostInput('network user username'));
+      new Util().l(data.network_user.username) > max_chars ?
+      data.network_user.username = "" : null;
 
       data.network_user.email = await new ReadLine().r(
         new Paint().underpostInput('network user email'));
+      new Util().l(data.network_user.email) > max_chars ?
+      data.network_user.email = "" : null;
 
       data.network_user.web = await new ReadLine().r(
         new Paint().underpostInput('network user web'));
+      new Util().l(data.network_user.web) > max_chars ?
+      data.network_user.web = "" : null;
 
       data.network_user.bio = await new ReadLine().r(
         new Paint().underpostInput('network user bio'));
+      new Util().l(data.network_user.bio) > max_chars ?
+      data.network_user.bio = "" : null;
 
       new Paint().underpostBar();
 
@@ -290,6 +303,11 @@ export class UnderPostManager {
           this.charset
         ));
 
+        let blockChainConfig = JSON.parse(fs.readFileSync(
+            this.mainDir+'/data/blockchain-config.json',
+            this.charset
+        ));
+
         let indexKey =
         parseInt(await new ReadLine().r(
           new Paint().underpostInput('index key')
@@ -351,8 +369,14 @@ export class UnderPostManager {
               +timeStampKey+'/private.pem');
               return async () => {
                 new Paint().underpostOption('white', ' ', 'Asymmetric Key Selected');
-                console.log('\n'+colors.green(publicKey));
-                console.log(colors.green(privateKey));
+                // console.log('\n'+colors.green(publicKey));
+                // console.log(colors.green(privateKey));
+                // new Paint().underpostOption('white', ' ', 'Base64 Public Key:');
+                let fileKeyContent = await KEYS.getKeyContent(
+                  type,
+                  timeStampKey
+                );
+                console.log(fileKeyContent);
                 function rowKey(obj){
                   this.index = obj.index;
                   this.path = obj.path;
@@ -364,7 +388,46 @@ export class UnderPostManager {
                     index: indexKey
                   })
                 );
-                new Paint().underpostBar();
+
+
+
+                let dataPost = new Util().fusionObj([
+                  {
+                    generation: parseInt(blockChainConfig.constructor.generation),
+                    lastUpdate: (+ new Date())
+                  },
+                  tempData.network_user
+                ]);
+                let passphrase = await new ReadLine().h(
+                  new Paint().underpostInput("Enter passphrase current asymmetric public key")
+                );
+                let sign_public_key = null;
+                try {
+                  sign_public_key = await new Keys().generateAsymetricFromSign(
+                    fileKeyContent.private.genesis_dir,
+                    fileKeyContent.public.base64,
+                    passphrase,
+                    dataPost
+                  );
+                }catch(err){
+                  console.log(err);
+                  new Paint().underpostOption('red', 'error', 'invalid assymetric passphrase');
+                  return;
+                }
+
+                console.log("sign_public_key ->");
+                console.log(sign_public_key);
+
+                if(sign_public_key!=null){
+                  new Util().copy(new Keys().
+                    getBase64AsymmetricPublicKeySignFromJSON(sign_public_key)
+                  );
+                  new Paint().underpostOption('cyan', 'success', 'Base64 Sign Public Key Copy to Clipboard');
+                  new Paint().underpostBar();
+                }else{
+                  new Paint().underpostOption('red', 'error', 'Base64 Sign Public Key generator failed');
+                  new Paint().underpostBar();
+                }
               }
               break;
             default:
@@ -647,38 +710,27 @@ export class UnderPostManager {
        }
     };
 
-    const WALLET = {
-
+    /*const WALLET = {
      createTransaction: async () => {
-
        try {
-
          let keyPool = new Util().tl(await new ReadLine().r(
            new Paint().underpostInput("Use a key from the public key pool ? (y/n)")
          ))[0];
-
          switch (keyPool) {
            case "y":
              this.poolPublickey.viewPool(this.poolPublickey.pool);
              break;
            case "n":
-
-
              break;
            default:
               new Paint().underpostOption('red', 'error', "invalid option");
          }
-
        }catch(err){
-
          console.log(err);
          new Paint().underpostOption('red', 'error', "createTransaction failed");
-
        }
-
      }
-
-    };
+   };*/
 
     //--------------------------------------------------------------------------
     // NAVI
@@ -703,9 +755,9 @@ export class UnderPostManager {
             }
           },
           {
-            text: 'Create Transaction',
+            text: 'Add base64 Public Key to Pool',
             fn: async ()=>{
-              await WALLET.createTransaction();
+              await this.poolPublickey.addPublicKey();
             }
           },
           {
@@ -881,7 +933,7 @@ export class UnderPostManager {
             }
           },
           {
-            text: 'View Key',
+            text: 'View Key and Get base64 sign Public Key',
             fn: async ()=>{
               await asymmetricKeysGestor(
                 await KEYS.view('asymmetricKeys')

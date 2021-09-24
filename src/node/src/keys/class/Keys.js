@@ -174,6 +174,12 @@ export class Keys {
     }
   }
 
+  getBase64AsymmetricPublicKeySignFromJSON(data){
+    return Buffer.from(new Util().JSONstr(data)).toString('base64');
+  }
 
+  getJSONAsymmetricPublicKeySignFromBase64(data){
+    return JSON.parse(Buffer.from(data, 'base64').toString());
+  }
 
 }

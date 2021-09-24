@@ -1,5 +1,7 @@
 
 
+        import clipboardy from 'clipboardy';
+
         export class Util {
 
           constructor(){}
@@ -36,6 +38,21 @@ Base64: {
 Name: {
   type: String
 }
+
+ecadenamiento opcional solo ts? ->
+arr?.length || 0;
+
+MAP VIA:
+
+[true, true, false]
+	.map( (v,i,a)=>{
+	console.log(v);
+	console.log(i);
+	console.log(a);
+	console.log('-')
+}  );
+
+parseFloat((89324.344545).toFixed(2));
 
 console.log('req file ->');
 console.log(req.file);
@@ -952,6 +969,16 @@ var max = Math.max( ...arr );
 	 newInstance(obj){
 		return JSON.parse(JSON.stringify(obj));
 	}
+
+
+copy(data) {
+  clipboardy.writeSync(data);
+}
+
+paste(data) {
+  return clipboardy.readSync();
+}
+
 
 
         }
