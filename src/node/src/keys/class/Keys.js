@@ -161,7 +161,7 @@ export class Keys {
   validateAsymmetricFromSign(obj, lengthBase64, publicDirPem){
     // 364
     try {
-      let dataSha = SHA256(JSONstr(obj.data)).toString();
+      let dataSha = SHA256(new Util().JSONstr(obj.data)).toString();
       let decrSign = this.decryptStringWithRsaPublicKey(
         obj.sign,
         publicDirPem
