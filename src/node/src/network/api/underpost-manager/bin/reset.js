@@ -11,13 +11,13 @@ var paths = [
 ];
 
 
-const chain32 = fs.readFileSync(
-    'C:/dd/global_data/json/cyberia/koyn/blockchain/default/32.json',
+const chain = fs.readFileSync(
+    'C:/dd/global_data/json/cyberia/koyn/blockchain/default/10.json',
     charset
 );
 
 for(let path of paths){
-  fs.writeFileSync(path, chain32, charset);
+  fs.writeFileSync(path, chain, charset);
 }
 
 

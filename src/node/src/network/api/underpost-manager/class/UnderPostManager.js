@@ -589,10 +589,10 @@ export class UnderPostManager {
 
 
            // input difficultyConfig
-           // let input_hash_rate_seconds = 6000;
-           // let input_interval_seconds_time = 10;
-           let input_hash_rate_seconds = 400000;
+           let input_hash_rate_seconds = 6000;
            let input_interval_seconds_time = 10;
+           // let input_hash_rate_seconds = 400000;
+           // let input_interval_seconds_time = 10;
            /*let new_hrs = await new ReadLine().r('Hash Rate Seconds: ');
            let new_ist = await new ReadLine().r('Interval Seconds Time: ');
            if(!isNaN(new_hrs)){
@@ -665,11 +665,11 @@ export class UnderPostManager {
                    {
                      url: 'http://localhost:3001/koyn',
                      type: 'App'
-                   },
+                   }/*,
                    {
                      url: 'http://localhost:3001/koyn',
                      type: 'Transaction'
-                   }
+                   }*/
                  ]
                }, this.wsBridge));
 
@@ -710,8 +710,8 @@ export class UnderPostManager {
        }
     };
 
-    /*const WALLET = {
-     createTransaction: async () => {
+    const WALLET = {
+     /*createTransaction: async () => {
        try {
          let keyPool = new Util().tl(await new ReadLine().r(
            new Paint().underpostInput("Use a key from the public key pool ? (y/n)")
@@ -729,8 +729,60 @@ export class UnderPostManager {
          console.log(err);
          new Paint().underpostOption('red', 'error', "createTransaction failed");
        }
+     }*/
+     getCurrentAmountActiveAsymmetricKey: async () => {
+
+
+       let tempData = JSON.parse(fs.readFileSync(
+         this.mainDir+'/data/underpost.json',
+         this.charset
+       ));
+
+       let fileKeyContent = await KEYS.getKeyContent(
+         "asymmetricKeys",
+         tempData.active_asymmetric_public_key
+       );
+
+       let blockChainConfig = JSON.parse(fs.readFileSync(
+           this.mainDir+'/data/blockchain-config.json',
+           this.charset
+       ));
+
+       let chain = JSON.parse(fs.readFileSync(
+           this.mainDir
+           +'/data/blockchain/generation-'
+           +blockChainConfig.constructor.generation
+           +'/chain.json',
+           this.charset
+       ));
+
+       // console.log(fileKeyContent);
+
+       let chainObj = new BlockChain({
+         generation: blockChainConfig.constructor.generation,
+         userConfig: {
+           maxErrorAttempts: 5,
+           RESTdelay: 1000
+         },
+         validatorMode: true
+       });
+
+       let validateChain = await chainObj.globalValidateChain(chain);
+
+       if(validateChain.global == true){
+
+         await chainObj.currentAmountCalculator(
+           fileKeyContent.public.base64
+         );
+
+       }else{
+
+         new Paint().underpostOption('red', 'error', 'invalid chain');
+
+       }
+
      }
-   };*/
+   };
 
     //--------------------------------------------------------------------------
     // NAVI
@@ -746,6 +798,12 @@ export class UnderPostManager {
             text: 'Share Current Asymmetric Public Key and get Public Key Pool',
             fn: async () => {
               await this.poolPublickey.updatePoolWithBridge();
+            }
+          },
+          {
+            text: 'Calculate Current Amount active Asymetric Key',
+            fn: async () => {
+              await WALLET.getCurrentAmountActiveAsymmetricKey();
             }
           },
           {

@@ -238,9 +238,27 @@ export class PublicKeyManager {
 
    async addPublicKey(){
     try{
-      let inputBase64PublicKey = await new ReadLine().r(
-        new Paint().underpostInput("Enter Base64 Sign Public Key")
-      );
+
+      let inputBase64PublicKey = null;
+      let paste_key = new Util().tl(await new ReadLine().r(
+        new Paint().underpostInput("paste key ? (y/n)")
+      ))[0];
+
+      switch (paste_key) {
+        case "y":
+          inputBase64PublicKey = new Util().paste();
+          break;
+        case "n":
+          inputBase64PublicKey = await new ReadLine().r(
+            new Paint().underpostInput("Enter Base64 Sign Public Key")
+          );
+          break;
+        default:
+         new Paint().underpostOption('red', 'error', "invalid option");
+         return;
+      }
+
+
       new Paint().underpostOption('yellow', ' ', 'Base64 decode Obj:');
 
       let test_key = new Keys()

@@ -2,6 +2,7 @@ import { Block } from "./block.js";
 import { Util } from "../../../../util/class/Util.js";
 import { ReadLine } from "../../../../read-line/class/ReadLine.js";
 import { RestService } from "../../../../rest/class/restService.js";
+import { Paint } from "../../../../paint/class/paint.js";
 import SHA256 from "crypto-js/sha256.js";
 import fs from "fs";
 import colors from "colors/safe.js";
@@ -839,6 +840,86 @@ export class BlockChain {
 			this.hashGeneration,
 			this.userConfig.charset
 		);
+
+	}
+
+	async currentAmountCalculator(base64PublicKey){
+
+		/*
+
+		data:   sender   { doc }
+						receiver { doc }
+						amount {"totalValue": 750,
+					                "hashs": [ [],[],[] ]
+							}
+						createdDate: (+ new Date())
+		sign:
+
+		*/
+
+		let amount = 0;
+		let hashs = [];
+		for(let block of this.chain){
+			for(let transaction of block.node.dataTransaction){
+
+				//----------------------------------------------------------------------
+				// sender validator
+				//----------------------------------------------------------------------
+				if(transaction.data.sender.data.base64PublicKey == base64PublicKey){
+					if(amount >= transaction.data.amount.totalValue){
+						let count_value = 0;
+						for(let hashs_transaction of transaction.data.amount.hashs){
+							let ind = 0;
+							for(let hash_current of hashs){
+								if(new Util().objEq(hash_current, hashs_transaction)){
+									hashs[ind] = null;
+									count_value++;
+								}
+							}
+							ind++;
+						}
+						if(count_value == transaction.data.amount.totalValue){
+							amount = amount - transaction.data.amount.totalValue;
+							hashs = hashs.filter(x=>x!=null);
+							new Paint().underpostOption('yellow', ' ', `
+							sender validator amount: `+count_value+`
+							current amount:          `+amount+`
+							`);
+						}else{
+							new Paint().underpostOption('red', 'error', 'invalid current amount for transaction');
+							return null;
+						}
+					}else{
+						new Paint().underpostOption('red', 'error', 'invalid current amount for transaction');
+						return null;
+					}
+				}
+				//----------------------------------------------------------------------
+				// receiver validator
+				//----------------------------------------------------------------------
+
+				if(transaction.data.receiver.data.base64PublicKey == base64PublicKey){
+					amount = amount + transaction.data.amount.totalValue;
+					hashs = hashs.concat(transaction.data.amount.hashs);
+				}
+
+				//----------------------------------------------------------------------
+				//----------------------------------------------------------------------
+
+
+			}
+			if(block.node.rewardAddress == base64PublicKey){
+				amount += block.block.reward.totalValue;
+				hashs += hashs.concat(block.block.reward.totalValue);
+				new Paint().underpostOption('green', ' ', `
+	index block                      : `+block.block.index+`
+	receiver reward validator amount : `+block.block.reward.totalValue+`
+	current amount                   : `+amount+`
+				`);
+			}
+		}
+
+		return { amount, hashs };
 
 	}
 

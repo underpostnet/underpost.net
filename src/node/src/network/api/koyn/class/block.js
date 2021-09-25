@@ -126,6 +126,7 @@ export class Block {
                 return await new Promise( async wsResolve => {
                   let fromHash = new Util().getHash();
                   ws.send(new Util().JSONstr({
+                    // change to global update detect new transactions ?
                     state: "get-last-block",
                     to: "server",
                     from: fromHash,
@@ -218,11 +219,13 @@ export class Block {
           		this.hash = this.calculateHash();
               current_ = (+ new Date());
               logStat(false);
-              let monitoringBridgeStatus = await monitoringBridge();
-              if(monitoringBridgeStatus.status == false){
-                resolve(monitoringBridgeStatus);
-                logStat(true);
-                return;
+              if(this.block.index!=0){ // fix -> return data only new block exist
+                let monitoringBridgeStatus = await monitoringBridge();
+                if(monitoringBridgeStatus.status == false){
+                  resolve(monitoringBridgeStatus);
+                  logStat(true);
+                  return;
+                }
               }
           	}
             logStat(true);
