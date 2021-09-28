@@ -740,6 +740,30 @@ export class UnderPostManager {
 
        const signSaveTransaction = async (sender, receiver, blockChainConfig, timestamp_key) => {
 
+        let senderValidator =  await new Keys()
+            .validateAsymmetricFromSign(
+              sender,
+              blockChainConfig.keys.publicLen,
+              this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
+
+        console.log("sender validator ->");
+        console.log(senderValidator);
+
+        let receiverValidator =  await new Keys()
+        .validateTempAsymmetricSignKey(
+          receiver,
+          blockChainConfig,
+          this.charset,
+          this.mainDir);
+
+        console.log("receiver validator ->");
+        console.log(receiverValidator);
+
+        if( (!receiverValidator) || (!senderValidator) ){
+          new Paint().underpostOption('red', 'error', 'invalid sender or receiver sign');
+          return;
+        }
+
          let chain = JSON.parse(fs.readFileSync(
              this.mainDir
              +'/data/blockchain/generation-'
@@ -816,6 +840,13 @@ export class UnderPostManager {
                    console.log('endObjTransaction ->');
                    console.log(endObjTransaction);
 
+                   console.log('from sign validator ->');
+                   console.log(await new Keys()
+                   .validateAsymmetricFromSign(
+                     endObjTransaction,
+                     blockChainConfig.keys.publicLen,
+                     this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem'));
+
                }else{
                  new Paint().underpostOption('red', 'error', 'insufficient current amount');
                  return;
@@ -860,7 +891,7 @@ export class UnderPostManager {
 
          switch (keyPool) {
            case "y":
-             this.poolPublickey.viewPool(this.poolPublickey.pool);
+             await this.poolPublickey.viewPool(this.poolPublickey.pool);
 
              let indexKey = parseInt(await new ReadLine().r(
                new Paint().underpostInput("index pool key ?")
@@ -970,7 +1001,7 @@ export class UnderPostManager {
         postTitle: null,
         options: [
           {
-            text: 'Share Current Asymmetric Public Key and get Public Key Pool',
+            text: 'Share Current Asymmetric Public Key and get Bridge Public Key Pool',
             fn: async () => {
               await this.poolPublickey.updatePoolWithBridge();
             }
@@ -994,7 +1025,7 @@ export class UnderPostManager {
             }
           },
           {
-            text: 'Add base64 Public Key to Pool',
+            text: 'Add base64 to Local Public Key Pool',
             fn: async ()=>{
               await this.poolPublickey.addPublicKey();
             }

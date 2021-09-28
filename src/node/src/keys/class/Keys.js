@@ -174,7 +174,23 @@ export class Keys {
         obj.sign,
         publicDirPem
       );
-      return ((decrSign==dataSha)&&(obj.data.base64PublicKey.length==lengthBase64));
+      if(new Util().existAttr(obj.data, "sender")){
+        // console.log(obj.data.sender.data);
+        // console.log((decrSign==dataSha));
+        // console.log(lengthBase64);
+        // console.log(obj.data.sender.data.base64PublicKey.length);
+        return(
+          (decrSign==dataSha)
+          &&
+          (obj.data.sender.data.base64PublicKey.length==lengthBase64)
+        );
+      }else{
+        return(
+          (decrSign==dataSha)
+          &&
+          (obj.data.base64PublicKey.length==lengthBase64)
+        );
+      }
     }catch(err){
       console.log("validateAsymmetricFromSign(obj, length, publicDirPem) error ->");
       console.log(err);
@@ -219,6 +235,30 @@ export class Keys {
       new Paint().underpostOption('red', 'error', 'invalid assymetric passphrase');
       return null;
     }
+  }
+
+  async validateTempAsymmetricSignKey(
+    test_key, blockChainConfig, charset, mainDir
+  ){
+
+      let id_file_key = new Util().getHash();
+      let result = true;
+      fs.writeFileSync(
+        mainDir+'/data/temp/test-key/'+id_file_key+'.pem',
+        Buffer.from(test_key.data.base64PublicKey, 'base64').toString(),
+        charset
+      );
+      if(
+        ! this.validateAsymmetricFromSign(
+        test_key,
+        blockChainConfig.keys.publicLen,
+        mainDir+'/data/temp/test-key/'+id_file_key+'.pem')
+      ){
+        result = false;
+      }
+      fs.unlinkSync(mainDir+'/data/temp/test-key/'+id_file_key+'.pem');
+      return result;
+
   }
 
 }

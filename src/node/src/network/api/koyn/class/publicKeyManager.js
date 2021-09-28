@@ -3,6 +3,8 @@ import { ReadLine } from "../../../../read-line/class/ReadLine.js";
 import { Keys } from "../../../../keys/class/Keys.js";
 import { RestService } from "../../../../rest/class/restService.js";
 import { Paint } from "../../../../paint/class/paint.js";
+import { BlockChain } from "../../../../network/api/koyn/class/blockChain.js";
+
 import fs from "fs";
 import colors from "colors/safe.js";
 
@@ -58,6 +60,11 @@ export class PublicKeyManager {
 
   async updatePoolWithBridge(){
 
+    let blockChainConfig = JSON.parse(fs.readFileSync(
+        this.mainDir+'/data/blockchain-config.json',
+        this.charset
+    ));
+
     // IMPORTANTE PARA ESCALAR: se puede pedir por ultima cantidad desde tal fecha
 
     this.bridge.pool = await this.getPoolPublicKey();
@@ -106,23 +113,17 @@ export class PublicKeyManager {
     let validate_sign_key = true;
     try{
       for(let test_key of this.bridge.pool){
-        let id_file_key = new Util().getHash();
-        fs.writeFileSync(
-          this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem',
-          Buffer.from(test_key.data.base64PublicKey, 'base64').toString(),
-          this.charset
-        );
-        if(
-          ! new Keys().validateAsymmetricFromSign(
-          test_key,
-          364,
-          this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem')
-        ){
-          this.bridge.pool = [];
-          this.bridge.lastUpdate = null;
-          validate_sign_key = false;
-        }
-        fs.unlinkSync(this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem');
+          let test_validate_sign_key = await new Keys()
+          .validateTempAsymmetricSignKey(
+            test_key,
+            blockChainConfig,
+            this.charset,
+            this.mainDir);
+          if(test_validate_sign_key == false){
+            validate_sign_key = false;
+            this.bridge.pool = [];
+            this.bridge.lastUpdate = null;
+          }
       }
       if(!validate_sign_key){
         new Paint().underpostOption('red', 'error', 'pool public key validator');
@@ -149,21 +150,58 @@ export class PublicKeyManager {
     new Paint().underpostOption('yellow', 'success', 'get bridge public keys');
     if(new Util().l(updates_keys)>0){
       new Paint().underpostOption('yellow', ' ', 'updated keys:');
-      this.viewPool(updates_keys.map(x=>x.data));
+      await this.viewPool(updates_keys.map(x=>x.data));
     }
     if(new Util().l(news_keys)>0){
       new Paint().underpostOption('yellow', ' ', 'new keys:');
-      this.viewPool(news_keys);
+      await this.viewPool(news_keys);
     }
 
   }
 
   async viewPool(pool){
-    console.table(new Util().newInstance(pool).map(x=>{
-      x.data.base64PublicKey = "..."+x.data.base64PublicKey.slice(250, 256)+"...";
-      x.data.lastUpdate = new Date(x.data.lastUpdate).toLocaleString();
-      return x.data;
-    }));
+
+    let blockChainConfig = JSON.parse(fs.readFileSync(
+        this.mainDir+'/data/blockchain-config.json',
+        this.charset
+    ));
+    let chainObj = new BlockChain({
+      generation: blockChainConfig.constructor.generation,
+      userConfig: {
+        maxErrorAttempts: 5,
+        RESTdelay: 1000
+      },
+      validatorMode: true
+    });
+
+    let chain = JSON.parse(fs.readFileSync(
+        this.mainDir
+        +'/data/blockchain/generation-'
+        +blockChainConfig.constructor.generation
+        +'/chain.json',
+        this.charset
+    ));
+
+    let validateChain = await chainObj.globalValidateChain(chain);
+    let tableLocalPool = await new Promise(async resolve => {
+       let dataTable = new Util().newInstance(pool);
+       for(let x of dataTable){
+         x.data.lastUpdate = new Date(x.data.lastUpdate).toLocaleString();
+         if(validateChain.global == true){
+           let amountData = await chainObj.currentAmountCalculator(
+             x.data.base64PublicKey,
+             false
+           );
+           x.data.amount = amountData.amount;
+         }else{
+           x.data.amount = "invalid chain";
+         }
+         x.data.base64PublicKey = "..."+x.data.base64PublicKey.slice(250, 256)+"...";
+       }
+      resolve(dataTable.map(x=>x.data));
+    });
+
+    console.table(tableLocalPool);
   }
 
   async getPoolPublicKey(){
@@ -240,6 +278,11 @@ export class PublicKeyManager {
    async addPublicKey(){
     try{
 
+      let blockChainConfig = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/blockchain-config.json',
+          this.charset
+      ));
+
       let inputBase64PublicKey = null;
       let paste_key = await new ReadLine().yn("paste key ?");
 
@@ -265,25 +308,14 @@ export class PublicKeyManager {
 
       console.log(test_key);
 
-      let validate_sign_key = true;
-      let id_file_key = new Util().getHash();
-      fs.writeFileSync(
-        this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem',
-        Buffer.from(test_key.data.base64PublicKey, 'base64').toString(),
-        this.charset
-      );
-      if(
-        ! new Keys().validateAsymmetricFromSign(
+      let validate_sign_key = new Keys()
+      .validateTempAsymmetricSignKey(
         test_key,
-        364,
-        this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem')
-      ){
-        validate_sign_key = false;
-      }
-      fs.unlinkSync(this.mainDir+'/data/temp/test-key/'+id_file_key+'.pem');
+        blockChainConfig,
+        this.charset,
+        this.mainDir);
 
       if(validate_sign_key){
-
 
         let foundKey = false;
         let ind_ = 0;
