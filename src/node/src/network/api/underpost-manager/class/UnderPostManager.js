@@ -389,31 +389,13 @@ export class UnderPostManager {
                   })
                 );
 
-
-
-                let dataPost = new Util().fusionObj([
-                  {
-                    generation: parseInt(blockChainConfig.constructor.generation),
-                    lastUpdate: (+ new Date())
-                  },
-                  tempData.network_user
-                ]);
-                let passphrase = await new ReadLine().h(
-                  new Paint().underpostInput("Enter passphrase current asymmetric public key")
+                let sign_public_key = await new Keys()
+                .getAsymmetricSignPublicObj(
+                  KEYS,
+                  tempData,
+                  timeStampKey,
+                  blockChainConfig
                 );
-                let sign_public_key = null;
-                try {
-                  sign_public_key = await new Keys().generateAsymetricFromSign(
-                    fileKeyContent.private.genesis_dir,
-                    fileKeyContent.public.base64,
-                    passphrase,
-                    dataPost
-                  );
-                }catch(err){
-                  console.log(err);
-                  new Paint().underpostOption('red', 'error', 'invalid assymetric passphrase');
-                  return;
-                }
 
                 console.log("sign_public_key ->");
                 console.log(sign_public_key);
@@ -453,6 +435,11 @@ export class UnderPostManager {
           this.charset
         ));
 
+        let blockChainConfig = JSON.parse(fs.readFileSync(
+            this.mainDir+'/data/blockchain-config.json',
+            this.charset
+        ));
+
         let indexKey =
         parseInt(await new ReadLine().r(
           new Paint().underpostInput('index key')
@@ -477,21 +464,37 @@ export class UnderPostManager {
             fixKeysArr[indexKey].date
           ));
 
-          tempData[('active_'+type.split('Keys')[0]+'_public_key')]
-          =
-          timeStampKey;
+          let signKey = await new Keys().
+          getAsymmetricSignPublicObj(
+            KEYS,
+            tempData,
+            timeStampKey,
+            blockChainConfig
+          );
 
-          fs.writeFileSync(this.mainDir+'/data/underpost.json',
-          new Util().jsonSave(tempData),
-          this.charset);
+          if(signKey!=null){
 
-          return async () => {
-            new Paint().underpostOption(
-              'yellow', 'success', 'Activate key:'+timeStampKey+
-              ' index:'+indexKey
-            );
-            new Paint().underpostBar();
+            fs.writeFileSync(this.mainDir+'/data/keys/asymmetric/active.json',
+            new Util().jsonSave(signKey),
+            this.charset);
+
+            tempData[('active_'+type.split('Keys')[0]+'_public_key')]
+            =
+            timeStampKey;
+
+            fs.writeFileSync(this.mainDir+'/data/underpost.json',
+            new Util().jsonSave(tempData),
+            this.charset);
+
+            return async () => {
+              new Paint().underpostOption(
+                'yellow', 'success', 'Activate key:'+timeStampKey+
+                ' index:'+indexKey
+              );
+              new Paint().underpostBar();
+            }
           }
+
           //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
         }else{
           return async () => {
@@ -711,14 +714,185 @@ export class UnderPostManager {
     };
 
     const WALLET = {
-     /*createTransaction: async () => {
+     createTransaction: async () => {
+
+       /*
+
+       -> blockchain tiene consisntencia de timepo inmutable
+
+       la llave activa hacia
+       la llave que pon ebasse 64 o poner de la pool
+       que sean distintintas que sean validadas
+       verdificar monto total,
+       actualiar de forma univificada transaccion en las pendientes
+       ok
+
+       data:   sender   { doc }
+               receiver { doc }
+               amount {"totalValue": 750,
+                             "hashs": [ [],[],[] ]
+                 }
+               createdDate: (+ new Date())
+       sign:
+
+
+        */
+
+       const signSaveTransaction = async (sender, receiver, blockChainConfig, timestamp_key) => {
+
+         let chain = JSON.parse(fs.readFileSync(
+             this.mainDir
+             +'/data/blockchain/generation-'
+             +blockChainConfig.constructor.generation
+             +'/chain.json',
+             this.charset
+         ));
+
+         // console.log(fileKeyContent);
+
+         let chainObj = new BlockChain({
+           generation: blockChainConfig.constructor.generation,
+           userConfig: {
+             maxErrorAttempts: 5,
+             RESTdelay: 1000
+           },
+           validatorMode: true
+         });
+
+         let validateChain = await chainObj.globalValidateChain(chain);
+
+         if(validateChain.global == true){
+
+           let objAmount = await chainObj.currentAmountCalculator(
+             sender.data.base64PublicKey,
+             false
+           );
+
+           console.log(
+             colors.cyan(" > current total amount sender: "+objAmount.amount)
+           );
+
+           if(objAmount.amount > 0){
+
+             let sender_amount = parseInt(await new ReadLine().r(
+               new Paint().underpostInput("enter sender amount to transaction")
+             ));
+
+             if(!isNaN(sender_amount)){
+
+               if(sender_amount<=objAmount.amount){
+
+                 console.log("generate transaction");
+
+                 let hashsTransaction =
+                 objAmount.hashs.splice((sender_amount*-1));
+
+                 let dataTransaction = {
+                   sender: sender,
+                   receiver: receiver,
+                   amount: {
+                     totalValue: sender_amount,
+                     hashs: hashsTransaction
+                   },
+                   createdDate: (+ new Date())
+                 };
+
+                 console.log(" data transaction ->");
+                 console.log(" value length:"+ new Util().l(hashsTransaction));
+                 console.log(dataTransaction);
+
+                 let passphrase = await new ReadLine().h(
+                   new Paint().underpostInput(
+                     "Enter passphrase current asymmetric public key for sign data transaction")
+                 );
+
+                 let endObjTransaction = new Keys().generateAsymetricFromSign(
+                   this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/private.pem',
+                   sender.data.base64PublicKey,
+                   passphrase,
+                   dataTransaction,
+                   false);
+
+                   console.log('endObjTransaction ->');
+                   console.log(endObjTransaction);
+
+               }else{
+                 new Paint().underpostOption('red', 'error', 'insufficient current amount');
+                 return;
+               }
+
+             }else{
+               new Paint().underpostOption('red', 'error', 'invalid input');
+               return;
+             }
+
+           }else{
+             new Paint().underpostOption('red', 'error', 'insufficient current amount');
+             return;
+           }
+
+         }else{
+           new Paint().underpostOption('red', 'error', 'invalid chain');
+           return;
+         }
+
+       };
+
        try {
-         let keyPool = new Util().tl(await new ReadLine().r(
-           new Paint().underpostInput("Use a key from the public key pool ? (y/n)")
-         ))[0];
+
+         let tempData = JSON.parse(fs.readFileSync(
+           this.mainDir+'/data/underpost.json',
+           this.charset
+         ));
+
+         let asymmetricKeyData = await KEYS.getKeyContent(
+           "asymmetricKeys",
+           tempData.active_asymmetric_public_key
+         );
+
+         let blockChainConfig = JSON.parse(fs.readFileSync(
+             this.mainDir+'/data/blockchain-config.json',
+             this.charset
+         ));
+
+         let keyPool = await new ReadLine()
+         .yn("Use a key receiver from the public key pool ?");
+
          switch (keyPool) {
            case "y":
              this.poolPublickey.viewPool(this.poolPublickey.pool);
+
+             let indexKey = parseInt(await new ReadLine().r(
+               new Paint().underpostInput("index pool key ?")
+             ));
+
+             let receiver = this.poolPublickey.pool[indexKey];
+             // console.log(" key receiver selected ->");
+             // console.log(receiver);
+
+             let sender = JSON.parse(fs.readFileSync(
+                 this.mainDir+'/data/keys/asymmetric/active.json',
+                 this.charset
+             ));
+             // console.log(" key sender selected ->");
+             // console.log(sender);
+
+             if(this.poolPublickey.pool[indexKey].data.base64PublicKey
+               !=
+               asymmetricKeyData.public.base64
+             ){
+
+              await signSaveTransaction(
+                sender,
+                receiver,
+                blockChainConfig,
+                tempData.active_asymmetric_public_key
+              );
+
+             }else{
+               new Paint().underpostOption('red', 'error', "invalid auto-transaction");
+             }
+
              break;
            case "n":
              break;
@@ -729,7 +903,7 @@ export class UnderPostManager {
          console.log(err);
          new Paint().underpostOption('red', 'error', "createTransaction failed");
        }
-     }*/
+     },
      getCurrentAmountActiveAsymmetricKey: async () => {
 
 
@@ -771,9 +945,10 @@ export class UnderPostManager {
 
        if(validateChain.global == true){
 
-         await chainObj.currentAmountCalculator(
-           fileKeyContent.public.base64
-         );
+         console.log([await chainObj.currentAmountCalculator(
+           fileKeyContent.public.base64,
+           true
+         )]);
 
        }else{
 
@@ -798,6 +973,12 @@ export class UnderPostManager {
             text: 'Share Current Asymmetric Public Key and get Public Key Pool',
             fn: async () => {
               await this.poolPublickey.updatePoolWithBridge();
+            }
+          },
+          {
+            text: 'Create Transaction',
+            fn: async () => {
+              await WALLET.createTransaction();
             }
           },
           {

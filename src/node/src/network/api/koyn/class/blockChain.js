@@ -843,7 +843,7 @@ export class BlockChain {
 
 	}
 
-	async currentAmountCalculator(base64PublicKey){
+	async currentAmountCalculator(base64PublicKey, log){
 
 		/*
 
@@ -881,10 +881,10 @@ export class BlockChain {
 						if(count_value == transaction.data.amount.totalValue){
 							amount = amount - transaction.data.amount.totalValue;
 							hashs = hashs.filter(x=>x!=null);
-							new Paint().underpostOption('yellow', ' ', `
+							log == true ? new Paint().underpostOption('yellow', ' ', `
 							sender validator amount: `+count_value+`
 							current amount:          `+amount+`
-							`);
+							`) : null;
 						}else{
 							new Paint().underpostOption('red', 'error', 'invalid current amount for transaction');
 							return null;
@@ -901,6 +901,11 @@ export class BlockChain {
 				if(transaction.data.receiver.data.base64PublicKey == base64PublicKey){
 					amount = amount + transaction.data.amount.totalValue;
 					hashs = hashs.concat(transaction.data.amount.hashs);
+					log == true ? new Paint().underpostOption('green', ' ', `
+		index block                      : `+block.block.index+`
+		receiver transaction amount      : `+transaction.data.amount.totalValue+`
+		current amount                   : `+amount+`
+					`): null;
 				}
 
 				//----------------------------------------------------------------------
@@ -910,12 +915,12 @@ export class BlockChain {
 			}
 			if(block.node.rewardAddress == base64PublicKey){
 				amount += block.block.reward.totalValue;
-				hashs += hashs.concat(block.block.reward.totalValue);
-				new Paint().underpostOption('green', ' ', `
+				hashs = hashs.concat(block.block.reward.hashs);
+				log == true ? new Paint().underpostOption('green', ' ', `
 	index block                      : `+block.block.index+`
 	receiver reward validator amount : `+block.block.reward.totalValue+`
 	current amount                   : `+amount+`
-				`);
+				`): null;
 			}
 		}
 

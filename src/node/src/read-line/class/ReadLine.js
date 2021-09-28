@@ -1,5 +1,7 @@
 
 import { Util } from "../../util/class/Util.js";
+import { Paint } from "../../paint/class/paint.js";
+
 import fs from "fs";
 import colors from "colors/safe.js";
 import readline from 'readline';
@@ -74,6 +76,12 @@ output -> Writeable stream to write prompts to. (default: process.stdout)
          resolve(res);
        });
     });
+  }
+
+  async yn(query){
+    return new Util().tl(await this.r(
+      new Paint().underpostInput(query+" (y/n)")
+    ))[0]
   }
 
 }

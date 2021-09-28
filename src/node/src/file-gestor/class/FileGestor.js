@@ -35,6 +35,8 @@ export class FileGestor {
 
         case 'keys':
 
+          let banNames = ["active.json"];
+
           function rowKey(file, pathKoyn) {
 
             this.name = file;
@@ -55,14 +57,16 @@ export class FileGestor {
 
           toInitReader.forEach(file => {
             let currentFile = new rowKey(file.name, path);
-            // obj.displayFolder
-            if(currentFile.type == 'folder'){
-              if(obj.displayFolder){
-                // table.push({});
+            if(!banNames.includes(file.name)){
+              // obj.displayFolder
+              if(currentFile.type == 'folder'){
+                if(obj.displayFolder){
+                  // table.push({});
+                  table.push(currentFile);
+                }
+              }else{
                 table.push(currentFile);
               }
-            }else{
-              table.push(currentFile);
             }
             currentFile.type == 'folder' && obj.recursiveFolder ?
             readerFiles(

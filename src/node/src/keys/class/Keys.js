@@ -1,11 +1,14 @@
+import { Util } from "../../util/class/Util.js";
+import { ReadLine } from "../../read-line/class/ReadLine.js";
+import { Paint } from "../../paint/class/paint.js";
+
+import SHA256 from "crypto-js/sha256.js";
 
 import fs from "fs";
 import crypto from "crypto";
 import path from "path";
 import colors from "colors/safe.js";
 import cryptoJs from "crypto-js";
-import { Util } from "../../util/class/Util.js";
-import SHA256 from "crypto-js/sha256.js";
 
 export class Keys {
 
@@ -139,13 +142,18 @@ export class Keys {
       return decrypted.toString("utf8");
   }
 
-  generateAsymetricFromSign(privateDirPem, publicBase64, passphrase, data){
-    let dataContent = new Util().fusionObj([
-      data,
-      {
-        base64PublicKey: publicBase64
-      }
-    ]);
+  generateAsymetricFromSign(privateDirPem, publicBase64, passphrase, data, setPublicKey){
+    let dataContent = {};
+    if(setPublicKey == true){
+      dataContent = new Util().fusionObj([
+        data,
+        {
+          base64PublicKey: publicBase64
+        }
+      ]);
+    }else{
+      dataContent = data;
+    }
     return {
       data: dataContent,
       sign: this.encryptStringWithRsaPrivateKey(
@@ -180,6 +188,37 @@ export class Keys {
 
   getJSONAsymmetricPublicKeySignFromBase64(data){
     return JSON.parse(Buffer.from(data, 'base64').toString());
+  }
+
+
+  async getAsymmetricSignPublicObj(KEYS, tempData, timeStampKey, blockChainConfig){
+    let fileKeyContent = await KEYS.getKeyContent(
+      "asymmetricKeys",
+      timeStampKey
+    );
+    let dataPost = new Util().fusionObj([
+      {
+        generation: parseInt(blockChainConfig.constructor.generation),
+        lastUpdate: (+ new Date())
+      },
+      tempData.network_user
+    ]);
+    let passphrase = await new ReadLine().h(
+      new Paint().underpostInput("Enter passphrase current asymmetric public key")
+    );
+    try {
+      return await this.generateAsymetricFromSign(
+        fileKeyContent.private.genesis_dir,
+        fileKeyContent.public.base64,
+        passphrase,
+        dataPost,
+        true
+      );
+    }catch(err){
+      console.log(err);
+      new Paint().underpostOption('red', 'error', 'invalid assymetric passphrase');
+      return null;
+    }
   }
 
 }

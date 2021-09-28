@@ -127,6 +127,7 @@ export class Block {
                   let fromHash = new Util().getHash();
                   ws.send(new Util().JSONstr({
                     // change to global update detect new transactions ?
+                    // ir agregando las transaccione spendiente que no esten 
                     state: "get-last-block",
                     to: "server",
                     from: fromHash,

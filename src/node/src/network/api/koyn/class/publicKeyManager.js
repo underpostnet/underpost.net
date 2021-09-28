@@ -217,7 +217,8 @@ export class PublicKeyManager {
            asymmetricKeyData.private.genesis_dir,
            asymmetricKeyData.public.base64,
            passphrase,
-           dataPost
+           dataPost,
+           true
          )
        );
      }catch(err){
@@ -240,9 +241,7 @@ export class PublicKeyManager {
     try{
 
       let inputBase64PublicKey = null;
-      let paste_key = new Util().tl(await new ReadLine().r(
-        new Paint().underpostInput("paste key ? (y/n)")
-      ))[0];
+      let paste_key = await new ReadLine().yn("paste key ?");
 
       switch (paste_key) {
         case "y":
