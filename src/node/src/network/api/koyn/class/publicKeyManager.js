@@ -12,7 +12,7 @@ import colors from "colors/safe.js";
 export class PublicKeyManager {
 
 
-  constructor(mainDir, charset, KEYS){
+  constructor(mainDir, charset, KEYS, BCmanager){
 
     this.mainDir = mainDir;
     this.charset = charset;
@@ -23,7 +23,8 @@ export class PublicKeyManager {
     };
     this.pathPool = "";
     this.modules = {
-      KEYS: KEYS
+      KEYS: KEYS,
+      BCmanager: BCmanager
     }
 
   }
@@ -165,24 +166,13 @@ export class PublicKeyManager {
         this.mainDir+'/data/blockchain-config.json',
         this.charset
     ));
-    let chainObj = new BlockChain({
-      generation: blockChainConfig.constructor.generation,
-      userConfig: {
-        maxErrorAttempts: 5,
-        RESTdelay: 1000
-      },
-      validatorMode: true
-    });
 
-    let chain = JSON.parse(fs.readFileSync(
-        this.mainDir
-        +'/data/blockchain/generation-'
-        +blockChainConfig.constructor.generation
-        +'/chain.json',
-        this.charset
-    ));
+    let BCobj = await this.modules.
+    BCmanager.instanceStaticChainObj(blockChainConfig);
+    let chainObj = BCobj.chainObj;
+    let chain = BCobj.chain;
+    let validateChain = BCobj.validateChain;
 
-    let validateChain = await chainObj.globalValidateChain(chain);
     let tableLocalPool = await new Promise(async resolve => {
        let dataTable = new Util().newInstance(pool);
        for(let x of dataTable){

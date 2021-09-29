@@ -13,114 +13,104 @@ export class FileGestor {
 
   }
 
-  dir(toPath){
+  dir(toPath, dirname){
   	switch (toPath) {
   		case undefined:
-  				return __dirname.replace(/\\/g, '/');
+  				return dirname.replace(/\\/g, '/');
   			  break;
   		default:
-  			  return path.join(__dirname, toPath).replace(/\\/g, '/')
+  			  return path.join(dirname, toPath).replace(/\\/g, '/')
   			  break;
   	}
   }
 
-  async logReadDirectory(obj){
-    let table = [];
-    const readerFiles = (path, toInitReader) => {
 
-      switch (obj.type) {
+    async logReadDirectoryKeys(mainDir, charset, type, BCmanager, KEYS, blockChainConfig){
 
+      let tempData = JSON.parse(fs.readFileSync(
+        mainDir+'/data/underpost.json',
+        charset
+      ));
 
+      let pathKeys = mainDir+'/data/keys/'+type;
+      console.log(this.getAllFilesPath(pathKeys, true));
 
+      console.log("path: "+pathKeys);
+      let tableKeys = KEYS.getFixKeyArr(tempData[(type+'Keys')]);
 
-        case 'keys':
+      switch (type) {
+        case "symmetric":
+          console.table(tableKeys);
+          break;
+        case "asymmetric":
 
-          let banNames = ["active.json"];
+          let BCobj = await BCmanager.instanceStaticChainObj(blockChainConfig);
+          let chainObj = BCobj.chainObj;
+          let chain = BCobj.chain;
+          let validateChain = BCobj.validateChain;
 
-          function rowKey(file, pathKoyn) {
+          let tableAsymmetricKeys = [];
 
-            this.name = file;
-            this.type = file.split('.')[1] ? file.split('.')[1] : 'folder';
-            this.path = pathKoyn.split(obj.path)[1]+'/'+file;
-
-            if(this.type=='pem' || this.type=='json'){
-              let date = pathKoyn.split('/').reverse()[0];
-              this.date = new Date(parseInt(date)).toLocaleString();
-              // this.timestamp = date;
+          for(let rowKey of tableKeys){
+            if(validateChain.global == true){
+              let amountData = await chainObj.currentAmountCalculator(
+                fs.readFileSync(
+                  mainDir+'/data/keys/asymmetric/'+rowKey.timestamp+'/public.pem')
+                  .toString('base64'),
+                false
+              );
+              rowKey.amount = amountData.amount;
             }else{
-              this.date = new Date(parseInt(file.split('.')[0])).toLocaleString();
-              // this.timestamp = file.split('.')[0];
+              rowKey.amount = "invalid chain";
             }
-
-
+            tableAsymmetricKeys.push(rowKey);
           }
 
-          toInitReader.forEach(file => {
-            let currentFile = new rowKey(file.name, path);
-            if(!banNames.includes(file.name)){
-              // obj.displayFolder
-              if(currentFile.type == 'folder'){
-                if(obj.displayFolder){
-                  // table.push({});
-                  table.push(currentFile);
-                }
-              }else{
-                table.push(currentFile);
-              }
-            }
-            currentFile.type == 'folder' && obj.recursiveFolder ?
-            readerFiles(
-              path+'/'+currentFile.name,
-              fs.readdirSync(path+'/'+currentFile.name, { withFileTypes: true })
-            ): null;
-
-
-          });
+          console.table(tableAsymmetricKeys);
           break;
-          //--------------------------------------------------------------------
-
-
-
-
         default:
-          null;
+          new Paint().underpostOption('red', 'error', 'invalid type key');
       }
+
+
     }
 
-    let empty = false;
-    fs.existsSync(obj.path) ? readerFiles(
-      obj.path,
-      fs.readdirSync(obj.path, { withFileTypes: true })
-    ) : empty = true;
 
-    if(!empty){
-      new Paint().underpostOption('white', ' ', obj.path);
-      new Util().l(table) > 0 ?
-      console.table(table) :
-      empty = true ;
-    }
-
-    empty ?
-    ((()=>{
-      // new Paint().underpostBar();
-      new Paint().underpostTextBotbar('Empty Directory');
-    })()) : null;
-
-  }
-
-
-  async deleteFolderRecursive(path) {
+ deleteFolderRecursive(path) {
   if( fs.existsSync(path) ) {
-      fs.readdirSync(path).forEach(function(file) {
+      fs.readdirSync(path).forEach( file => {
         var curPath = path + "/" + file;
           if(fs.lstatSync(curPath).isDirectory()) { // recurse
-              deleteFolderRecursive(curPath);
+              this.deleteFolderRecursive(curPath);
           } else { // delete file
               fs.unlinkSync(curPath);
           }
       });
       fs.rmdirSync(path);
     }
+  }
+
+  getAllFilesPath(pathDir, recursive){
+    let dataFiles = [];
+    const readFiles = async path => {
+      if( fs.existsSync(path) ) {
+            let objDir = {
+              path: path,
+              files: []
+            };
+          fs.readdirSync(path).forEach( file => {
+              let curPath = path + "/" + file;
+              if(fs.lstatSync(curPath).isDirectory()) {
+                  recursive ? readFiles(curPath) : null;
+              } else {
+                  objDir.files.push(file);
+              }
+          });
+          dataFiles.push(objDir);
+        }
+    };
+    readFiles(pathDir);
+    return dataFiles;
   }
 
    getDataFile(dir, json){

@@ -255,30 +255,22 @@ export class UnderPostManager {
 
         new Paint().underpostBar();
 
-        let fixKeysArr = [];
-        let indexKeyReal = 0;
-        for(let key_time of tempData[type]){
-          fixKeysArr.push({date: key_time, index: indexKeyReal});
-          fixKeysArr.push({date: key_time, index: indexKeyReal});
-          indexKeyReal++;
-        }
+        let fixKeysArr = KEYS.getFixKeyArr(tempData[type]);
 
-        // console.log('delete -> ');
-        // console.log(fixKeysArr[indexKey]);
+        console.log('delete -> ');
+        console.log(fixKeysArr[indexKey]);
 
         if(fixKeysArr[indexKey]!=undefined){
           //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-          let timeStampDel = JSON.parse(new Util().JSONstr(
-            fixKeysArr[indexKey].date
-          ));
+          let timeStampDel = fixKeysArr[indexKey].timestamp;
 
-          tempData[type].splice(fixKeysArr[indexKey].index, 1);
+          tempData[type].splice(indexKey, 1);
 
           fs.writeFileSync(this.mainDir+'/data/underpost.json',
           new Util().jsonSave(tempData),
           this.charset);
 
-          await new FileGestor().deleteFolderRecursive(
+          new FileGestor().deleteFolderRecursive(
             this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'+timeStampDel
           );
 
@@ -315,22 +307,14 @@ export class UnderPostManager {
 
         new Paint().underpostBar();
 
-        let fixKeysArr = [];
-        let indexKeyReal = 0;
-        for(let key_time of tempData[type]){
-          fixKeysArr.push({date: key_time, index: indexKeyReal});
-          fixKeysArr.push({date: key_time, index: indexKeyReal});
-          indexKeyReal++;
-        }
+        let fixKeysArr = KEYS.getFixKeyArr(tempData[type]);
 
         // console.log('delete -> ');
         // console.log(fixKeysArr[indexKey]);
 
         if(fixKeysArr[indexKey]!=undefined){
           //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-          let timeStampKey = JSON.parse(new Util().JSONstr(
-            fixKeysArr[indexKey].date
-          ));
+          let timeStampKey = fixKeysArr[indexKey].timestamp;
 
           switch (type) {
             case "symmetricKeys":
@@ -447,45 +431,18 @@ export class UnderPostManager {
 
         new Paint().underpostBar();
 
-        let fixKeysArr = [];
-        let indexKeyReal = 0;
-        for(let key_time of tempData[type]){
-          fixKeysArr.push({date: key_time, index: indexKeyReal});
-          fixKeysArr.push({date: key_time, index: indexKeyReal});
-          indexKeyReal++;
-        }
-
-        // console.log('delete -> ');
-        // console.log(fixKeysArr[indexKey]);
+        let fixKeysArr = KEYS.getFixKeyArr(tempData[type]);
 
         if(fixKeysArr[indexKey]!=undefined){
-          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-          let timeStampKey = JSON.parse(new Util().JSONstr(
-            fixKeysArr[indexKey].date
-          ));
 
-          let signKey = await new Keys().
-          getAsymmetricSignPublicObj(
-            KEYS,
-            tempData,
-            timeStampKey,
-            blockChainConfig
-          );
-
-          if(signKey!=null){
-
-            fs.writeFileSync(this.mainDir+'/data/keys/asymmetric/active.json',
-            new Util().jsonSave(signKey),
-            this.charset);
-
+          let timeStampKey = fixKeysArr[indexKey].timestamp;
+          const activateKey = () => {
             tempData[('active_'+type.split('Keys')[0]+'_public_key')]
             =
             timeStampKey;
-
             fs.writeFileSync(this.mainDir+'/data/underpost.json',
             new Util().jsonSave(tempData),
             this.charset);
-
             return async () => {
               new Paint().underpostOption(
                 'yellow', 'success', 'Activate key:'+timeStampKey+
@@ -493,15 +450,45 @@ export class UnderPostManager {
               );
               new Paint().underpostBar();
             }
-          }
+          };
 
-          //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+          switch (type) {
+            case "symmetricKeys":
+                  return activateKey();
+              break;
+            case "asymmetricKeys":
+                  let signKey = await new Keys().
+                  getAsymmetricSignPublicObj(
+                    KEYS,
+                    tempData,
+                    timeStampKey,
+                    blockChainConfig
+                  );
+                  if(signKey!=null){
+                    fs.writeFileSync(this.mainDir+'/data/keys/asymmetric/active.json',
+                    new Util().jsonSave(signKey),
+                    this.charset);
+                    return activateKey();
+                  }else{
+                    return async () => {
+                      new Paint().underpostOption('red', 'error', 'failer sign key');
+                      new Paint().underpostBar();
+                    }
+                  }
+              break;
+            default:
+              return async () => {
+                new Paint().underpostOption('red', 'error', 'invalid type key');
+                new Paint().underpostBar();
+              }
+          }
         }else{
           return async () => {
             new Paint().underpostOption('red', 'error', 'invalid index key');
             new Paint().underpostBar();
           }
         }
+
 
       },
       getKeyContent: async (type, timestamp) => {
@@ -538,6 +525,18 @@ export class UnderPostManager {
 
 
 
+      },
+      getFixKeyArr: arrKey => {
+        let fixKeysArr = [];
+        let indexKeyReal = 0;
+        for(let key_time of arrKey){
+          fixKeysArr.push({
+            date: new Date(key_time).toLocaleString(),
+            timestamp: key_time
+          });
+          indexKeyReal++;
+        }
+        return fixKeysArr;
       }
     };
 
@@ -710,6 +709,30 @@ export class UnderPostManager {
            this.charset);
           new Paint().underpostOption('yellow', 'success', 'Clear Chain Generation 0');
           new Paint().underpostBar();
+       },
+       instanceStaticChainObj: async blockChainConfig => {
+         let chainObj = new BlockChain({
+           generation: blockChainConfig.constructor.generation,
+           userConfig: {
+             maxErrorAttempts: 5,
+             RESTdelay: 1000
+           },
+           validatorMode: true
+         });
+
+         let chain = JSON.parse(fs.readFileSync(
+             this.mainDir
+             +'/data/blockchain/generation-'
+             +blockChainConfig.constructor.generation
+             +'/chain.json',
+             this.charset
+         ));
+
+         // TODO: actualizar con bridge
+
+         let validateChain = await chainObj.globalValidateChain(chain);
+
+         return { chainObj, chain, validateChain };
        }
     };
 
@@ -764,26 +787,10 @@ export class UnderPostManager {
           return;
         }
 
-         let chain = JSON.parse(fs.readFileSync(
-             this.mainDir
-             +'/data/blockchain/generation-'
-             +blockChainConfig.constructor.generation
-             +'/chain.json',
-             this.charset
-         ));
-
-         // console.log(fileKeyContent);
-
-         let chainObj = new BlockChain({
-           generation: blockChainConfig.constructor.generation,
-           userConfig: {
-             maxErrorAttempts: 5,
-             RESTdelay: 1000
-           },
-           validatorMode: true
-         });
-
-         let validateChain = await chainObj.globalValidateChain(chain);
+        let BCobj = await BCmanager.instanceStaticChainObj(blockChainConfig);
+        let chainObj = BCobj.chainObj;
+        let chain = BCobj.chain;
+        let validateChain = BCobj.validateChain;
 
          if(validateChain.global == true){
 
@@ -953,26 +960,10 @@ export class UnderPostManager {
            this.charset
        ));
 
-       let chain = JSON.parse(fs.readFileSync(
-           this.mainDir
-           +'/data/blockchain/generation-'
-           +blockChainConfig.constructor.generation
-           +'/chain.json',
-           this.charset
-       ));
-
-       // console.log(fileKeyContent);
-
-       let chainObj = new BlockChain({
-         generation: blockChainConfig.constructor.generation,
-         userConfig: {
-           maxErrorAttempts: 5,
-           RESTdelay: 1000
-         },
-         validatorMode: true
-       });
-
-       let validateChain = await chainObj.globalValidateChain(chain);
+       let BCobj = await BCmanager.instanceStaticChainObj(blockChainConfig);
+       let chainObj = BCobj.chainObj;
+       let chain = BCobj.chain;
+       let validateChain = BCobj.validateChain;
 
        if(validateChain.global == true){
 
@@ -1101,12 +1092,18 @@ export class UnderPostManager {
         preTitle: null,
         title: 'Symmetric Keys Gestor',
         postTitle: async () => {
-          await new FileGestor().logReadDirectory({
-              path: this.mainDir+'/data/keys/symmetric',
-              recursiveFolder: true,
-              displayFolder: false,
-              type: 'keys'
-          });
+          let blockChainConfig = JSON.parse(fs.readFileSync(
+              this.mainDir+'/data/blockchain-config.json',
+              this.charset
+          ));
+          await new FileGestor().logReadDirectoryKeys(
+            this.mainDir,
+            this.charset,
+            "symmetric",
+            BCmanager,
+            KEYS,
+            blockChainConfig
+          );
           if(postTitleFn!=null){
             await postTitleFn();
           }
@@ -1167,12 +1164,18 @@ export class UnderPostManager {
         preTitle: null,
         title: 'Asymmetric Keys Gestor',
         postTitle: async () => {
-          await new FileGestor().logReadDirectory({
-              path: this.mainDir+'/data/keys/asymmetric',
-              recursiveFolder: true,
-              displayFolder: false,
-              type: 'keys'
-          });
+          let blockChainConfig = JSON.parse(fs.readFileSync(
+              this.mainDir+'/data/blockchain-config.json',
+              this.charset
+          ));
+          await new FileGestor().logReadDirectoryKeys(
+            this.mainDir,
+            this.charset,
+            "asymmetric",
+            BCmanager,
+            KEYS,
+            blockChainConfig
+          );
           if(postTitleFn!=null){
             await postTitleFn();
           }
@@ -1324,6 +1327,9 @@ export class UnderPostManager {
     // console.log("asymmetricKeyData ->");
     // console.log(asymmetricKeyData);
 
+    // console.log("test ->");
+    // console.log(new FileGestor().dir('../../', this.mainDir));
+
     // return;
     //--------------------------------------------------------------------------
 
@@ -1351,7 +1357,12 @@ export class UnderPostManager {
       await newTemplate();
     }
 
-    this.poolPublickey = new PublicKeyManager(this.mainDir, this.charset, KEYS);
+    this.poolPublickey = new PublicKeyManager(
+      this.mainDir,
+      this.charset,
+      KEYS,
+      BCmanager
+    );
     await this.poolPublickey.init();
 
     //--------------------------------------------------------------------------
