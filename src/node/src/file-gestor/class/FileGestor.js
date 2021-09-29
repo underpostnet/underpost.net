@@ -13,7 +13,7 @@ export class FileGestor {
 
   }
 
-  dir(toPath, dirname){
+  dir(dirname, toPath){
   	switch (toPath) {
   		case undefined:
   				return dirname.replace(/\\/g, '/');
@@ -23,58 +23,6 @@ export class FileGestor {
   			  break;
   	}
   }
-
-
-    async logReadDirectoryKeys(mainDir, charset, type, BCmanager, KEYS, blockChainConfig){
-
-      let tempData = JSON.parse(fs.readFileSync(
-        mainDir+'/data/underpost.json',
-        charset
-      ));
-
-      let pathKeys = mainDir+'/data/keys/'+type;
-      console.log(this.getAllFilesPath(pathKeys, true));
-
-      console.log("path: "+pathKeys);
-      let tableKeys = KEYS.getFixKeyArr(tempData[(type+'Keys')]);
-
-      switch (type) {
-        case "symmetric":
-          console.table(tableKeys);
-          break;
-        case "asymmetric":
-
-          let BCobj = await BCmanager.instanceStaticChainObj(blockChainConfig);
-          let chainObj = BCobj.chainObj;
-          let chain = BCobj.chain;
-          let validateChain = BCobj.validateChain;
-
-          let tableAsymmetricKeys = [];
-
-          for(let rowKey of tableKeys){
-            if(validateChain.global == true){
-              let amountData = await chainObj.currentAmountCalculator(
-                fs.readFileSync(
-                  mainDir+'/data/keys/asymmetric/'+rowKey.timestamp+'/public.pem')
-                  .toString('base64'),
-                false
-              );
-              rowKey.amount = amountData.amount;
-            }else{
-              rowKey.amount = "invalid chain";
-            }
-            tableAsymmetricKeys.push(rowKey);
-          }
-
-          console.table(tableAsymmetricKeys);
-          break;
-        default:
-          new Paint().underpostOption('red', 'error', 'invalid type key');
-      }
-
-
-    }
-
 
  deleteFolderRecursive(path) {
   if( fs.existsSync(path) ) {

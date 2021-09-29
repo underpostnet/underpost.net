@@ -537,6 +537,59 @@ export class UnderPostManager {
           indexKeyReal++;
         }
         return fixKeysArr;
+      },
+      viewAll: async type => {
+
+        let tempData = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/underpost.json',
+          this.charset
+        ));
+
+        let blockChainConfig = JSON.parse(fs.readFileSync(
+            this.mainDir+'/data/blockchain-config.json',
+            this.charset
+        ));
+
+        let pathKeys = this.mainDir+'/data/keys/'+type;
+        console.log(new FileGestor().getAllFilesPath(pathKeys, true));
+
+        console.log("path: "+pathKeys);
+        let tableKeys = KEYS.getFixKeyArr(tempData[(type+'Keys')]);
+
+        switch (type) {
+          case "symmetric":
+            console.table(tableKeys);
+            break;
+          case "asymmetric":
+
+            let BCobj = await BCmanager.instanceStaticChainObj(blockChainConfig);
+            let chainObj = BCobj.chainObj;
+            let chain = BCobj.chain;
+            let validateChain = BCobj.validateChain;
+
+            let tableAsymmetricKeys = [];
+
+            for(let rowKey of tableKeys){
+              if(validateChain.global == true){
+                let amountData = await chainObj.currentAmountCalculator(
+                  fs.readFileSync(
+                    this.mainDir+'/data/keys/asymmetric/'+rowKey.timestamp+'/public.pem')
+                    .toString('base64'),
+                  false
+                );
+                rowKey.amount = amountData.amount;
+              }else{
+                rowKey.amount = "invalid chain";
+              }
+              tableAsymmetricKeys.push(rowKey);
+            }
+
+            console.table(tableAsymmetricKeys);
+            break;
+          default:
+            new Paint().underpostOption('red', 'error', 'invalid type key');
+        }
+
       }
     };
 
@@ -1092,18 +1145,7 @@ export class UnderPostManager {
         preTitle: null,
         title: 'Symmetric Keys Gestor',
         postTitle: async () => {
-          let blockChainConfig = JSON.parse(fs.readFileSync(
-              this.mainDir+'/data/blockchain-config.json',
-              this.charset
-          ));
-          await new FileGestor().logReadDirectoryKeys(
-            this.mainDir,
-            this.charset,
-            "symmetric",
-            BCmanager,
-            KEYS,
-            blockChainConfig
-          );
+          await KEYS.viewAll("symmetric");
           if(postTitleFn!=null){
             await postTitleFn();
           }
@@ -1164,18 +1206,7 @@ export class UnderPostManager {
         preTitle: null,
         title: 'Asymmetric Keys Gestor',
         postTitle: async () => {
-          let blockChainConfig = JSON.parse(fs.readFileSync(
-              this.mainDir+'/data/blockchain-config.json',
-              this.charset
-          ));
-          await new FileGestor().logReadDirectoryKeys(
-            this.mainDir,
-            this.charset,
-            "asymmetric",
-            BCmanager,
-            KEYS,
-            blockChainConfig
-          );
+          await KEYS.viewAll("asymmetric");
           if(postTitleFn!=null){
             await postTitleFn();
           }
@@ -1328,7 +1359,12 @@ export class UnderPostManager {
     // console.log(asymmetricKeyData);
 
     // console.log("test ->");
-    // console.log(new FileGestor().dir('../../', this.mainDir));
+    // console.log(new FileGestor().dir(this.mainDir));
+    // console.log(new FileGestor().dir(this.mainDir, '../'));
+    // console.log(new FileGestor().dir(this.mainDir, '../../'));
+    // console.log(new FileGestor().dir(this.mainDir, '../../src'));
+
+    // fs.unlinkSync(this.mainDir+'/test');
 
     // return;
     //--------------------------------------------------------------------------
