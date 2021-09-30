@@ -792,38 +792,24 @@ export class UnderPostManager {
     const WALLET = {
      createTransaction: async () => {
 
-       /*
-
-       -> blockchain tiene consisntencia de timepo inmutable
-
-       la llave activa hacia
-       la llave que pon ebasse 64 o poner de la pool
-       que sean distintintas que sean validadas
-       verdificar monto total,
-       actualiar de forma univificada transaccion en las pendientes
-       ok
-
-       data:   sender   { doc }
-               receiver { doc }
-               amount {"totalValue": 750,
-                             "hashs": [ [],[],[] ]
-                 }
-               createdDate: (+ new Date())
-       sign:
-
-
-        */
+       //  BlockChain  -> Immutable Time Consistency
 
        const signSaveTransaction = async (sender, receiver, blockChainConfig, timestamp_key) => {
 
-        let senderValidator =  await new Keys()
-            .validateAsymmetricFromSign(
-              sender,
-              blockChainConfig.keys.publicLen,
-              this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
+          console.log(" key receiver selected ->");
+          console.log(receiver);
 
-        console.log("sender validator ->");
-        console.log(senderValidator);
+          console.log(" key sender selected ->");
+          console.log(sender);
+
+          let senderValidator =  await new Keys()
+          .validateAsymmetricFromSign(
+            sender,
+            blockChainConfig.keys.publicLen,
+            this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
+
+          console.log(" sender validator ->");
+          console.log(senderValidator);
 
         let receiverValidator =  await new Keys()
         .validateTempAsymmetricSignKey(
@@ -832,8 +818,8 @@ export class UnderPostManager {
           this.charset,
           this.mainDir);
 
-        console.log("receiver validator ->");
-        console.log(receiverValidator);
+        console.log(" receiver validator ->");
+        console.log( receiverValidator);
 
         if( (!receiverValidator) || (!senderValidator) ){
           new Paint().underpostOption('red', 'error', 'invalid sender or receiver sign');
@@ -949,6 +935,12 @@ export class UnderPostManager {
          let keyPool = await new ReadLine()
          .yn("Use a key receiver from the public key pool ?");
 
+         let sender = JSON.parse(fs.readFileSync(
+             this.mainDir+'/data/keys/asymmetric/active.json',
+             this.charset
+         ));
+         let receiver = null;
+
          switch (keyPool) {
            case "y":
              await this.poolPublickey.viewPool(this.poolPublickey.pool);
@@ -957,16 +949,7 @@ export class UnderPostManager {
                new Paint().underpostInput("index pool key ?")
              ));
 
-             let receiver = this.poolPublickey.pool[indexKey];
-             // console.log(" key receiver selected ->");
-             // console.log(receiver);
-
-             let sender = JSON.parse(fs.readFileSync(
-                 this.mainDir+'/data/keys/asymmetric/active.json',
-                 this.charset
-             ));
-             // console.log(" key sender selected ->");
-             // console.log(sender);
+             receiver = this.poolPublickey.pool[indexKey];
 
              if(this.poolPublickey.pool[indexKey].data.base64PublicKey
                !=
@@ -986,6 +969,33 @@ export class UnderPostManager {
 
              break;
            case "n":
+
+             receiver = await
+             this.poolPublickey.getExternalPublicKey();
+
+             if(!new Util().existAttr(receiver, "error")){
+
+               if(receiver.data.base64PublicKey
+                 !=
+                 asymmetricKeyData.public.base64
+               ){
+
+                await signSaveTransaction(
+                  sender,
+                  receiver,
+                  blockChainConfig,
+                  tempData.active_asymmetric_public_key
+                );
+
+               }else{
+                 new Paint().underpostOption('red', 'error', "invalid auto-transaction");
+               }
+
+
+             }else{
+               new Paint().underpostOption('red', 'error', 'failed validate sign key');
+             }
+
              break;
            default:
               new Paint().underpostOption('red', 'error', "invalid option");

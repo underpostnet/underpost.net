@@ -167,6 +167,11 @@ export class PublicKeyManager {
         this.charset
     ));
 
+    let tempData = JSON.parse(fs.readFileSync(
+      this.mainDir+'/data/underpost.json',
+      this.charset
+    ));
+
     let BCobj = await this.modules.
     BCmanager.instanceStaticChainObj(blockChainConfig);
     let chainObj = BCobj.chainObj;
@@ -186,7 +191,20 @@ export class PublicKeyManager {
          }else{
            x.data.amount = "invalid chain";
          }
+
+         let foundLocal = null;
+         for(let localKey of tempData.asymmetricKeys){
+           let localBase64PublicKey = fs.readFileSync(
+             this.mainDir+'/data/keys/asymmetric/'+localKey+'/public.pem')
+             .toString('base64');
+             if(x.data.base64PublicKey==localBase64PublicKey){
+               foundLocal = localKey;
+               break;
+             }
+         }
+         x.data.local = foundLocal;
          x.data.base64PublicKey = "..."+x.data.base64PublicKey.slice(250, 256)+"...";
+
        }
       resolve(dataTable.map(x=>x.data));
     });
@@ -265,6 +283,47 @@ export class PublicKeyManager {
 
    }
 
+   async getExternalPublicKey(){
+
+     let blockChainConfig = JSON.parse(fs.readFileSync(
+         this.mainDir+'/data/blockchain-config.json',
+         this.charset
+     ));
+
+     let inputBase64PublicKey = null;
+     let paste_key = await new ReadLine().yn("paste key ?");
+     switch (paste_key) {
+       case "y":
+         inputBase64PublicKey = new Util().paste();
+         break;
+       case "n":
+         inputBase64PublicKey = await new ReadLine().r(
+           new Paint().underpostInput("Enter Base64 Sign Public Key")
+         );
+         break;
+       default:
+        new Paint().underpostOption('red', 'error', "invalid option");
+        return;
+     }
+     new Paint().underpostOption('yellow', ' ', 'Base64 decode Obj:');
+     let test_key = new Keys()
+       .getJSONAsymmetricPublicKeySignFromBase64(inputBase64PublicKey);
+     let validate_sign_key = await new Keys()
+     .validateTempAsymmetricSignKey(
+       test_key,
+       blockChainConfig,
+       this.charset,
+       this.mainDir);
+
+      console.log(test_key);
+      if(validate_sign_key == true){
+        return test_key
+      }else{
+        return { error: "invalid public sign key ", data: test_key }
+      }
+
+   }
+
    async addPublicKey(){
     try{
 
@@ -273,53 +332,23 @@ export class PublicKeyManager {
           this.charset
       ));
 
-      let inputBase64PublicKey = null;
-      let paste_key = await new ReadLine().yn("paste key ?");
+      let externalPublicKey = await this.getExternalPublicKey();
 
-      switch (paste_key) {
-        case "y":
-          inputBase64PublicKey = new Util().paste();
-          break;
-        case "n":
-          inputBase64PublicKey = await new ReadLine().r(
-            new Paint().underpostInput("Enter Base64 Sign Public Key")
-          );
-          break;
-        default:
-         new Paint().underpostOption('red', 'error', "invalid option");
-         return;
-      }
-
-
-      new Paint().underpostOption('yellow', ' ', 'Base64 decode Obj:');
-
-      let test_key = new Keys()
-        .getJSONAsymmetricPublicKeySignFromBase64(inputBase64PublicKey);
-
-      console.log(test_key);
-
-      let validate_sign_key = new Keys()
-      .validateTempAsymmetricSignKey(
-        test_key,
-        blockChainConfig,
-        this.charset,
-        this.mainDir);
-
-      if(validate_sign_key){
+      if(!new Util().existAttr(externalPublicKey, "error")){
 
         let foundKey = false;
         let ind_ = 0;
         for(let key of this.pool){
-          if(key.data.base64PublicKey==test_key.data.base64PublicKey){
+          if(key.data.base64PublicKey==externalPublicKey.data.base64PublicKey){
             foundKey = true;
-            this.pool[ind_]=test_key;
+            this.pool[ind_]=externalPublicKey;
             new Paint().underpostOption('cyan', 'success', 'updated sign public key');
             break;
           }
           ind_++;
         }
         if(!foundKey){
-          this.pool.push(test_key);
+          this.pool.push(externalPublicKey);
           new Paint().underpostOption('cyan', 'success', 'add sign public key');
         }
 
