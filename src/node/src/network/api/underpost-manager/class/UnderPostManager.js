@@ -764,24 +764,42 @@ export class UnderPostManager {
           new Paint().underpostBar();
        },
        instanceStaticChainObj: async blockChainConfig => {
+
          let chainObj = new BlockChain({
            generation: blockChainConfig.constructor.generation,
            userConfig: {
+             blocksToUndermine: 1,
+             propagateBlock: true,
+             bridgeUrl: blockChainConfig.constructor.userConfig.bridgeUrl,
+             intervalBridgeMonitoring: 1000,
+             zerosConstDifficulty: null,
+             rewardAddress: "",
+             blockChainDataPath: this.mainDir+'/data/blockchain',
+             // blockChainDataPath: '../data/blockchain',
+             // blockChainDataPath: null,
              maxErrorAttempts: 5,
-             RESTdelay: 1000
+             RESTdelay: 1000,
+             charset: 'utf8'
            },
            validatorMode: true
          });
 
-         let chain = JSON.parse(fs.readFileSync(
+         /*let chain = JSON.parse(fs.readFileSync(
              this.mainDir
              +'/data/blockchain/generation-'
              +blockChainConfig.constructor.generation
              +'/chain.json',
              this.charset
-         ));
+         ));*/
 
-         // TODO: actualizar con bridge
+
+         // UPDATE CHAIN WITH BRIDGE
+
+         await chainObj.setCurrentChain();
+
+         let chain = chainObj.chain;
+
+
 
          let validateChain = await chainObj.globalValidateChain(chain);
 
