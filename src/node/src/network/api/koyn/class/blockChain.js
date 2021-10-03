@@ -57,7 +57,7 @@ export class BlockChain {
 		}
 	}
 
-	async setCurrentChain(){
+	async setCurrentChain(validate){
 
 		const setBlockClass = async (arr, rest) => {
 
@@ -79,19 +79,46 @@ export class BlockChain {
 				this.userConfig.charset
 			));
 
-			let bridgeChain = localChain.concat(await new RestService().getJSON(
+			/*let bridgeChain = localChain.concat(await new RestService().getJSON(
 				this.userConfig.bridgeUrl+'/chain/'+this.generation
 				+'/'+new Util().l(localChain)+'/last'
+			));*/
+
+			let bridgeChainLen = parseInt(await new RestService().getJSON(
+				this.userConfig.bridgeUrl+'/chain-len/'+this.generation
 			));
 
+			console.log(colors.yellow("bridge chain len:"+bridgeChainLen));
+			console.log(colors.yellow("local chain len:"+localChain.length));
 			console.log(colors.yellow("difference length chain bridge:"+
-			(bridgeChain.length-localChain.length)));
+			(bridgeChainLen-localChain.length)));
 
-			new Util().l(bridgeChain) > new Util().l(localChain) &&
-			this.equalValidate(localChain, bridgeChain)
-			?
-			await setBlockClass(bridgeChain, true) :
-			await setBlockClass(localChain, false) ;
+			if(bridgeChainLen>new Util().l(localChain)){
+
+				let bridgeChain = localChain;
+				for(let indexBlock of new Util().range(localChain.length, (bridgeChainLen-1))){
+					console.log(colors.green("get block index:"+indexBlock));
+					let reqUrl =
+					this.userConfig.bridgeUrl
+					+'/block/'+this.generation
+					+'/'
+					+indexBlock;
+					console.log(colors.green("url:"+reqUrl));
+					let newBlock = await new RestService().getJSON(reqUrl);
+					// console.log(newBlock);
+					bridgeChain.push(newBlock);
+				}
+
+					await setBlockClass(bridgeChain, true);
+
+			}else {
+
+					await setBlockClass(localChain, false);
+			}
+
+			// console.log(new Util().l(this.chain));
+			validate!=undefined ? await this.globalValidateChain(this.chain) : null;
+
 
 		};
 
@@ -691,7 +718,7 @@ export class BlockChain {
 	}
 
 	async mainProcess(obj, ws){
-		await this.setCurrentChain();
+		await this.setCurrentChain(true);
 		await this.setRewardConfig();
 		let statusMainProcess = null;
 		for(let i=1; i<=(this.userConfig.blocksToUndermine); i++){
