@@ -905,11 +905,38 @@ export class UnderPostManager {
                    console.log(endObjTransaction);
 
                    console.log('from sign validator ->');
-                   console.log(await new Keys()
+                   let validatorTransaction = await new Keys()
                    .validateAsymmetricFromSign(
                      endObjTransaction,
                      blockChainConfig.keys.publicLen,
-                     this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem'));
+                     this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
+                   console.log(validatorTransaction);
+                   if(validatorTransaction == true){
+
+                     let pathDataTransactions =
+                     this.mainDir+'/data/blockchain/generation-'
+                     +blockChainConfig.constructor.generation+'/pending-transactions.json';
+
+                     let pendingTransactions = JSON.parse(fs.readFileSync(
+                       pathDataTransactions,
+                       this.charset
+                     ));
+
+                     pendingTransactions.push(endObjTransaction);
+
+                     fs.writeFileSync(
+                       pathDataTransactions,
+                       new Util().jsonSave(pendingTransactions),
+                       this.charset);
+
+                       new Paint().underpostOption('cyan', 'success', 'transaction moved to pending');
+
+                   }else{
+
+                     new Paint().underpostOption('red', 'error', 'invalid sign transaction');
+                     return;
+
+                   }
 
                }else{
                  new Paint().underpostOption('red', 'error', 'insufficient current amount');
