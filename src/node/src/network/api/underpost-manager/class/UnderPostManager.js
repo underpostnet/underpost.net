@@ -550,6 +550,12 @@ export class UnderPostManager {
             this.charset
         ));
 
+        let tempDataTransactions = await new RestService().getJSON(
+          blockChainConfig.constructor.userConfig.bridgeUrl
+          +'/transactions/'
+          +blockChainConfig.constructor.generation
+        );
+
         let pathKeys = this.mainDir+'/data/keys/'+type;
         console.log(new FileGestor().getAllFilesPath(pathKeys, true));
 
@@ -566,6 +572,12 @@ export class UnderPostManager {
             let chainObj = BCobj.chainObj;
             let chain = BCobj.chain;
             let validateChain = BCobj.validateChain;
+
+            await chainObj.currentAmountCalculator(
+              "",
+              false,
+              tempDataTransactions.pool
+            );
 
             let tableAsymmetricKeys = [];
 
@@ -851,9 +863,16 @@ export class UnderPostManager {
 
          if(validateChain.global == true){
 
+           let tempDataTransactions = await new RestService().getJSON(
+             blockChainConfig.constructor.userConfig.bridgeUrl
+             +'/transactions/'
+             +blockChainConfig.constructor.generation
+           );
+
            let objAmount = await chainObj.currentAmountCalculator(
              sender.data.base64PublicKey,
-             false
+             false,
+             tempDataTransactions.pool
            );
 
            console.log(
@@ -913,7 +932,7 @@ export class UnderPostManager {
                    console.log(validatorTransaction);
                    if(validatorTransaction == true){
 
-                     let pathDataTransactions =
+                     /*let pathDataTransactions =
                      this.mainDir+'/data/blockchain/generation-'
                      +blockChainConfig.constructor.generation+'/pending-transactions.json';
 
@@ -929,7 +948,16 @@ export class UnderPostManager {
                        new Util().jsonSave(pendingTransactions),
                        this.charset);
 
-                       new Paint().underpostOption('cyan', 'success', 'transaction moved to pending');
+                       new Paint().underpostOption('cyan', 'success', 'transaction moved to pending');*/
+
+                       let postTransactionStatus = await new RestService().postJSON(
+                         blockChainConfig.constructor.userConfig.bridgeUrl+'/transactions/'
+                         +blockChainConfig.constructor.generation,
+                         endObjTransaction
+                       );
+
+                       console.log("postTransactionStatus ->");
+                       console.log(postTransactionStatus);
 
                    }else{
 
@@ -1074,10 +1102,15 @@ export class UnderPostManager {
        let validateChain = BCobj.validateChain;
 
        if(validateChain.global == true){
-
+         let tempDataTransactions = await new RestService().getJSON(
+           blockChainConfig.constructor.userConfig.bridgeUrl
+           +'/transactions/'
+           +blockChainConfig.constructor.generation
+         );
          console.log([await chainObj.currentAmountCalculator(
            fileKeyContent.public.base64,
-           true
+           true,
+           tempDataTransactions.pool
          )]);
 
        }else{

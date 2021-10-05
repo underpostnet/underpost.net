@@ -119,6 +119,15 @@ export class Block {
               }
             };
 
+            const checkDataTransactionStatus = async bridgeDataTransactions => {
+              if(new Util().l(bridgeDataTransactions)>new Util().l(this.node.dataTransaction)){
+                console.log(colors.cyan("set news transactions count:"+(
+                  new Util().l(bridgeDataTransactions)-new Util().l(this.node.dataTransaction)
+                )));
+                this.node.dataTransaction = bridgeDataTransactions;
+              }
+            };
+
             //var onWsMsgController = 0;
             const monitoringBridge = async () => {
               if(current_-timer_monitoring_>interval){
@@ -127,7 +136,7 @@ export class Block {
                   let fromHash = new Util().getHash();
                   ws.send(new Util().JSONstr({
                     // change to global update detect new transactions ?
-                    // ir agregando las transaccione spendiente que no esten 
+                    // ir agregando las transaccione spendiente que no esten
                     state: "get-last-block",
                     to: "server",
                     from: fromHash,
@@ -169,6 +178,7 @@ export class Block {
                                               /*await ws.reset();
                                               await ws.onOpen(async data => {
                                               });*/
+                                              await checkDataTransactionStatus(responseWsObj.dataTransaction.pool);
                                               wsResolve({
                                                 status: false,
                                                 block: responseWsObj.data
@@ -178,6 +188,7 @@ export class Block {
                                               /*await ws.reset();
                                               await ws.onOpen(async data => {
                                               });*/
+                                              await checkDataTransactionStatus(responseWsObj.dataTransaction.pool);
                                               wsResolve({
                                                 status: true,
                                                 block: null

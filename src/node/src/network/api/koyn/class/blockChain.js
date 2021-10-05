@@ -870,7 +870,15 @@ export class BlockChain {
 
 	}
 
-	async currentAmountCalculator(base64PublicKey, log){
+	async currentAmountCalculator(base64PublicKey, log, dataTransaction){
+
+		if(dataTransaction!=undefined){
+			this.chain.push({
+				node: {
+					dataTransaction: dataTransaction
+				}
+			});
+		}
 
 		/*
 
@@ -902,8 +910,8 @@ export class BlockChain {
 									hashs[ind] = null;
 									count_value++;
 								}
+								ind++;
 							}
-							ind++;
 						}
 						if(count_value == transaction.data.amount.totalValue){
 							amount = amount - transaction.data.amount.totalValue;

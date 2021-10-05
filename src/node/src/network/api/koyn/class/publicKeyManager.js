@@ -178,6 +178,18 @@ export class PublicKeyManager {
     let chain = BCobj.chain;
     let validateChain = BCobj.validateChain;
 
+    let tempDataTransactions = await new RestService().getJSON(
+      blockChainConfig.constructor.userConfig.bridgeUrl
+      +'/transactions/'
+      +blockChainConfig.constructor.generation
+    );
+
+    await chainObj.currentAmountCalculator(
+      "",
+      false,
+      tempDataTransactions.pool
+    );
+
     let tableLocalPool = await new Promise(async resolve => {
        let dataTable = new Util().newInstance(pool);
        for(let x of dataTable){
