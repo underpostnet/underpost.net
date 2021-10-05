@@ -696,7 +696,7 @@ export class UnderPostManager {
                  blocksToUndermine: 1,
                  propagateBlock: true,
                  bridgeUrl: blockChainConfig.constructor.userConfig.bridgeUrl,
-                 intervalBridgeMonitoring: 10000,
+                 intervalBridgeMonitoring: 1000,
                  zerosConstDifficulty: null,
                  rewardAddress: publicKey,
                  blockChainDataPath: this.mainDir+'/data/blockchain',
