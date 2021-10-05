@@ -24,7 +24,10 @@ export class Block {
       this.nonce = obj.nonce;
 
       obj.dataGenesis ?
-      this.dataGenesis = obj.dataGenesis :
+      ((()=>{
+        this.dataGenesis = obj.dataGenesis;
+        this.transactionTemplate = obj.transactionTemplate;
+      })()) :
       null;
 
     }
@@ -37,6 +40,7 @@ export class Block {
               node: this.node,
               block: this.block,
               dataGenesis: this.dataGenesis,
+              transactionTemplate: this.transactionTemplate,
               nonce: this.nonce
             })
           ).toString();
@@ -56,7 +60,10 @@ export class Block {
       return await new Promise(async resolve => {
 
             this.block = Object.assign(this.block, obj.blockConfig);
-            obj.blockConfig.index == 0 ? this.dataGenesis = obj.dataGenesis: null;
+            obj.blockConfig.index == 0 ? ((()=>{
+              this.dataGenesis = obj.dataGenesis;
+              this.transactionTemplate = obj.transactionTemplate;
+            })()): null;
 
             this.node = Object.assign(
               {
@@ -124,13 +131,14 @@ export class Block {
                 console.log(colors.cyan("set news transactions count:"+(
                   new Util().l(bridgeDataTransactions)-new Util().l(this.node.dataTransaction)
                 )));
+                console.log();
                 this.node.dataTransaction = bridgeDataTransactions;
               }
             };
 
             //var onWsMsgController = 0;
-            const monitoringBridge = async () => {
-              if(current_-timer_monitoring_>interval){
+            const monitoringBridge = async force => {
+              if( (current_-timer_monitoring_>interval) || (force==true) ){
                 timer_monitoring_ = new Util().newInstance(current_);
                 return await new Promise( async wsResolve => {
                   let fromHash = new Util().getHash();
@@ -225,14 +233,15 @@ export class Block {
               };
             };
 
-
+            let first_mine = true;
           	while(!this.hash.startsWith(this.block.difficulty.zeros)) {
           		this.nonce++;
           		this.hash = this.calculateHash();
               current_ = (+ new Date());
               logStat(false);
               if(this.block.index!=0){ // fix -> return data only new block exist
-                let monitoringBridgeStatus = await monitoringBridge();
+                let monitoringBridgeStatus = await monitoringBridge(first_mine);
+                first_mine = false;
                 if(monitoringBridgeStatus.status == false){
                   resolve(monitoringBridgeStatus);
                   logStat(true);

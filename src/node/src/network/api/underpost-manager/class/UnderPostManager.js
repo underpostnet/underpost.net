@@ -696,7 +696,7 @@ export class UnderPostManager {
                  blocksToUndermine: 1,
                  propagateBlock: true,
                  bridgeUrl: blockChainConfig.constructor.userConfig.bridgeUrl,
-                 intervalBridgeMonitoring: 1000,
+                 intervalBridgeMonitoring: 10000,
                  zerosConstDifficulty: null,
                  rewardAddress: publicKey,
                  blockChainDataPath: this.mainDir+'/data/blockchain',
@@ -704,7 +704,8 @@ export class UnderPostManager {
                  // blockChainDataPath: null,
                  maxErrorAttempts: 5,
                  RESTdelay: 1000,
-                 charset: 'utf8'
+                 charset: 'utf8',
+                 transactionTemplate: blockChainConfig.network.transactionTemplate
                },
                rewardConfig: {
                  intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */

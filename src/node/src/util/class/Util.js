@@ -12,6 +12,8 @@ npx kill-port [port]
 nvm list
 nvm use [version]
 
+null==undefined -> true
+
 delete person.age;  // or delete person["age"];
 
 fetch&ajax CRUD module & (cors) ->
@@ -51,6 +53,9 @@ MAP VIA:
 	console.log(a);
 	console.log('-')
 }  );
+
+
+ARRAY.includes(UNIQUE ELEMENT)
 
 parseFloat((89324.344545).toFixed(2));
 
@@ -780,7 +785,7 @@ var max = Math.max( ...arr );
 									allListKeys.push(key_);
 								}
 							}
-							if(typeof(obj_[key_])=='object'){
+							if((typeof(obj_[key_])=='object') && (obj_[key_]!=null)){
 								listKeys_(obj_[key_]);
 							}
 						});
@@ -969,6 +974,32 @@ var max = Math.max( ...arr );
 	 newInstance(obj){
 		return JSON.parse(JSON.stringify(obj));
 	}
+
+	 setValueAllKeys(obj, setValue){
+		const listKeys_ = obj_ => {
+			Object.keys(obj_).forEach( key_ => {
+				if((typeof(obj_[key_])=='object') && (obj_[key_]!=null)){
+					listKeys_(obj_[key_]);
+				}else{
+					obj_[key_] = setValue;
+				}
+			});
+		};
+		listKeys_(obj);
+		return obj;
+	}
+
+
+
+
+
+
+
+
+
+
+
+	// end
 
 
 copy(data) {

@@ -544,14 +544,34 @@ export class BlockChain {
 		if(block.block.index!=0){
 
 			let blockTemplate = new Util().fusionObj([this.chain[0]]);
+
+			for(let transaction_ of block.node.dataTransaction){
+
+				let transactionTemplate = new Util().uniqueArray(
+					new Util().getAllKeys(blockTemplate.transactionTemplate)
+				);
+
+				let transactionBlock = new Util().uniqueArray(
+					new Util().getAllKeys(transaction_)
+				);
+
+				if(!new Util().objEq(transactionTemplate, transactionBlock)){
+					return false;
+				}
+
+			}
+
 			delete blockTemplate.dataGenesis;
+			delete blockTemplate.transactionTemplate;
+			let auxBlock = new Util().newInstance(block);
+			auxBlock.node.dataTransaction = [];
 
 			let keysTemplate = new Util().uniqueArray(
 				new Util().getAllKeys(blockTemplate)
 			);
 
 			let keysBlock = new Util().uniqueArray(
-				new Util().getAllKeys(block)
+				new Util().getAllKeys(auxBlock)
 			);
 
 			// console.log("keysTemplate");
@@ -728,7 +748,8 @@ export class BlockChain {
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig(),
-						dataGenesis: this.genesisBlockChainConfig()
+						dataGenesis: this.genesisBlockChainConfig(),
+						transactionTemplate: this.userConfig.transactionTemplate
 					}, ws);
 					if(statusMainProcess.status == false){return statusMainProcess;}
 					break;
