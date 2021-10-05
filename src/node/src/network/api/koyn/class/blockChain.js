@@ -876,6 +876,9 @@ export class BlockChain {
 			this.chain.push({
 				node: {
 					dataTransaction: dataTransaction
+				},
+				block: {
+					index: new Util().l(this.chain)
 				}
 			});
 		}
