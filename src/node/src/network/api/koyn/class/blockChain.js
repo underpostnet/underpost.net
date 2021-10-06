@@ -385,7 +385,7 @@ export class BlockChain {
 		const formatDiff = (diff) => {
 			let returnTarget = diffToTarget(diff);
 			let returnZeros = getZerosHash(returnTarget);
-			new Util().l(returnZeros) < 1 ? returnZeros = this.userConfig.minimumZeros : null;
+			new Util().l(returnZeros) < new Util().l(this.userConfig.minimumZeros) ? returnZeros = this.userConfig.minimumZeros : null;
 			return {
 				zeros: returnZeros,
 				target: returnTarget,
