@@ -705,7 +705,8 @@ export class UnderPostManager {
                  maxErrorAttempts: 5,
                  RESTdelay: 1000,
                  charset: 'utf8',
-                 transactionTemplate: blockChainConfig.network.transactionTemplate
+                 transactionTemplate: blockChainConfig.network.transactionTemplate,
+                 minimumZeros: "0000"
                },
                rewardConfig: {
                  intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */
