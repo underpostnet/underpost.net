@@ -627,6 +627,29 @@ b -> a | mayor -> menor
 	}
 }
 
+ getSumSizeJSON(arrObj){
+	let size_sum = 0;
+	let kiloBytes_sum = 0;
+	let megaBytes_sum = 0;
+	for(let obj_ of arrObj){
+
+		const size_ = new TextEncoder().encode(JSON.stringify(obj_)).length;
+		const kiloBytes_ = size_ / 1024;
+		const megaBytes_ = kiloBytes_ / 1024;
+
+		size_sum += size_;
+		kiloBytes_sum += kiloBytes_;
+		megaBytes_sum += megaBytes_;
+
+	}
+	return {
+		size: size_sum,
+		kiloBytes: kiloBytes_sum,
+		megaBytes: megaBytes_sum
+	}
+}
+
+
  jsonLog(json){
 
 	console.log(JSON.stringify(json, null, 4));

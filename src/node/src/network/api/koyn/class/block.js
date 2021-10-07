@@ -99,6 +99,8 @@ export class Block {
             let m_ = 0;
             let s_ = 0;
 
+            let limitSizeActive = false;
+            let limitMbBlock = obj.limitMbBlock;
             let roundDigitSize = 3;
             // let unitSizeLog = "megaBytes";
             let unitSizeLog = "kiloBytes";
@@ -136,13 +138,27 @@ export class Block {
             };
 
             const checkDataTransactionStatus = async bridgeDataTransactions => {
-              if(new Util().l(bridgeDataTransactions)>new Util().l(this.node.dataTransaction)){
-                console.log(colors.cyan("set news transactions count:"+(
-                  new Util().l(bridgeDataTransactions)-new Util().l(this.node.dataTransaction)
-                )));
-                console.log();
-                this.node.dataTransaction = bridgeDataTransactions;
+
+              // console.log("checkDataTransactionStatus ->");
+              // console.log(bridgeDataTransactions);
+              let auxDataTransactions = new Util().newInstance(this.node.dataTransaction);
+
+              if(new Util().l(bridgeDataTransactions)>0){
+                console.log(colors.cyan("set news transactions count:"+
+                  new Util().l(bridgeDataTransactions)
+                ));
+                this.node.dataTransaction = this.node.dataTransaction.concat(bridgeDataTransactions);
               }
+
+              // console.log(new Util().getSizeJSON(this));
+              if(new Util().getSizeJSON(this).megaBytes > limitMbBlock){
+                console.log(colors.red("maximum block weight exceeded"))
+                this.node.dataTransaction = auxDataTransactions;
+                console.log(new Util().getSizeJSON(this));
+                limitSizeActive = true;
+              }
+
+              console.log();
             };
 
             //var onWsMsgController = 0;
@@ -158,7 +174,8 @@ export class Block {
                     to: "server",
                     from: fromHash,
                     data: {
-                      generation: this.block.generation
+                      generation: this.block.generation,
+                      lastIndexTransaction: new Util().l(this.node.dataTransaction)
                     }
                   }));
                   //const idOnMsg = new Util().newInstance(onWsMsgController);
@@ -195,7 +212,7 @@ export class Block {
                                               /*await ws.reset();
                                               await ws.onOpen(async data => {
                                               });*/
-                                              await checkDataTransactionStatus(responseWsObj.dataTransaction.pool);
+                                              // await checkDataTransactionStatus(responseWsObj.dataTransaction.pool);
                                               wsResolve({
                                                 status: false,
                                                 block: responseWsObj.data
@@ -205,6 +222,7 @@ export class Block {
                                               /*await ws.reset();
                                               await ws.onOpen(async data => {
                                               });*/
+                                              limitSizeActive == true ? null :
                                               await checkDataTransactionStatus(responseWsObj.dataTransaction.pool);
                                               wsResolve({
                                                 status: true,

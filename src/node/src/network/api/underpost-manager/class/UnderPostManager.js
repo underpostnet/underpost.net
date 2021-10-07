@@ -688,6 +688,7 @@ export class UnderPostManager {
              var blockChainProcess = new BlockChain({
                generation: blockChainConfig.constructor.generation,
                version: '0.0.0',
+               name: "Koλn",
                hashGeneration: null,
                // pathPreviousHashGeneration: '../data/blockchain/generation-0/hash',
                pathPreviousHashGeneration: null,
@@ -707,7 +708,8 @@ export class UnderPostManager {
                  charset: 'utf8',
                  transactionTemplate: blockChainConfig.network.transactionTemplate,
                  minimumZeros: "0",
-                 hashToken: false
+                 hashToken: false,
+                 limitMbBlock: 20
                },
                rewardConfig: {
                  intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */

@@ -776,7 +776,8 @@ export class BlockChain {
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig(),
 						dataGenesis: this.genesisBlockChainConfig(),
-						transactionTemplate: this.userConfig.transactionTemplate
+						transactionTemplate: this.userConfig.transactionTemplate,
+						limitMbBlock: this.userConfig.limitMbBlock
 					}, ws);
 					if(statusMainProcess.status == false){return statusMainProcess;}
 					break;
@@ -784,7 +785,8 @@ export class BlockChain {
 					statusMainProcess = await this.addBlock({
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
-						blockConfig: this.currentBlockConfig()
+						blockConfig: this.currentBlockConfig(),
+						limitMbBlock: this.userConfig.limitMbBlock
 					}, ws);
 					if(statusMainProcess.status == false){return statusMainProcess;}
 			}
