@@ -99,7 +99,14 @@ export class Block {
             let m_ = 0;
             let s_ = 0;
 
-            console.log(colors.magenta('time:00:00:00 nonce:0 hash/s:0'));
+            let roundDigitSize = 3;
+            // let unitSizeLog = "megaBytes";
+            let unitSizeLog = "kiloBytes";
+
+            console.log(colors.magenta('time:00:00:00 nonce:0 hash/s:0 size: '
+              +new Util().aprox(new Util().getSizeJSON(this)[unitSizeLog], roundDigitSize)
+              +' ['+unitSizeLog+']'
+            ));
 
             const logStat =  force => {
               if((current_-timer_>1000)||force){
@@ -121,7 +128,9 @@ export class Block {
                   new Util().pad(m_, size_)+':'+
                   new Util().pad(s_, size_)+' nonce:'+
                   this.nonce+' hash/s:'+
-                  ((this.nonce/  (((+ new Date())-start_)/1000)  ).toFixed(2))
+                  ((this.nonce/  (((+ new Date())-start_)/1000)  ).toFixed(2))+' size: '
+                    +new Util().aprox(new Util().getSizeJSON(this)[unitSizeLog], roundDigitSize)
+                    +' ['+unitSizeLog+']'
                 ));
               }
             };

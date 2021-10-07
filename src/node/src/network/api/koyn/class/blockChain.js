@@ -272,6 +272,20 @@ export class BlockChain {
 				hashs: reward
 			};
 		};
+		if(!(this.userConfig.hashToken == true)){
+			switch (new Util().l(this.chain)) {
+				case 0:
+					return {
+						totalValue: this.rewardConfig.rewardCurrencyPerBlock[0],
+						hashs: []
+					};
+				default:
+					return {
+						totalValue: this.getRewardToIndexBlock(this.latestBlock(), this.rewardConfig, true),
+						hashs: []
+					};
+			}
+		}
 		switch (new Util().l(this.chain)) {
 			case 0:
 				return genereteHashsKoyn(this.rewardConfig.rewardCurrencyPerBlock[0]);
@@ -720,6 +734,8 @@ export class BlockChain {
 			return false;
 		}
 
+		if(this.userConfig.hashToken == true){
+
 		let valueHashKoyn = new Util().l(block.block.reward.hashs);
 
 		if(valueHashKoyn!=block.block.reward.totalValue){
@@ -732,6 +748,17 @@ export class BlockChain {
 			// console.log("test 3 ->");
 			return false;
 		}
+
+		} else{
+			if(this.getRewardToIndexBlock(block, rewardConfig, false)
+			!=
+			block.block.reward.totalValue){
+				// console.log("test 3 ->");
+				return false;
+			}
+		}
+
+
 
 		return true;
 
@@ -937,11 +964,11 @@ export class BlockChain {
 								ind++;
 							}
 						}
-						if(count_value == transaction.data.amount.totalValue){
+						if((count_value == transaction.data.amount.totalValue)||(!(this.userConfig.hashToken==true))){
 							amount = amount - transaction.data.amount.totalValue;
 							hashs = hashs.filter(x=>x!=null);
 							log == true ? new Paint().underpostOption('yellow', ' ', `
-							sender validator amount: `+count_value+`
+							sender validator amount: `+transaction.data.amount.totalValue+`
 							current amount:          `+amount+`
 							`) : null;
 						}else{
