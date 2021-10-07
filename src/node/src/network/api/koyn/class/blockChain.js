@@ -504,6 +504,7 @@ export class BlockChain {
 		let signValidate = false;
 		let rewardValidate = false;
 		let keysValidate = false;
+		let sizeValidate = true;
 		let typeValidate = 'last-validate-block';
 
 	 // siempre los sing comprobar cyberia en true el promedio de  tiempo es
@@ -526,6 +527,9 @@ export class BlockChain {
 					if(! this.validateKeysBlock(block)){
 						keysValidate = false;
 					}
+					if(new Util().getSizeJSON(block).megaBytes>this.userConfig.limitMbBlock){
+						sizeValidate = false;
+					}
 				}
 				hashValidate = this.checkValid();
 		}else{
@@ -536,6 +540,9 @@ export class BlockChain {
 			 keysValidate =
 			 this.validateKeysBlock(this.newBlock);
 			 hashValidate = this.checkValid(this.newBlock);
+			 if(new Util().getSizeJSON(this.newBlock).megaBytes>this.userConfig.limitMbBlock){
+				 sizeValidate = false;
+			 }
 		}
 
 		// validate transactions
@@ -544,12 +551,14 @@ export class BlockChain {
 		console.log(colors.cyan('validator-status:'+hashValidate));
 		console.log(colors.cyan('check-app-sign:'+signValidate));
 		console.log(colors.cyan('reward-block-validate:'+rewardValidate));
+		console.log(colors.cyan('size-validate:'+sizeValidate));
 		console.log(colors.cyan('keys-validate:'+keysValidate));
 
-		return { hashValidate, signValidate, rewardValidate, keysValidate,
+		return { hashValidate, signValidate, rewardValidate, sizeValidate, keysValidate,
 		global: ( hashValidate   &&
 							signValidate   &&
 							rewardValidate &&
+							sizeValidate   &&
 							keysValidate) };
 	}
 
