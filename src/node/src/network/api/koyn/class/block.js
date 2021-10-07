@@ -105,9 +105,9 @@ export class Block {
             // let unitSizeLog = "megaBytes";
             let unitSizeLog = "kiloBytes";
 
-            console.log(colors.magenta('time:00:00:00 nonce:0 hash/s:0 size: '
+            console.log(colors.magenta('time:00:00:00 nonce:0 hash/s:0 size:'
               +new Util().aprox(new Util().getSizeJSON(this)[unitSizeLog], roundDigitSize)
-              +' ['+unitSizeLog+']'
+              +'['+unitSizeLog+']'
             ));
 
             const logStat =  force => {
@@ -130,9 +130,9 @@ export class Block {
                   new Util().pad(m_, size_)+':'+
                   new Util().pad(s_, size_)+' nonce:'+
                   this.nonce+' hash/s:'+
-                  ((this.nonce/  (((+ new Date())-start_)/1000)  ).toFixed(2))+' size: '
+                  ((this.nonce/  (((+ new Date())-start_)/1000)  ).toFixed(2))+' size:'
                     +new Util().aprox(new Util().getSizeJSON(this)[unitSizeLog], roundDigitSize)
-                    +' ['+unitSizeLog+']'
+                    +'['+unitSizeLog+']'
                 ));
               }
             };
@@ -142,12 +142,14 @@ export class Block {
               // console.log("checkDataTransactionStatus ->");
               // console.log(bridgeDataTransactions);
               let auxDataTransactions = new Util().newInstance(this.node.dataTransaction);
-
+              let logs = false;
               if(new Util().l(bridgeDataTransactions)>0){
                 console.log(colors.cyan("set news transactions count:"+
                   new Util().l(bridgeDataTransactions)
                 ));
                 this.node.dataTransaction = this.node.dataTransaction.concat(bridgeDataTransactions);
+
+                logs = true;
               }
 
               // console.log(new Util().getSizeJSON(this));
@@ -156,9 +158,11 @@ export class Block {
                 this.node.dataTransaction = auxDataTransactions;
                 console.log(new Util().getSizeJSON(this));
                 limitSizeActive = true;
-              }
 
-              console.log();
+                logs = true;
+              }
+              logs ? console.log() : null;
+
             };
 
             //var onWsMsgController = 0;
