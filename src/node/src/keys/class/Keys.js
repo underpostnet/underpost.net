@@ -238,25 +238,28 @@ export class Keys {
   }
 
   async validateTempAsymmetricSignKey(
-    test_key, blockChainConfig, charset, mainDir
+    test_key, blockChainConfig, charset, mainDir, nameDataFolder
   ){
+      nameDataFolder==undefined ? nameDataFolder = 'data': null;
 
       let id_file_key = new Util().getHash();
       let result = true;
       fs.writeFileSync(
-        mainDir+'/data/temp/test-key/'+id_file_key+'.pem',
-        Buffer.from(test_key.data.base64PublicKey, 'base64').toString(),
+        mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem',
+        new Util().existAttr(test_key.data, "sender") ?
+        Buffer.from(test_key.data.sender.data.base64PublicKey, 'base64').toString()
+        : Buffer.from(test_key.data.base64PublicKey, 'base64').toString(),
         charset
       );
       if(
         ! this.validateAsymmetricFromSign(
         test_key,
         blockChainConfig.keys.publicLen,
-        mainDir+'/data/temp/test-key/'+id_file_key+'.pem')
+        mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem')
       ){
         result = false;
       }
-      fs.unlinkSync(mainDir+'/data/temp/test-key/'+id_file_key+'.pem');
+      fs.unlinkSync(mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem');
       return result;
 
   }

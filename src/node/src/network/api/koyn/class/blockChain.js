@@ -3,6 +3,7 @@ import { Util } from "../../../../util/class/Util.js";
 import { ReadLine } from "../../../../read-line/class/ReadLine.js";
 import { RestService } from "../../../../rest/class/restService.js";
 import { Paint } from "../../../../paint/class/paint.js";
+import { Keys } from "../../../../keys/class/Keys.js";
 import SHA256 from "crypto-js/sha256.js";
 import fs from "fs";
 import colors from "colors/safe.js";
@@ -505,6 +506,8 @@ export class BlockChain {
 		let rewardValidate = false;
 		let keysValidate = false;
 		let sizeValidate = true;
+		let timeTransactionValidate = true;
+		let validateSignsTransactions = true;
 		let typeValidate = 'last-validate-block';
 
 	 // siempre los sing comprobar cyberia en true el promedio de  tiempo es
@@ -531,6 +534,14 @@ export class BlockChain {
 						sizeValidate = false;
 					}
 				}
+				if(this.validateTimesTransactions()==false){
+					timeTransactionValidate = false;
+				}
+				validateSignsTransactions = await
+				this.validateSignsTransactions(
+						this.userConfig.dataDir,
+						this.userConfig.dataFolder
+				);
 				hashValidate = this.checkValid();
 		}else{
 			 signValidate =
@@ -543,9 +554,15 @@ export class BlockChain {
 			 if(new Util().getSizeJSON(this.newBlock).megaBytes>this.userConfig.limitMbBlock){
 				 sizeValidate = false;
 			 }
+			 if(this.validateTimesTransactions(this.newBlock)==false){
+				 timeTransactionValidate = false;
+			 }
+			 validateSignsTransactions = await
+			 this.validateSignsTransactions(
+ 					this.userConfig.dataDir,
+ 					this.userConfig.dataFolder,
+ 					this.newBlock);
 		}
-
-		// validate transactions
 
 		console.log(colors.magenta('type-validate:'+typeValidate));
 		console.log(colors.cyan('validator-status:'+hashValidate));
@@ -553,12 +570,22 @@ export class BlockChain {
 		console.log(colors.cyan('reward-block-validate:'+rewardValidate));
 		console.log(colors.cyan('size-validate:'+sizeValidate));
 		console.log(colors.cyan('keys-validate:'+keysValidate));
+		console.log(colors.cyan('time-transactions-validate:'+timeTransactionValidate));
+		console.log(colors.cyan('signs-transactions-validate:'+validateSignsTransactions))
 
-		return { hashValidate, signValidate, rewardValidate, sizeValidate, keysValidate,
+		return { hashValidate,
+						signValidate,
+						rewardValidate,
+						sizeValidate,
+						keysValidate,
+						timeTransactionValidate,
+						validateSignsTransactions,
 		global: ( hashValidate   &&
 							signValidate   &&
 							rewardValidate &&
 							sizeValidate   &&
+							timeTransactionValidate &&
+							validateSignsTransactions &&
 							keysValidate) };
 	}
 
@@ -607,6 +634,115 @@ export class BlockChain {
 		}else{
 			return true;
 		}
+
+	}
+
+	validateTimesTransactions(block){
+
+		if(block == undefined){
+
+			let publicKeys = this.chain.
+			map(x=>x.node.dataTransaction.
+			map(x=>x.data.sender.data.base64PublicKey));
+
+			let dataTransactionTest = [];
+			for(let fix_ of publicKeys){
+				dataTransactionTest = dataTransactionTest.concat(fix_);
+			}
+			dataTransactionTest = new Util().uniqueArray(dataTransactionTest);
+
+			for(let key_test of dataTransactionTest){
+				let times = [];
+				for(let block_ of this.chain){
+					for(let transaction of block_.node.dataTransaction){
+						if(transaction.data.sender.base64PublicKey==key_test){
+							times.push(transaction.data.createdDate);
+						}
+					}
+				}
+				let times_validate =
+				new Util().sortArrAsc(
+					new Util().uniqueArray(
+						new Util().newInstance(times)
+					)
+				);
+
+				if(!new Util().objEq(times, times_validate)){
+					return false;
+				}
+
+			}
+
+		}else{
+
+			let publicKeys = block.node.dataTransaction.
+			map(x=>x.data.sender.data.base64PublicKey);
+
+			let dataTransactionTest = new Util().uniqueArray(publicKeys);
+
+			for(let key_test of dataTransactionTest){
+				let times = [];
+				for(let transaction of block.node.dataTransaction){
+					if(transaction.data.sender.base64PublicKey==key_test){
+						times.push(transaction.data.createdDate);
+					}
+				}
+				let times_validate =
+				new Util().sortArrAsc(
+					new Util().uniqueArray(
+						new Util().newInstance(times)
+					)
+				);
+
+				if(!new Util().objEq(times, times_validate)){
+					return false;
+				}
+
+			}
+
+		}
+
+		return true;
+
+	}
+
+	async validateSignsTransactions(dataDir, dataFolder, block){
+
+		if(block==undefined){
+
+			for(let block of this.chain){
+				for(let transaction of block.node.dataTransaction){
+					let validateSign = await new Keys()
+					.validateTempAsymmetricSignKey(
+						transaction,
+						this.userConfig.blockchain,
+						this.userConfig.charset,
+						this.userConfig.dataDir,
+						this.userConfig.dataFolder);
+					if(validateSign == false){
+						return false;
+					}
+				}
+			}
+
+		}else{
+
+			for(let transaction of block.node.dataTransaction){
+				let validateSign = await new Keys()
+				.validateTempAsymmetricSignKey(
+					transaction,
+					this.userConfig.blockchain,
+					this.userConfig.charset,
+					this.userConfig.dataDir,
+					this.userConfig.dataFolder);
+				if(validateSign == false){
+					return false;
+				}
+			}
+
+		}
+
+		return true;
 
 	}
 
@@ -957,6 +1093,21 @@ export class BlockChain {
 		let amount = 0;
 		let hashs = [];
 		for(let block of this.chain){
+
+			if(this.validateTimesTransactions(block)==false){
+				return null;
+			}
+
+			let validateSignsTransactions = await
+			this.validateSignsTransactions(
+					this.userConfig.dataDir,
+					this.userConfig.dataFolder,
+					block);
+
+			if(validateSignsTransactions==false){
+				return null;
+			}
+
 			for(let transaction of block.node.dataTransaction){
 
 				//----------------------------------------------------------------------
@@ -1019,6 +1170,20 @@ export class BlockChain {
 	current amount                   : `+amount+`
 				`): null;
 			}
+		}
+
+		if(this.validateTimesTransactions()==false){
+			return null;
+		}
+
+		let validateSignsTransactions = await
+		this.validateSignsTransactions(
+				this.userConfig.dataDir,
+				this.userConfig.dataFolder
+		);
+
+		if(validateSignsTransactions==false){
+			return null;
 		}
 
 		return { amount, hashs };

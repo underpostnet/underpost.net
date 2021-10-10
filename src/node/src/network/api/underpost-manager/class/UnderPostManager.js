@@ -705,11 +705,14 @@ export class UnderPostManager {
                  // blockChainDataPath: null,
                  maxErrorAttempts: 5,
                  RESTdelay: 1000,
-                 charset: 'utf8',
+                 charset: this.charset,
                  transactionTemplate: blockChainConfig.network.transactionTemplate,
                  minimumZeros: "0",
                  hashToken: false,
-                 limitMbBlock: 20
+                 limitMbBlock: 20,
+                 blockchain: blockChainConfig,
+                 dataDir: this.mainDir,
+                 dataFolder: 'data'
                },
                rewardConfig: {
                  intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */
@@ -796,7 +799,11 @@ export class UnderPostManager {
              // blockChainDataPath: null,
              maxErrorAttempts: 5,
              RESTdelay: 1000,
-             charset: 'utf8'
+             charset: this.charset,
+             limitMbBlock: 20,
+             blockchain: blockChainConfig,
+             dataDir: this.mainDir,
+             dataFolder: 'data'
            },
            validatorMode: true
          });
