@@ -1013,6 +1013,11 @@ var max = Math.max( ...arr );
 	}
 
 
+	 isFunction(obj_){
+		return typeof(obj_)=='function';
+	}
+
+
 
 
 

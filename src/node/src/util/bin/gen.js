@@ -10,6 +10,8 @@ var util = fs.readFileSync(utilPath, {encoding:'utf8', flag:'r'});
 
 util = util.replace(/function/g, '');
 
+util = util.replace("return typeof(obj_)=='';", "return typeof(obj_)=='function';");
+
 util = util.replace("const timer = ms => new Promise(res => setTimeout(res, ms));",`
 
     async timer(ms){
