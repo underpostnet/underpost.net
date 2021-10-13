@@ -496,22 +496,22 @@ export class UnderPostManager {
         switch (type) {
           case "symmetric":
             return {
-              iv: new FileGestor().getDataFile(
+              iv: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
               '/'+timestamp+'/iv.json', true),
-              key: new FileGestor().getDataFile(
+              key: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
               '/'+timestamp+'/key.json', true)
             }
           case "asymmetric":
             return {
-              public: new FileGestor().getDataFile(
+              public: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
               '/'+timestamp+'/public.pem'),
-              private: new FileGestor().getDataFile(
+              private: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
               '/'+timestamp+'/private.pem')

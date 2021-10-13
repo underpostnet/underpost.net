@@ -37,6 +37,8 @@
     "shelljs": "latest",
     "mime": "latest",
     "read": "latest",
-    "clipboardy": "latest"
+    "clipboardy": "latest",
+    "file-sizeof": "latest",
+    "mp3-duration": "latest"
   }
 }

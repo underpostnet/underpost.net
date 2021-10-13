@@ -6,6 +6,8 @@ import colors from "colors/safe.js";
 import readline from 'readline';
 import path from 'path';
 import mime from 'mime';
+import sizeof from "file-sizeof";
+import mp3Duration from 'mp3-duration';
 
 export class FileGestor {
 
@@ -61,36 +63,73 @@ export class FileGestor {
     return dataFiles;
   }
 
-   getDataFile(dir, json){
-     if(! fs.existsSync(dir) ){
-       return { error: "ENOENT, no such file or directory" };
-     }
-     let bufferFile = fs.readFileSync(dir);
-     try{
-       if(!json){
-         return {
-           name: dir.split('/').pop(),
-           mimeType: mime.getType(dir),
-           buffer: bufferFile,
-           base64: bufferFile.toString('base64'),
-           source: 'data:'+mime.getType(dir)+';base64,'+bufferFile.toString('base64'),
-           raw: bufferFile.toString(),
-           genesis_dir: dir
-         }
-       }else{
-         return {
-           name: dir.split('/').pop(),
-           mimeType: mime.getType(dir),
-           buffer: bufferFile,
-           base64: bufferFile.toString('base64'),
-           json: Buffer.from(bufferFile.toString('base64'), 'base64').toString(),
-           obj: JSON.parse(bufferFile.toString()),
-           genesis_dir: dir
-         }
+   async getDataFile(dir, typeFile){
+     return await new Promise( async resolve => {
+       if(! fs.existsSync(dir) ){
+         return { error: "ENOENT, no such file or directory" };
        }
-     }catch(err){
-       return { error: err }
-     }
+       let bufferFile = fs.readFileSync(dir);
+       try{
+          switch (typeFile) {
+            case true:
+              resolve({
+                name: dir.split('/').pop(),
+                mimeType: mime.getType(dir),
+                buffer: bufferFile,
+                base64: bufferFile.toString('base64'),
+                json: Buffer.from(bufferFile.toString('base64'), 'base64').toString(),
+                obj: JSON.parse(bufferFile.toString()),
+                genesis_dir: dir,
+                size: {
+                  SI: sizeof.SI(dir),
+                  IEC: sizeof.IEC(dir)
+                },
+                stats: fs.statSync(dir)
+              });
+              break;
+            case 'mp3':
+              let duration = await new Promise( resolve => {
+                mp3Duration(dir, (err, duration) => {
+                  resolve(duration);
+                });
+              });
+              resolve({
+                name: dir.split('/').pop(),
+                mimeType: mime.getType(dir),
+                buffer: bufferFile,
+                base64: bufferFile.toString('base64'),
+                source: 'data:'+mime.getType(dir)+';base64,'+bufferFile.toString('base64'),
+                raw: bufferFile.toString(),
+                genesis_dir: dir,
+                secondsDuration: duration,
+                size: {
+                  SI: sizeof.sizeof.SI(bufferFile),
+                  IEC: sizeof.sizeof.IEC(bufferFile)
+                },
+                stats: fs.statSync(dir)
+              });
+              break;
+            default:
+              resolve({
+                name: dir.split('/').pop(),
+                mimeType: mime.getType(dir),
+                buffer: bufferFile,
+                base64: bufferFile.toString('base64'),
+                source: 'data:'+mime.getType(dir)+';base64,'+bufferFile.toString('base64'),
+                raw: bufferFile.toString(),
+                genesis_dir: dir,
+                size: {
+                  SI: sizeof.sizeof.SI(bufferFile),
+                  IEC: sizeof.sizeof.IEC(bufferFile)
+                },
+                stats: fs.statSync(dir)
+              });
+              break;
+          }
+       }catch(err){
+         return { error: err }
+       }
+     });
    }
 
 }
