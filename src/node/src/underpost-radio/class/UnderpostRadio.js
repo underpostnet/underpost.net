@@ -63,7 +63,7 @@ export class UnderpostRadio {
       // console.log("singlesDataRadio radio "+genre+" ->");
       // console.log(singlesDataRadio);
 
-      app.get(('/stream/single/'+genre), (req, res) => {
+      app.post(('/stream/single/'+genre), (req, res) => {
         res.send(JSONstr(singlesDataRadio));
       });
 
