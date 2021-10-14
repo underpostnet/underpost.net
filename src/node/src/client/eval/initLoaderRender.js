@@ -7,8 +7,8 @@ var main_render_js = "";
 for(let module_ of data.path[i].mainModules){
 
   let fix = module_.split('/').reverse()[0];
-  main_loader_js += fix+'.loader(); ';
-  main_render_js += fix+'.render(); ';
+  main_loader_js += 'await '+fix+'.loader(); ';
+  main_render_js += 'await '+fix+'.render(); ';
 
 }
 
