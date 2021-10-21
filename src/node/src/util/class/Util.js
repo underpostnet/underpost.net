@@ -351,6 +351,11 @@ loop(1000);
  getDate(){
 
 	/*
+
+	get Day() -> 1,2,3,4,5,6,0
+	let currenDay_ = this.startTime.getDay();
+	currenDay_ == 0 ? currenDay_ = 7 :null;
+
 	let date_ = new Date();
 	console.log(date_);
 	console.log((+ new Date()));
@@ -360,6 +365,11 @@ loop(1000);
 	let custom_date =
 	new Date(new Date().getTime() - (new Date().getTimezoneOffset()*60*1000));
 	console.log(custom_date.toLocaleString());
+
+	ultimo date de un mes
+	var date = new Date();
+	var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+	var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
 	new Date().toISOString(); -> '2021-05-24T22:22:00.948Z'
 
@@ -1019,7 +1029,15 @@ var max = Math.max( ...arr );
 
 
 
-
+ isOpenFalse(value){
+		return ((value == null ) ||
+		(value == undefined ) ||
+		(value == '' ) ||
+		(value == "" ) ||
+		(value == `` ) ||
+		(value == 0 ) ||
+		(value == false));
+}
 
 
 
