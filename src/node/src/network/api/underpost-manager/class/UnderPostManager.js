@@ -46,13 +46,13 @@ export class UnderPostManager {
         data.clientPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/client/';
         data.staticPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/static/';
 
-        fs.writeFileSync(
+        /*fs.writeFileSync(
           this.mainDir+'/app.js',
           fs.readFileSync(
               this.mainDir+'/underpost/underpost.net/src/node/src/network/api/appServer.js',
               this.charset
           ).replace('{{path}}', this.mainDir),
-          this.charset);
+          this.charset);*/
 
         for(let module_ of [
         'microdata.json',

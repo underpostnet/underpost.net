@@ -18,6 +18,8 @@ dev ? (data.url = 'http://'+data.http_host_dev+':'+data.http_port):null;
 var serverToken = getHash();
 var usersToken = [];
 
+/*compiler*/
+
 var loadUnderpostMod = (name, type) =>{return fs.readFileSync(data.underpostServerPath+type+'/'+name, charset)};
 var UnderpostMods = JSON.parse(fs.readFileSync(data.dataPath+'underpostMods.json', charset));
 for(let mod of UnderpostMods.server){
