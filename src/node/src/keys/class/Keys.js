@@ -33,9 +33,9 @@ export class Keys {
         });
 
         let time = (+ new Date());
-        await !fs.existsSync(path+time) ? fs.mkdirSync(path+time):null;
-        await fs.writeFileSync(path+time+'/private.pem', privateKey);
-        await fs.writeFileSync(path+time+'/public.pem', publicKey);
+        !fs.existsSync(path+time) ? fs.mkdirSync(path+time):null;
+        fs.writeFileSync(path+time+'/private.pem', privateKey);
+        fs.writeFileSync(path+time+'/public.pem', publicKey);
 
         console.log(colors.yellow('.generateKeys(path, passphrase)  -> success'));
 
@@ -52,7 +52,7 @@ export class Keys {
 
   }
 
-  async generateSymmetricKeys(obj){
+  generateKeyIv(obj){
 
     let genSize = 64; // 32
     let password = obj.passphrase;
@@ -63,19 +63,31 @@ export class Keys {
     let iv = cryptoJs.lib.WordArray.create(key.words.slice(keySize), ivSize * 4);
     key.sigBytes = keySize * 4;
 
+
+    return { key, iv };
+
+  }
+
+  async generateSymmetricKeys(obj){
+
+
+    let dataKey = this.generateKeyIv(obj.passphrase);
+
     let time = (+ new Date());
 
-    await !fs.existsSync(obj.path+'/symmetric') ?
+    !fs.existsSync(obj.path+'/symmetric') ?
     fs.mkdirSync(obj.path+'/symmetric'):null;
 
-    await !fs.existsSync(obj.path+'/symmetric/'+time) ?
+    !fs.existsSync(obj.path+'/symmetric/'+time) ?
     fs.mkdirSync(obj.path+'/symmetric/'+time):null;
 
-    await fs.writeFileSync(
-      obj.path+'/symmetric/'+time+'/key.json', new Util().JSONstr(key.toString()));
+    fs.writeFileSync(
+      obj.path+'/symmetric/'+time+'/key.json',
+      new Util().JSONstr(dataKey.key.toString()));
 
-    await fs.writeFileSync(
-      obj.path+'/symmetric/'+time+'/iv.json', new Util().JSONstr(iv.toString()));
+    fs.writeFileSync(
+      obj.path+'/symmetric/'+time+'/iv.json',
+      new Util().JSONstr(dataKey.iv.toString()));
 
     return time;
 
@@ -101,16 +113,16 @@ export class Keys {
 
         let time = (+ new Date());
 
-        await !fs.existsSync(obj.path+'/asymmetric') ?
+        !fs.existsSync(obj.path+'/asymmetric') ?
         fs.mkdirSync(obj.path+'/asymmetric'):null;
 
-        await !fs.existsSync(obj.path+'/asymmetric/'+time) ?
+        !fs.existsSync(obj.path+'/asymmetric/'+time) ?
         fs.mkdirSync(obj.path+'/asymmetric/'+time):null;
 
-        await fs.writeFileSync(obj.path+'/asymmetric/'+time+'/private.pem'
+        fs.writeFileSync(obj.path+'/asymmetric/'+time+'/private.pem'
         , privateKey);
 
-        await fs.writeFileSync(obj.path+'/asymmetric/'+time+'/public.pem'
+        fs.writeFileSync(obj.path+'/asymmetric/'+time+'/public.pem'
         , publicKey);
 
         return time;

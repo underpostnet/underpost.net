@@ -1,7 +1,7 @@
-let express = require('express');
-var app = express();
-var var_dump = require('var_dump');
-var path = require('path');
+// var express = require('express');
+// var app = express();
+// var var_dump = require('var_dump');
+// var path = require('path');
 
 
 var static = {

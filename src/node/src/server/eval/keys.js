@@ -1,5 +1,5 @@
 
-var SHA256 = require('crypto-js/sha256');
+//  SHA256 = require('crypto-js/sha256');
 //  SHA256(str).toString();
 
 //------------------------------------------------------------------------------

@@ -12,7 +12,7 @@ just the session ID. Session data is stored server-side.
 
 */
 
-var session = require('express-session');
+// var session = require('express-session');
 
 
 //------------------------------------------------------------------------------

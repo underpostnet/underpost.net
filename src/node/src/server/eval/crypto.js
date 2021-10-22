@@ -1,15 +1,15 @@
-var crypto = require('crypto');
-var Crypto = require('crypto-js');
+// var crypto = require('crypto');
+// var cryptoJs = require('crypto-js');
 
 function generateK(){
 
   let genSize = 64; // 32
   let password = data.db.password;
-  let salt = Crypto.lib.WordArray.random(64 / 8);
+  let salt = cryptoJs.lib.WordArray.random(64 / 8);
   let keySize = 256 / genSize;
   let ivSize = 128 / genSize;
-  let key = Crypto.algo.EvpKDF.create({ keySize: keySize + ivSize, hasher: Crypto.algo.SHA1 }).compute(password, salt);
-  let iv = Crypto.lib.WordArray.create(key.words.slice(keySize), ivSize * 4);
+  let key = cryptoJs.algo.EvpKDF.create({ keySize: keySize + ivSize, hasher: cryptoJs.algo.SHA1 }).compute(password, salt);
+  let iv = cryptoJs.lib.WordArray.create(key.words.slice(keySize), ivSize * 4);
   key.sigBytes = keySize * 4;
 
   log('progress', 'K key -> ');

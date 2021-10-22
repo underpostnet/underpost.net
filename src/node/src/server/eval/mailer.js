@@ -1,4 +1,4 @@
-var nodemailer = require("nodemailer");
+// var nodemailer = require("nodemailer");
 
 // async..await is not allowed in global scope, must use a wrapper
 async function sendEmail(obj, fn) {

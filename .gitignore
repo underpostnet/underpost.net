@@ -1,7 +1,5 @@
 /src/node/apps
 /src/scheme/src
-/src/node/src/gen/private
 /src/node/node_modules
 /src/node/package-lock.json
-/src/node/src/network/client/modules/main/client-modules-main-private
 /src/node/src/network/underpost-data-template

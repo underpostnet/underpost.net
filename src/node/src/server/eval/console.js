@@ -1,6 +1,6 @@
 
 // https://www.npmjs.com/package/colors
-var colors = require('colors/safe');
+// var colors = require('colors/safe');
 
 // set single property
 // var error = colors.red;
