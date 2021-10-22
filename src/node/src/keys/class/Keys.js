@@ -71,7 +71,7 @@ export class Keys {
   async generateSymmetricKeys(obj){
 
 
-    let dataKey = this.generateKeyIv(obj.passphrase);
+    let dataKey = this.generateKeyIv(obj);
 
     let time = (+ new Date());
 
