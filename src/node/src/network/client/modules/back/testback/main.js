@@ -1,4 +1,4 @@
-const testback {
-  loader: async ()=>{ append('body', ' content back <br>'); }
+const testback = {
+  loader: async ()=>{ append('body', ' content back <br>'); },
   render: async ()=>{}
 };
