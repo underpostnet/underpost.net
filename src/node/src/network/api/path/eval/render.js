@@ -81,36 +81,36 @@ function gentPath(suburl, req, res, i, back_, initData){
 
 		`+fonts+`
 
-		h1, h2 {
-			display: none;
-		}
-		body {
-			cursor: default;
-			font-family: 'retro-font';
-			font-size: 10px;
-			overflow-x: hidden;
-		}
-		/* width */
-		::-webkit-scrollbar {
-			width: 10px;
-		}
-
-		/* Track */
-		::-webkit-scrollbar-track {
-			background: #f1f1f1;
-		}
-
-		/* Handle */
-		::-webkit-scrollbar-thumb {
-			background: #888;
-		}
-
-		/* Handle on hover */
-		::-webkit-scrollbar-thumb:hover {
-			background: #555;
-		}
-
 		<style>
+
+					h1, h2 {
+						display: none;
+					}
+					body {
+						cursor: default;
+						font-family: 'retro-font';
+						font-size: 10px;
+						overflow-x: hidden;
+					}
+					/* width */
+					::-webkit-scrollbar {
+						width: 10px;
+					}
+
+					/* Track */
+					::-webkit-scrollbar-track {
+						background: #f1f1f1;
+					}
+
+					/* Handle */
+					::-webkit-scrollbar-thumb {
+						background: #888;
+					}
+
+					/* Handle on hover */
+					::-webkit-scrollbar-thumb:hover {
+						background: #555;
+					}
 
 			`+fs.readFileSync(
 
