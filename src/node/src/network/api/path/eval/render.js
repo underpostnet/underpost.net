@@ -68,7 +68,7 @@ function gentPath(suburl, req, res, i, back_, initData){
 
 		<meta name='viewport' content='width=device-width, user-scalable=no' />
 
-		<script async src='https://www.googletagmanager.com/gtag/js?id=`+data.googletag+`'></script>
+		<!-- <script async src='https://www.googletagmanager.com/gtag/js?id=`+data.googletag+`'></script>
 
 		<script type='text/javascript'>
 
@@ -77,7 +77,7 @@ function gentPath(suburl, req, res, i, back_, initData){
 		gtag('js', new Date());
 		gtag('config', '`+data.googletag+`');
 
-		</script>
+		</script> -->
 
 		`+fonts+`
 
