@@ -178,6 +178,15 @@ export class UnderPostManager {
         ]);
       }
 
+      // check app modules
+      let ind_module = 0;
+      for(let pathModules of mainData.path){
+        if(!new Util().objEq(pathModules.modules, dataTemplate.path[ind_module].modules)){
+           mainData.path[ind_module].modules = dataTemplate.path[ind_module].modules;
+        }
+        ind_module++;
+      }
+
       mainData.reset ?
       mainData = await initConfig(mainData) : null ;
 
