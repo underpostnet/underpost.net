@@ -68,6 +68,77 @@ export class Keys {
 
   }
 
+  symmetricEncr(text, secretKey, iv, algorithm){
+
+      const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
+
+      const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
+
+      return {
+          iv: iv.toString('hex'),
+          content: encrypted.toString('hex')
+      };
+  };
+
+  symmetricDecr(hash, secretKey, algorithm){
+
+      const decipher = crypto.createDecipheriv(algorithm, secretKey, Buffer.from(hash.iv, 'hex'));
+
+      const decrpyted = Buffer.concat([decipher.update(Buffer.from(hash.content, 'hex')), decipher.final()]);
+
+      return decrpyted.toString();
+  };
+
+  //--------------------------------------------
+  //--------------------------------------------
+
+  	Ksym_encr(content){
+  		return this.symmetricEncr(
+        content,
+        this.asymmetric_config.key,
+        Buffer.from(this.asymmetric_config.iv, "utf8"),
+        this.asymmetric_config.algorithm
+      ).content;
+  	}
+
+  	Ksym_decr(content){
+  		return this.symmetricDecr(
+        {
+    			content: content,
+    			iv: Buffer.from(this.asymmetric_config.iv, "utf8").toString('hex')
+  		  },
+        this.asymmetric_config.key,
+        this.asymmetric_config.algorithm
+      );
+  	}
+
+  	Ksym_info(){
+  		log('info', 'Symmetric Gestor Test ->');
+  		log('info', 'buffer iv ->');
+  		console.log(Buffer.from(this.asymmetric_config.iv, "utf8"));
+  		log('info','key char str length -> '+l(this.asymmetric_config.key));
+  		log('info','iv char str length -> '+l(this.asymmetric_config.iv));
+  	}
+
+    Ksym_test(){
+      log('info', 'K test ->');
+      log('info', this.Ksym_decr(this.Ksym_encr(
+        new Util().JSONstr({content:"test"})
+      )));
+      /*
+    	let test = 'asda';
+    	console.log(k.encr(test));
+    	console.log(k.encr(test));
+    	console.log(k.decr(k.encr(test)));
+    	console.log(k.decr(k.encr(test)));
+    	*/
+    }
+
+  //--------------------------------------------
+  //--------------------------------------------
+
+
+
   async generateSymmetricKeys(obj){
 
 
