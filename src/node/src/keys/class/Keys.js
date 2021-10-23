@@ -95,9 +95,9 @@ export class Keys {
   	Ksym_encr(content){
   		return this.symmetricEncr(
         content,
-        this.asymmetric_config.key,
-        Buffer.from(this.asymmetric_config.iv, "utf8"),
-        this.asymmetric_config.algorithm
+        this.symmetric_config.key,
+        Buffer.from(this.symmetric_config.iv, "utf8"),
+        this.symmetric_config.algorithm
       ).content;
   	}
 
@@ -105,19 +105,19 @@ export class Keys {
   		return this.symmetricDecr(
         {
     			content: content,
-    			iv: Buffer.from(this.asymmetric_config.iv, "utf8").toString('hex')
+    			iv: Buffer.from(this.symmetric_config.iv, "utf8").toString('hex')
   		  },
-        this.asymmetric_config.key,
-        this.asymmetric_config.algorithm
+        this.symmetric_config.key,
+        this.symmetric_config.algorithm
       );
   	}
 
   	Ksym_info(){
   		log('info', 'Symmetric Gestor Test ->');
   		log('info', 'buffer iv ->');
-  		console.log(Buffer.from(this.asymmetric_config.iv, "utf8"));
-  		log('info','key char str length -> '+l(this.asymmetric_config.key));
-  		log('info','iv char str length -> '+l(this.asymmetric_config.iv));
+  		console.log(Buffer.from(this.symmetric_config.iv, "utf8"));
+  		log('info','key char str length -> '+l(this.symmetric_config.key));
+  		log('info','iv char str length -> '+l(this.symmetric_config.iv));
   	}
 
     Ksym_test(){
