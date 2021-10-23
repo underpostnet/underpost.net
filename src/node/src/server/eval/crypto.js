@@ -56,7 +56,7 @@ var k = {
 		return decrypt({
 			content: content,
 			iv: Buffer.from(data.db.iv, "utf8").toString('hex')
-		}, data.db.key, Buffer.from(data.db.iv, "utf8"));
+		}, data.db.key);
 	},
 	info: function(){
 		log('info', 'DB ENCRYPT INFO ->');
