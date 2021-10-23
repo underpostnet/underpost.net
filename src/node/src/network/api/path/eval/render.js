@@ -1,6 +1,6 @@
 
 function gentPath(suburl, req, res, i, back_, initData){
-	let infoHead = logHeader(req, res, data, i, true);
+	let infoHead = logHeader(req, res, data, i, true, back_);
 	let lang = infoHead.lang;
 	let lang_id = infoHead.id;
 	for(let mod of UnderpostMods.client){
