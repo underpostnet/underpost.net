@@ -49,6 +49,17 @@ function validateToken(token){
   return false;
 }
 
+function validateLogToken(token){
+	if(logUsersToken!=undefined){
+		for(let check of logUsersToken){
+			if(check===token){
+	      return true;
+	    }
+		}
+	}
+	return false;
+}
+
 app.get('/robots.txt', function(req, res) {
 	res.sendFile(data.dataPath+'robots.txt');
 });
