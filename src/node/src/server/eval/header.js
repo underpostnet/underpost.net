@@ -1,7 +1,7 @@
 
 
 
-function logHeader(req, res, data, i, html_head){
+function logHeader(req, res, data, i, html_head, back_){
 
 	generateToken(req);
 
@@ -10,7 +10,7 @@ function logHeader(req, res, data, i, html_head){
 	log('info',
 		`
 		http connection
-		url: `+data.path[i].url+`
+		url: `+(back_?data.path[i].back_url:data.path[i].url)+`
 		ip: `+ip+`
 		time: `+new Date().toISOString()+`
 		host: `+req.headers.host+`
