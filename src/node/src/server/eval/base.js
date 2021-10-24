@@ -70,14 +70,16 @@ app.get('/sitemap.xsl', function(req, res) {
 
 var sitemap = '';
 for(var renderSitemap of data.path){
-	sitemap = sitemap+`
-	<url>
-        <loc>`+data.url+renderSitemap.url+`</loc>
-        <lastmod>`+renderSitemap.date+`</lastmod>
-				<changefreq>`+renderSitemap.changefreq+`</changefreq>
-				<priority>`+renderSitemap.priority+`</priority>
-	</url>
-	`;
+	if(renderSitemap.sitemap_visible){
+		sitemap = sitemap+`
+		<url>
+	        <loc>`+data.url+renderSitemap.url+`</loc>
+	        <lastmod>`+renderSitemap.date+`</lastmod>
+					<changefreq>`+renderSitemap.changefreq+`</changefreq>
+					<priority>`+renderSitemap.priority+`</priority>
+		</url>
+		`;
+	}
 }
 
 var baseSitemap = fs.readFileSync(
