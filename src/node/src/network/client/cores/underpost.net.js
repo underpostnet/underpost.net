@@ -55,8 +55,8 @@
       console.log('init template system lang -> '+['en','es'][data.const.lang]);
       notifi.load({
         AttrImg: {
-          failed: "<i class='fa fa-times'></i>",
-          check: "<i class='fa fa-check'></i>"
+          failed: "failed",
+          check: "success"
         },
         style: {
           notifiValidator: `
