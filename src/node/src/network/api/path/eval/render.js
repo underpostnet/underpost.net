@@ -141,19 +141,39 @@ function gentPath(suburl, req, res, i, back_, initData){
 
 }
 
+function pathController(initData, i, req, res, back_){
+	if(!back_){
+		switch (data.path[i].url) {
+			case "/error/:error_id":
+						initData += ` data.const.error_id = `+req.params.error_id+`;`;
+				break;
+			default:
+
+		}
+
+	}
+	return initData;
+}
+
 for(let i=0; i<l(data.path);i++){
 
 
 
 	const suburl = data.path[i].url;
   app.get(suburl, function(req, res) {
-			gentPath(suburl, req, res, i, false, '');
+			let initData = '';
+			initData = pathController(initData, i, req, res, false);
+			initData != null ? gentPath(suburl, req, res, i, false, initData)
+			: null;
 			res.end();
   });
 
 	const backurl = data.path[i].back_url;
 	app.get(backurl, function(req, res) {
-			gentPath(backurl, req, res, i, true, '');
+			let initData = '';
+			initData = pathController(initData, i, req, res, true);
+			initData != null ? gentPath(backurl, req, res, i, true, initData)
+			: null;
 			res.end();
   });
 
