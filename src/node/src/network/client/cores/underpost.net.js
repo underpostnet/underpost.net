@@ -31,7 +31,7 @@
 
   let data = {
     const: {
-      callback: 100,
+      callback: 300,
       lang: lang()=='en' ? 0 : 1,
       dir: 'ltr',
       token: null
@@ -45,7 +45,7 @@
   {{INITDATA}}
 
   //----------------------------------------------------------------------------
-  // MAIN HTML ( HEAD & BODY )
+  // MAIN
   //----------------------------------------------------------------------------
 
   const main = {
@@ -53,17 +53,47 @@
       s('html').lang = ['en','es'][data.const.lang];
       s('html').dir = data.const.dir;
       console.log('init template system lang -> '+['en','es'][data.const.lang]);
-      notclick('body', 1, false);
-	    notclick('body', 2, false);
+      notifi.load({
+        AttrImg: {
+          failed: "<i class='fa fa-times'></i>",
+          check: "<i class='fa fa-check'></i>"
+        },
+        style: {
+          notifiValidator: `
+          bottom: 20px;
+          border-radius: 10px;
+          border: 2px solid yellow;
+          z-index: 9999;
+          height: 50px;
+          transform: translate(-50%, 0);
+          left: 50%;
+          width: 300px;
+          `,
+          notifiValidator_c1: `
+          width: 80px;
+          height: 100%;
+          border: 2px solid blue;
+          top: 0%;
+          left: 0%;
+          `,
+          notifiValidator_c2: `
+          height: 100%;
+          border: 2px solid blue;
+          top: 0%;
+          left: 80px;
+          width: 220px;
+          `
+
+        }
+      });
       await global.init();
       await main.render();
+      s('html').scrollTop = 0;
     },
     render: async ()=>{
       if(data.var.w!=window.innerWidth || data.var.h!=window.innerHeight){
         data.var.w=window.innerWidth;
         data.var.h=window.innerHeight;
-        s('body').style.width = data.var.w+'px';
-        s('body').style.height = data.var.h+'px';
         console.log('-> render | w:'+data.var.w+' h:'+data.var.h);
         await global.render();
       }

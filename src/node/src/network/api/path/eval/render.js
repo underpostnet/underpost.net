@@ -24,7 +24,10 @@ function gentPath(suburl, req, res, i, back_, initData){
 	*/
 
 
-	var mainJs = fs.readFileSync(data.clientPath+'path/'+data.path[i].main_path+'/'+(back_?'back':'main')+'.js').toString();
+	var mainJs =
+	fs.readFileSync(
+		data.clientPath+'cores/'+data.path[i].client_core
+	).toString();
 
 	mainJs = mainJs.replace('{{UNDERPOST}}', (mod_lib+mod_underpost));
 	mainJs = mainJs.replace('{{COMPONENTS}}', mod_js);

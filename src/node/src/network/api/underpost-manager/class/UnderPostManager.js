@@ -178,11 +178,12 @@ export class UnderPostManager {
         ]);
       }
 
-      // check app modules
+      // check app paths
       let ind_module = 0;
-      for(let pathModules of mainData.path){
-        if(!new Util().objEq(pathModules.modules, dataTemplate.path[ind_module].modules)){
-           mainData.path[ind_module].modules = dataTemplate.path[ind_module].modules;
+      for(let pathTemplate of dataTemplate.path){
+        // check app modules
+        if(!new Util().objEq(pathTemplate, mainData.path[ind_module])){
+           mainData.path[ind_module] = pathTemplate;
         }
         ind_module++;
       }
