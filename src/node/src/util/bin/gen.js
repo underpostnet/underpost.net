@@ -12,6 +12,11 @@ util = util.replace(/function/g, '');
 
 util = util.replace("return typeof(obj_)=='';", "return typeof(obj_)=='function';");
 
+util = util.replace(`let value_ = pad(minutes_, size)+":"+pad(seconds_, size);`,
+`
+let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
+`);
+
 util = util.replace("const timer = ms => new Promise(res => setTimeout(res, ms));",`
 
     async timer(ms){
