@@ -2,13 +2,14 @@
 setTimeout(()=>{
   console.log(" init status error middleware -> ");
   app.use( (req, res, next) => {
-     // res.status(404).send('Sorry cant find that!');
-     res.status(404).redirect(301, '/error/404');
+    for(let num_error of range(400, 499)){
+      res.status(num_error).redirect(301, '/error/'+num_error);
+    }
   });
 
-
   app.use( (req, res, next) => {
-    // res.status(500).send('Sorry server error!');
-    res.status(500).redirect(301, '/error/500');
+     for(let num_error of range(500, 599)){
+       res.status(num_error).redirect(301, '/error/'+num_error);
+     }
   });
 }, data.delayInitStatusError);
