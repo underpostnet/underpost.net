@@ -16,6 +16,17 @@ null==undefined -> true
 
 delete person.age;  // or delete person["age"];
 
+si pertenece a una clase ->
+let validKeys = getKeys(dataRender[0])
+.filter(x =>
+							(
+								(typeof(dataRender[0][x])!="object")
+								||
+								(dataRender[0][x] instanceof Date)
+							)
+);
+
+
 fetch&ajax CRUD module & (cors) ->
 GETS
 GET(OBTAIN PULL POLL)
@@ -435,6 +446,10 @@ loop(1000);
 
 	return [ date , month , year , hour , mins];
 
+}
+
+ offTime(){
+	return (new Date().getTimezoneOffset()*60*1000);
 }
 
  testMail(email){
@@ -1060,10 +1075,57 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
 	);
 }
 
+ changeKeyname(obj, oldKey, newKey){
+	obj[newKey] = new Util().newInstance(obj[oldKey]);
+	delete obj[oldKey];
+	return obj;
+}
+
+
+ setSimpleIntID(arr, nameID){
+	let current_id = -1;
+	arr.map( x => {
+		if(
+			x.hasOwnProperty(nameID)
+			&&
+			x[nameID] > current_id
+		){
+			current_id = x[nameID];
+		}
+	});
+	arr = arr.map(x=>{
+		if(!x.hasOwnProperty(nameID)){
+			x[nameID] = current_id + 1;
+			current_id++;
+		}
+		return x;
+	});
+	return arr;
+}
+
 
 
 
 	// end
+
+
+
+    writeSimpleIntID(fs, path_, charset_, name_id){
+      fs.writeFileSync(
+        path_,
+        new Util().jsonSave(
+          new Util().setSimpleIntID(
+            JSON.parse(fs.readFileSync(path_, charset_)),
+            name_id
+          )
+        ),
+        charset_
+      );
+    }
+
+
+
+
 
 
 copy(data) {

@@ -12,6 +12,31 @@ util = util.replace(/function/g, '');
 
 util = util.replace("return typeof(obj_)=='';", "return typeof(obj_)=='function';");
 
+util = util.replace("obj[newKey] = newInstance(obj[oldKey]);",
+`obj[newKey] = new Util().newInstance(obj[oldKey]);`);
+
+// funcion sobre escribre arrelo JSON seteando ID
+util += `
+
+
+    writeSimpleIntID(fs, path_, charset_, name_id){
+      fs.writeFileSync(
+        path_,
+        new Util().jsonSave(
+          new Util().setSimpleIntID(
+            JSON.parse(fs.readFileSync(path_, charset_)),
+            name_id
+          )
+        ),
+        charset_
+      );
+    }
+
+
+
+
+`;
+
 util = util.replace(`let value_ = pad(minutes_, size)+":"+pad(seconds_, size);`,
 `
 let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
