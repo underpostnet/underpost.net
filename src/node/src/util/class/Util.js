@@ -1103,6 +1103,18 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
 	return arr;
 }
 
+ makeid(length, num) {
+    let result           = '';
+    let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		num ? characters += '0123456789':null;
+    let charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() *
+ charactersLength));
+   }
+   return result;
+}
+
 
 
 

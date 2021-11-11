@@ -40,7 +40,7 @@ export class FileGestor {
     }
   }
 
-  getAllFilesPath(pathDir, recursive){
+  getAllFilesPath(pathDir, recursive, forceFolder){
     let dataFiles = [];
     const readFiles = async path => {
       if( fs.existsSync(path) ) {
@@ -52,6 +52,7 @@ export class FileGestor {
               let curPath = path + "/" + file;
               if(fs.lstatSync(curPath).isDirectory()) {
                   recursive ? readFiles(curPath) : null;
+                  forceFolder ? objDir.files.push(file) : null;
               } else {
                   objDir.files.push(file);
               }
