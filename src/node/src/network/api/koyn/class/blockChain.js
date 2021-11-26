@@ -835,7 +835,7 @@ export class BlockChain {
 				// console.log(colors.yellow("attempt:"+(countAttempts+1)));
 				let signResult = await new RestService().postJSON(
 							signObj.url+'/validate', {
-							sign: signObj.sign,
+							sign: JSON.parse(signObj.data).sign,
 							generation: parseInt(this.generation),
 							allValidate: allBlockValidate
 				});

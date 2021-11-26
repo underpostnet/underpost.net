@@ -265,6 +265,24 @@ obj.paths.filter((el)=>{
 number validator ->
 isNaN("asd")
 
+
+
+round->
+
+Utilizar Math.round():
+
+Math.round(num * 100) / 100
+O para ser más específico y para asegurar que cosas como 1.005 redondeen correctamente, use Number.EPSILON :
+
+Math.round((num + Number.EPSILON) * 100) / 100
+
+
+sumatoria:
+
+[1,1,1].reduce((pre, current) => pre+current); -> 3
+
+
+
 */
 
  aprox(num, dec){
@@ -407,6 +425,11 @@ loop(1000);
 
 
 	 ).getTime());
+
+
+	 new Date(2016, 11, 17)
+	 december -> 11
+	 Date.parse('12-24-2020') -> timestamp
 
 
 	*/
@@ -1113,6 +1136,16 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
  charactersLength));
    }
    return result;
+}
+
+
+ getRandomColor() {
+  let letters = '0123456789ABCDEF';
+  let color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }
 
 

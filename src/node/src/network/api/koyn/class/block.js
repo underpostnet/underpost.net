@@ -300,7 +300,7 @@ export class Block {
             storage.push({
               type: path.type,
               url: path.url,
-              sign: await new RestService().getRawContent(path.url+'/sign/'+this.block.generation)
+              data: await new RestService().getRawContent(path.url+'/sign/'+this.block.generation)
             });
             break;
           case "Transaction":
