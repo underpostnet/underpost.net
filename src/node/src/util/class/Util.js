@@ -139,7 +139,7 @@ import { a, b, c } from 'file/abc';
 
 
 const path = require('path');
-var fs = require('fs');
+let fs = require('fs');
 
 fs.writeFileSync(
 				 (path.join(__dirname, '../../base64')+'/'+token),
@@ -183,7 +183,7 @@ asyncCall();
 
 
 
-var obj = {
+let obj = {
     'Students': [{
             "name": "Raj",
              "Age":"15",
@@ -205,7 +205,7 @@ var obj = {
         ]
 };
 
-var newArray = obj.Students.filter( (el)
+let newArray = obj.Students.filter( (el)
 {
   return el.Age >=15 &&
          el.RollNumber <= 200 &&
@@ -282,6 +282,90 @@ sumatoria:
 [1,1,1].reduce((pre, current) => pre+current); -> 3
 
 
+//Add element to front of array
+let numbers = ["2", "3", "4", "5"];
+numbers.unshift("1");
+//Result - numbers: ["1", "2", "3", "4", "5"]
+
+-------------------------------------------------------
+-------------------------------------------------------
+
+reponder un mensaje de error
+de forma decente
+
+// si poner mejor directamente 404, y 500 en el framework
+
+return res.status(400).json({
+	msg: `Error`
+});
+
+return res.status(400).send({
+	message: 'error'
+});
+
+redirect 301 permanente
+redirect 302 temporal
+
+404 not foung
+500 server error
+
+https://developer.mozilla.org/es/docs/Web/HTTP/Status
+
+
+{ ...{1: true, 2: 23}, ...{no: 34 }, b: 98 }
+->
+{1: true, 2: 23, no: 34, b: 98}
+
+
+-------------------------------------------------------
+-------------------------------------------------------
+
+
+Array(5).fill(undefined) ->
+[undefined, undefined, undefined, undefined, undefined]
+
+
+simular error ->
+throw "msg";
+
+
+-------------------------------------------------------
+-------------------------------------------------------
+
+
+clear interval ->
+
+let prevNowPlaying = null;
+
+ initNowPlayingMeta(station) {
+    if(prevNowPlaying) {
+        clearInterval(prevNowPlaying);
+    }
+    $('#cancion').children().remove();
+    $('#cancion').load('sonando.php?emisora=' + station);
+    prevNowPlaying = setInterval( () {
+        $('#cancion').load('sonando.php?emisora=' + station);
+    }, 5000);
+}
+
+
+-------------------------------------------------------
+-------------------------------------------------------
+
+
+order alphabetycalli
+
+[{t:"asd"}, {t:"zasdasd"}, {t:"bsd"}].sort((a, b){
+    if(a.t < b.t) { return -1; }
+    if(a.t > b.t) { return 1; }
+    return 0;
+});
+
+
+['a',234,true].find(x=>x==="a"); -> "a"
+['a',234,true].find(x=>x==="as"); -> undefined
+
+
 
 */
 
@@ -299,7 +383,7 @@ sumatoria:
 
  randomExep(min, max, failOn) {
     failOn = Array.isArray(failOn) ? failOn : [failOn]
-    var num = Math.floor(Math.random() * (max - min + 1)) + min;
+    let num = Math.floor(Math.random() * (max - min + 1)) + min;
     return failOn.includes(num) ? randomExep(min, max, failOn) : num;
 }
 
@@ -361,7 +445,7 @@ loop(1000);
 }
 
  YoutubeUrl(url) {
-	 var p = /^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+	 let p = /^(?:https?:\/\/)?(?:m\.|www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
 	 if(url.match(p)){
 			 return url.match(p)[1];
 	 }
@@ -369,7 +453,7 @@ loop(1000);
 }
 
  fDate(s) {
-  var d = new Date();
+  let d = new Date();
   s = s.split('/');
   d.setFullYear(s[2]);
   d.setMonth((s[1]-1));
@@ -396,9 +480,9 @@ loop(1000);
 	console.log(custom_date.toLocaleString());
 
 	ultimo date de un mes
-	var date = new Date();
-	var firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-	var lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+	let date = new Date();
+	let firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+	let lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
 	new Date().toISOString(); -> '2021-05-24T22:22:00.948Z'
 
@@ -434,10 +518,10 @@ loop(1000);
 
 	*/
 
-	var f = new Date();
+	let f = new Date();
 
-	var hour = f.getHours();
-	var mins = f.getMinutes();
+	let hour = f.getHours();
+	let mins = f.getMinutes();
 
 	if(hour<10){
 
@@ -451,9 +535,9 @@ loop(1000);
 
 	}
 
-	var date = f.getDate();
-	var month = (f.getMonth() +1);
-	var year = f.getFullYear();
+	let date = f.getDate();
+	let month = (f.getMonth() +1);
+	let year = f.getFullYear();
 
 	if(date<10){
 
@@ -483,8 +567,8 @@ loop(1000);
 
  regulartxt(txt){
 
-  var patt = new RegExp(/^[A-Za-z0-9\s]+$/g);
-  var res = patt.test(txt);
+  let patt = new RegExp(/^[A-Za-z0-9\s]+$/g);
+  let res = patt.test(txt);
 
   return res;
 
@@ -636,7 +720,7 @@ clearLastLine(){
 /*
 
 metodo sor y sort reverse
-var numArray = [140000, 10, 104, 99];
+let numArray = [140000, 10, 104, 99];
 .sort((a, b)=> {
       return a - b;
     });
@@ -717,25 +801,25 @@ b -> a | mayor -> menor
 }
 
  LightenDarkenColor(col,amt) {
-  var usePound = false;
+  let usePound = false;
   if ( col[0] == "#" ) {
       col = col.slice(1);
       usePound = true;
   }
 
-  var num = parseInt(col,16);
+  let num = parseInt(col,16);
 
-  var r = (num >> 16) + amt;
+  let r = (num >> 16) + amt;
 
   if ( r > 255 ) r = 255;
   else if  (r < 0) r = 0;
 
-  var b = ((num >> 8) & 0x00FF) + amt;
+  let b = ((num >> 8) & 0x00FF) + amt;
 
   if ( b > 255 ) b = 255;
   else if  (b < 0) b = 0;
 
-  var g = (num & 0x0000FF) + amt;
+  let g = (num & 0x0000FF) + amt;
 
   if ( g > 255 ) g = 255;
   else if  ( g < 0 ) g = 0;
@@ -751,8 +835,8 @@ b -> a | mayor -> menor
 	return Math.min.apply(null, arr);
 }
 /*
-var min = Math.min( ...arr ),
-var max = Math.max( ...arr );
+let min = Math.min( ...arr ),
+let max = Math.max( ...arr );
 */
 
  range(ini, fin){
@@ -896,7 +980,7 @@ var max = Math.max( ...arr );
 
 	/*
 
-	var a = [
+	let a = [
 		{
 		  a:23,
 		  b:10
@@ -985,7 +1069,7 @@ var max = Math.max( ...arr );
 	}
 
 	 getLastElement(arr){
-		return arr[arr.length-1];
+		return newInstance(arr[arr.length-1]);
 	}
 
 	 objEq(x, y) {
@@ -1008,7 +1092,7 @@ var max = Math.max( ...arr );
     if (!(y instanceof Object)) { return false; }
 
     // recursive object equality check
-    var p = Object.keys(x);
+    let p = Object.keys(x);
     return Object.keys(y).every(i => { return p.indexOf(i) !== -1; }) &&
         p.every(i => { return this.objEq(x[i], y[i]); });
 	}
@@ -1101,9 +1185,11 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
 		fn(value_);
 	};
 	update_();
+	let intervalReturn =
 	setInterval(()=>update_(),
 		(factor_!=undefined?1000*factor_:1000)
 	);
+	return intervalReturn;
 }
 
  changeKeyname(obj, oldKey, newKey){
@@ -1159,6 +1245,20 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
 
  jsonWebRender(objRender){
 	return `JSON.parse(`+'`'+JSONstr(objRender)+'`'+`);`;
+}
+
+
+
+ getObJSeqKey(targetObj, stringKeys){
+	let valObj = JSON.parse(JSON.stringify(targetObj));
+	if(stringKeys.split("-").length>1){
+		for(let key_ of stringKeys.split("-")){
+			valObj = valObj[key_];
+		}
+	}else{
+		return valObj[stringKeys];
+	}
+	return valObj;
 }
 
 
