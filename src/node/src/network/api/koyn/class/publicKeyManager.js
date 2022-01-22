@@ -22,10 +22,7 @@ export class PublicKeyManager {
       pool: []
     };
     this.pathPool = "";
-    this.modules = {
-      KEYS: KEYS,
-      BCmanager: BCmanager
-    }
+    this.modules = { KEYS, BCmanager };
 
   }
 
@@ -38,8 +35,19 @@ export class PublicKeyManager {
 
     this.pathPool =
     this.mainDir+'/data/blockchain/generation-'
-    + blockChainConfig.constructor.generation
-    +'/public-key-pool.json';
+    + blockChainConfig.constructor.generation;
+
+    ! fs.existsSync(this.pathPool) ?
+    fs.mkdirSync(this.pathPool) : null;
+
+    if(this.pathPool+'/chain.json'){
+      fs.writeFileSync(
+        this.pathPool+'/chain.json',
+        new Util().jsonSave([]),
+        this.charset);
+    }
+
+    this.pathPool += '/public-key-pool.json';
 
      if(!fs.existsSync(this.pathPool)){
 

@@ -1069,7 +1069,7 @@ let max = Math.max( ...arr );
 	}
 
 	 getLastElement(arr){
-		return newInstance(arr[arr.length-1]);
+		return this.newInstance(arr[arr.length-1]);
 	}
 
 	 objEq(x, y) {

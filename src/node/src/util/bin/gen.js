@@ -61,6 +61,8 @@ util = util.replace('p.every(i => { return objEq(x[i], y[i]); });',
 util = util.replace('obj.hasOwnProperty(attr);',
 `Object.prototype.hasOwnProperty.call(obj, attr)`);
 
+util = util.replace('newInstance(arr[arr.length-1]);','this.newInstance(arr[arr.length-1]);');
+
 util = util + `
 
 copy(data) {
