@@ -32,12 +32,12 @@
     "express-session": "latest",
     "crypto-js": "latest",
     "file-get-contents": "latest",
-    "ws": "latest",
+    "ws": "7.4.6",
     "node-fetch": "latest",
     "shelljs": "latest",
     "mime": "latest",
     "read": "latest",
-    "clipboardy": "latest",
+    "clipboardy": "2.3.0",
     "file-sizeof": "latest",
     "mp3-duration": "latest"
   }
