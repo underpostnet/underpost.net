@@ -40,7 +40,7 @@ export class PublicKeyManager {
     ! fs.existsSync(this.pathPool) ?
     fs.mkdirSync(this.pathPool) : null;
 
-    if(this.pathPool+'/chain.json'){
+    if(! fs.existsSync(this.pathPool+'/chain.json')){
       fs.writeFileSync(
         this.pathPool+'/chain.json',
         new Util().jsonSave([]),
