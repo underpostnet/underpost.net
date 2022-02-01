@@ -646,7 +646,7 @@ export class UnderPostManager {
          if( resp.status == true ){
 
            // var publicKey = await new ReadLine().r('public key:');
-           
+
            if(new Util().isOpenFalse(tempData.active_asymmetric_public_key)){
              new Paint().underpostOption('red','error', 'invalid assymetric key active: '
              +tempData.active_asymmetric_public_key);
@@ -792,6 +792,10 @@ export class UnderPostManager {
 
        },
        clearChain: async ()=>{
+         let blockChainConfig = JSON.parse(fs.readFileSync(
+             this.mainDir+'/data/blockchain-config.json',
+             this.charset
+         ));
          fs.writeFileSync(
            this.mainDir+'/data/blockchain/generation-'+blockChainConfig.constructor.generation+'/chain.json',
            "[]",

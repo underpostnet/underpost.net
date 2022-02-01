@@ -2,34 +2,35 @@
 
 
 import fs from "fs";
-var generation = 0;
-var charset = "utf8";
-var paths = [
-  'C:/dd/underpost.net/src/node/apps/underpost/data/blockchain/generation-'+generation+'/chain.json',
-  'C:/dd/global_data/json/cyberia/koyn/blockchain/generation-'+generation+'/chain.json',
-  'C:/Users/fcove/OneDrive/Escritorio/node_test/underpost-network/data/blockchain/generation-'+generation+'/chain.json'
+const charset = "utf8";
+const { pathApi, pathClient } = JSON.parse(fs.readFileSync('./config.json', charset));
+
+const pathsEmptyArray = [
+  pathClient+'/chain.json',
+  pathApi+'/chain.json',
+  pathApi+'/signHistory.json',
+  pathApi+'/koyn-nodes.json',
+  pathApi+'/public-key-pull.json'
+];
+const pathsDeleteArray = [
+  pathApi+'/doc.json',
+  pathClient+'/hash',
+  pathClient+'/public-key-pool.json',
+  pathClient+'/rewardConfig.json'
 ];
 
+pathsEmptyArray.map( path => fs.writeFileSync(path,
+  JSON.stringify([]), charset));
 
-/*const chain = fs.readFileSync(
-    'C:/dd/global_data/json/cyberia/koyn/blockchain/default/10.json',
-    charset
-);*/
+pathsDeleteArray.map( path => fs.unlinkSync(path));
 
-const chain = JSON.stringify([]);
-
-for(let path of paths){
-  fs.writeFileSync(path, chain, charset);
-}
-
-
-
-  fs.writeFileSync(
-      'C:/dd/global_data/json/cyberia/koyn/blockchain/generation-'+generation+'/temp-pool-transactions.json',
-  fs.readFileSync(
-      'C:/dd/global_data/json/cyberia/koyn/blockchain/default/temp-pool-transactions.json',
-      charset
-  ), charset);
+fs.writeFileSync(
+  pathApi+'/temp-pool-transactions.json',
+  JSON.stringify({
+    index: 0,
+    pool: []
+  }, null, 4)
+);
 
 
 
