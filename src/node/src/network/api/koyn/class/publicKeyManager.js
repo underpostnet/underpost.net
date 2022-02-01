@@ -158,11 +158,11 @@ export class PublicKeyManager {
 
     new Paint().underpostOption('yellow', 'success', 'get bridge public keys');
     if(new Util().l(updates_keys)>0){
-      new Paint().underpostOption('yellow', ' ', 'updated keys:');
+      new Paint().underpostOption('cyan', ' \n', new Util().tu('updated keys:')+'\n');
       await this.viewPool(updates_keys.map(x=>x.data));
     }
     if(new Util().l(news_keys)>0){
-      new Paint().underpostOption('yellow', ' ', 'new keys:');
+      new Paint().underpostOption('cyan', ' \n', new Util().tu('new keys:')+'\n');
       await this.viewPool(news_keys);
     }
 
@@ -277,7 +277,8 @@ export class PublicKeyManager {
      let resp = {success: false};
      try {
        resp = await new RestService().postJSON(
-         blockChainConfig.constructor.userConfig.bridgeUrl+'/node/public-key',
+         blockChainConfig.constructor.userConfig.bridgeUrl+'/node/public-key/'+
+         blockChainConfig.constructor.generation,
          new Keys().generateAsymetricFromSign(
            asymmetricKeyData.private.genesis_dir,
            asymmetricKeyData.public.base64,

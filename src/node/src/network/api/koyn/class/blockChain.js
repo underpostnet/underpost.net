@@ -836,7 +836,7 @@ export class BlockChain {
 				let signResult = await new RestService().postJSON(
 							signObj.url+'/validate', {
 							sign: JSON.parse(signObj.data).sign,
-							generation: parseInt(this.generation),
+							generation: this.generation,
 							allValidate: allBlockValidate
 				});
 				// console.log("signResult ->");

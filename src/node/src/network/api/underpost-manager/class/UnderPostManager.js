@@ -633,7 +633,7 @@ export class UnderPostManager {
            blockChainConfig.constructor.userConfig.bridgeUrl+'/node/ip',
            new Util().fusionObj([
              {
-               generation: parseInt(blockChainConfig.constructor.generation),
+               generation: blockChainConfig.constructor.generation,
                ws_port: tempData.ws_port,
                http_port: tempData.http_port
              },
@@ -707,7 +707,7 @@ export class UnderPostManager {
                name: "Koλn",
                hashGeneration: null,
                // pathPreviousHashGeneration: '../data/blockchain/generation-0/hash',
-               pathPreviousHashGeneration: null,
+               pathPreviousHashGeneration: blockChainConfig.constructor.pathPreviousHashGeneration,
                dataGenesisHashGeneration: 'khrónos',
                userConfig: {
                  blocksToUndermine: 1,
