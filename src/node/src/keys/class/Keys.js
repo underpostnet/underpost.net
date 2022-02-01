@@ -297,7 +297,6 @@ export class Keys {
     );
     let dataPost = new Util().fusionObj([
       {
-        generation: parseInt(blockChainConfig.constructor.generation),
         lastUpdate: (+ new Date())
       },
       tempData.network_user

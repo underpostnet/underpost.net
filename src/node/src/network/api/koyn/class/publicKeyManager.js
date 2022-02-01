@@ -262,7 +262,6 @@ export class PublicKeyManager {
 
      let dataPost = new Util().fusionObj([
        {
-         generation: parseInt(blockChainConfig.constructor.generation),
          lastUpdate: (+ new Date())
        },
        tempData.network_user
