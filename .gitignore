@@ -2,5 +2,4 @@
 /src/scheme/src
 /src/node/node_modules
 /src/node/package-lock.json
-/src/node/src/network/underpost-data-template
 /src/node/src/network/api/underpost-manager/bin/config.json
