@@ -123,11 +123,6 @@ export class UnderPostManager {
       new Util().l(data.network_user.web) > max_chars ?
       data.network_user.web = "" : null;
 
-      data.network_user.bio = await new ReadLine().r(
-        new Paint().underpostInput('network user bio'));
-      new Util().l(data.network_user.bio) > max_chars ?
-      data.network_user.bio = "" : null;
-
       new Paint().underpostBar();
 
       data.reset = false;
@@ -172,10 +167,11 @@ export class UnderPostManager {
 
       // check network_user obj
       if(!new Util().objEq(dataTemplate.network_user, mainData.network_user)){
-        mainData.network_user = new Util().fusionObj([
-          dataTemplate.network_user,
-          mainData.network_user
-        ]);
+        let newUserData = {};
+        new Util().iterateKeys(dataTemplate.network_user, (key, value) => {
+          newUserData[key] = new Util().newInstance(mainData.network_user[key]);
+        });
+        mainData.network_user = newUserData;
       }
 
       // check app paths
@@ -724,7 +720,6 @@ export class UnderPostManager {
                  charset: this.charset,
                  transactionTemplate: blockChainConfig.network.transactionTemplate,
                  minimumZeros: "0",
-                 hashToken: false,
                  limitMbBlock: 20,
                  blockchain: blockChainConfig,
                  dataDir: this.mainDir,
@@ -923,21 +918,16 @@ export class UnderPostManager {
 
                  console.log("generate transaction");
 
-                 let hashsTransaction =
-                 objAmount.hashs.splice((sender_amount*-1));
-
                  let dataTransaction = {
                    sender: sender,
                    receiver: receiver,
-                   amount: {
-                     totalValue: sender_amount,
-                     hashs: hashsTransaction
-                   },
+                   amount: sender_amount,
+                   subject: await new ReadLine().r(
+                     new Paint().underpostInput('subject ? <enter> skip')),
                    createdDate: (+ new Date())
                  };
 
                  console.log(" data transaction ->");
-                 console.log(" value length:"+ new Util().l(hashsTransaction));
                  console.log(dataTransaction);
 
                  let passphrase = await new ReadLine().h(
@@ -1054,9 +1044,9 @@ export class UnderPostManager {
                new Paint().underpostInput("index pool key ?")
              ));
 
-             receiver = this.poolPublickey.pool[indexKey];
+             receiver = this.poolPublickey.pool[indexKey].signKey;
 
-             if(this.poolPublickey.pool[indexKey].data.base64PublicKey
+             if(this.poolPublickey.pool[indexKey].signKey.data.base64PublicKey
                !=
                asymmetricKeyData.public.base64
              ){
@@ -1565,7 +1555,6 @@ export class UnderPostManager {
     new Paint().underpostOption('yellow', 'username              ', tempData.network_user.username);
     new Paint().underpostOption('yellow', 'email                 ', tempData.network_user.email);
     new Paint().underpostOption('yellow', 'web                   ', tempData.network_user.web);
-    new Paint().underpostOption('yellow', 'bio                   ', tempData.network_user.bio);
     new Paint().underpostOption('yellow', 'Symmetric Key Active  ', tempData.active_symmetric_public_key);
     new Paint().underpostOption('yellow', 'Asymmetric Key Active ', tempData.active_asymmetric_public_key);
     new Paint().underpostOption('yellow', 'ip                    ', tempData.network_user.ip);

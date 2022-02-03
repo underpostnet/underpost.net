@@ -258,40 +258,11 @@ export class BlockChain {
 	}
 
   calculateReward(){
-		const genereteHashsKoyn = rewardCurrency => {
-			// esta funcion disminuye en factor de 30 el rendimiento
-			let reward = [];
-			for(let iCurrency of new Util().range(1, rewardCurrency)){
-				let hashsKoyn = [];
-				for(let iHash in new Util().range(1, this.rewardConfig.hashesPerCurrency)){
-					hashsKoyn.push(new Util().getHash());
-				}
-				reward.push(hashsKoyn);
-			}
-			return {
-				totalValue: new Util().l(reward),
-				hashs: reward
-			};
-		};
-		if(!(this.userConfig.hashToken == true)){
-			switch (new Util().l(this.chain)) {
-				case 0:
-					return {
-						totalValue: this.rewardConfig.rewardCurrencyPerBlock[0],
-						hashs: []
-					};
-				default:
-					return {
-						totalValue: this.getRewardToIndexBlock(this.latestBlock(), this.rewardConfig, true),
-						hashs: []
-					};
-			}
-		}
 		switch (new Util().l(this.chain)) {
 			case 0:
-				return genereteHashsKoyn(this.rewardConfig.rewardCurrencyPerBlock[0]);
+				return this.rewardConfig.rewardCurrencyPerBlock[0];
 			default:
-				return genereteHashsKoyn(this.getRewardToIndexBlock(this.latestBlock(), this.rewardConfig, true));
+				return this.getRewardToIndexBlock(this.latestBlock(), this.rewardConfig, true);
 		}
   }
 
@@ -871,39 +842,20 @@ export class BlockChain {
 		let rewardConfig = this.chain[0].dataGenesis.rewardConfig;
 
 		if(block.block.index>=new Util().getLastElement(rewardConfig.blocks)
-		&& block.block.reward.totalValue == 0){
+		&& block.block.reward == 0){
 			return true;
 		}else if(block.block.index<new Util().getLastElement(rewardConfig.blocks)
-		&& block.block.reward.totalValue == 0){
+		&& block.block.reward == 0){
 			// console.log("test 1 ->");
 			return false;
 		}
 
-		if(this.userConfig.hashToken == true){
-
-		let valueHashKoyn = new Util().l(block.block.reward.hashs);
-
-		if(valueHashKoyn!=block.block.reward.totalValue){
-			// console.log("test 2 ->");
-			return false;
-		}
-
-		// reward: { totalValue: 0, hashs: [] },
-		if(this.getRewardToIndexBlock(block, rewardConfig, false)!=valueHashKoyn){
+		if(this.getRewardToIndexBlock(block, rewardConfig, false)
+		!=
+		block.block.reward){
 			// console.log("test 3 ->");
 			return false;
 		}
-
-		} else{
-			if(this.getRewardToIndexBlock(block, rewardConfig, false)
-			!=
-			block.block.reward.totalValue){
-				// console.log("test 3 ->");
-				return false;
-			}
-		}
-
-
 
 		return true;
 
@@ -974,7 +926,7 @@ export class BlockChain {
 		let currentReward = 0;
 		for(let block of this.chain){
 			block.block.reward ?
-			currentReward += block.block.reward.totalValue : null;
+			currentReward += block.block.reward : null;
 		}
 		console.log(colors.cyan('current-reward-delivered:'+currentReward));
 	}
@@ -1078,20 +1030,7 @@ export class BlockChain {
 			});
 		}
 
-		/*
-
-		data:   sender   { doc }
-						receiver { doc }
-						amount {"totalValue": 750,
-					                "hashs": [ [],[],[] ]
-							}
-						createdDate: (+ new Date())
-		sign:
-
-		*/
-
 		let amount = 0;
-		let hashs = [];
 		for(let block of this.chain){
 
 			if(this.validateTimesTransactions(block)==false){
@@ -1114,29 +1053,12 @@ export class BlockChain {
 				// sender validator
 				//----------------------------------------------------------------------
 				if(transaction.data.sender.data.base64PublicKey == base64PublicKey){
-					if(amount >= transaction.data.amount.totalValue){
-						let count_value = 0;
-						for(let hashs_transaction of transaction.data.amount.hashs){
-							let ind = 0;
-							for(let hash_current of hashs){
-								if(new Util().objEq(hash_current, hashs_transaction)){
-									hashs[ind] = null;
-									count_value++;
-								}
-								ind++;
-							}
-						}
-						if((count_value == transaction.data.amount.totalValue)||(!(this.userConfig.hashToken==true))){
-							amount = amount - transaction.data.amount.totalValue;
-							hashs = hashs.filter(x=>x!=null);
-							log == true ? new Paint().underpostOption('yellow', ' ', `
-							sender validator amount: `+transaction.data.amount.totalValue+`
-							current amount:          `+amount+`
-							`) : null;
-						}else{
-							new Paint().underpostOption('red', 'error', 'invalid current amount for transaction');
-							return null;
-						}
+					if(amount >= transaction.data.amount){
+						amount = amount - transaction.data.amount;
+						log == true ? new Paint().underpostOption('yellow', ' ', `
+						sender validator amount: `+transaction.data.amount+`
+						current amount:          `+amount+`
+						`) : null;
 					}else{
 						new Paint().underpostOption('red', 'error', 'invalid current amount for transaction');
 						return null;
@@ -1147,11 +1069,10 @@ export class BlockChain {
 				//----------------------------------------------------------------------
 
 				if(transaction.data.receiver.data.base64PublicKey == base64PublicKey){
-					amount = amount + transaction.data.amount.totalValue;
-					hashs = hashs.concat(transaction.data.amount.hashs);
+					amount = amount + transaction.data.amount;
 					log == true ? new Paint().underpostOption('green', ' ', `
 		index block                      : `+block.block.index+`
-		receiver transaction amount      : `+transaction.data.amount.totalValue+`
+		receiver transaction amount      : `+transaction.data.amount+`
 		current amount                   : `+amount+`
 					`): null;
 				}
@@ -1162,11 +1083,10 @@ export class BlockChain {
 
 			}
 			if(block.node.rewardAddress == base64PublicKey){
-				amount += block.block.reward.totalValue;
-				hashs = hashs.concat(block.block.reward.hashs);
+				amount += block.block.reward;
 				log == true ? new Paint().underpostOption('green', ' ', `
 	index block                      : `+block.block.index+`
-	receiver reward validator amount : `+block.block.reward.totalValue+`
+	receiver reward validator amount : `+block.block.reward+`
 	current amount                   : `+amount+`
 				`): null;
 			}
@@ -1186,7 +1106,7 @@ export class BlockChain {
 			return null;
 		}
 
-		return { amount, hashs };
+		return { amount };
 
 	}
 

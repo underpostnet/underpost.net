@@ -94,9 +94,9 @@ export class PublicKeyManager {
       let ind_b = 0;
       let foundKey = false;
       for(let poolObj of this.pool){
-        if(poolObj.data.base64PublicKey == bridgeObj.data.base64PublicKey){
+        if(poolObj.signKey.data.base64PublicKey == bridgeObj.signKey.data.base64PublicKey){
           foundKey = true;
-          if(poolObj.data.lastUpdate < bridgeObj.data.lastUpdate){
+          if(poolObj.lastUpdate < bridgeObj.lastUpdate){
             updates_keys.push({
               index: ind_b,
               data: bridgeObj
@@ -124,7 +124,7 @@ export class PublicKeyManager {
       for(let test_key of this.bridge.pool){
           let test_validate_sign_key = await new Keys()
           .validateTempAsymmetricSignKey(
-            test_key,
+            test_key.signKey,
             blockChainConfig,
             this.charset,
             this.mainDir);
@@ -201,15 +201,15 @@ export class PublicKeyManager {
     let tableLocalPool = await new Promise(async resolve => {
        let dataTable = new Util().newInstance(pool);
        for(let x of dataTable){
-         x.data.lastUpdate = new Date(x.data.lastUpdate).toLocaleString();
+         x.lastUpdate = new Date(x.lastUpdate).toLocaleString();
          if(validateChain.global == true){
            let amountData = await chainObj.currentAmountCalculator(
-             x.data.base64PublicKey,
+             x.signKey.data.base64PublicKey,
              false
            );
-           x.data.amount = amountData.amount;
+           x.signKey.data.amount = amountData.amount;
          }else{
-           x.data.amount = "invalid chain";
+           x.signKey.data.amount = "invalid chain";
          }
 
          let foundLocal = null;
@@ -217,16 +217,23 @@ export class PublicKeyManager {
            let localBase64PublicKey = fs.readFileSync(
              this.mainDir+'/data/keys/asymmetric/'+localKey+'/public.pem')
              .toString('base64');
-             if(x.data.base64PublicKey==localBase64PublicKey){
+             if(x.signKey.data.base64PublicKey==localBase64PublicKey){
                foundLocal = localKey;
                break;
              }
          }
-         x.data.local = foundLocal;
-         x.data.base64PublicKey = "..."+x.data.base64PublicKey.slice(250, 256)+"...";
+         x.signKey.data.local = foundLocal;
+         x.signKey.data.base64PublicKey = "..."+x.signKey.data.base64PublicKey.slice(250, 256)+"...";
 
        }
-      resolve(dataTable.map(x=>x.data));
+      resolve(dataTable.map(x=>{
+        return {
+          lastUpdate: x.lastUpdate,
+          comment: x.comment,
+          amount: x.signKey.data.amount,
+          B64PUKSHA256: x.signKey.data.B64PUKSHA256
+        };
+      }));
     });
 
     console.table(tableLocalPool);
@@ -262,7 +269,8 @@ export class PublicKeyManager {
 
      let dataPost = new Util().fusionObj([
        {
-         lastUpdate: (+ new Date())
+         http_port: tempData.http_port,
+         ws_port: tempData.ws_port
        },
        tempData.network_user
      ]);
@@ -279,13 +287,18 @@ export class PublicKeyManager {
        resp = await new RestService().postJSON(
          blockChainConfig.constructor.userConfig.bridgeUrl+'/node/public-key/'+
          blockChainConfig.constructor.generation,
-         new Keys().generateAsymetricFromSign(
-           asymmetricKeyData.private.genesis_dir,
-           asymmetricKeyData.public.base64,
-           passphrase,
-           dataPost,
-           true
-         )
+         {
+           comment: await new ReadLine().r(
+             new Paint().underpostInput('comment state ? <enter> skip')),
+           lastUpdate: (+ new Date()),
+           signKey: new Keys().generateAsymetricFromSign(
+             asymmetricKeyData.private.genesis_dir,
+             asymmetricKeyData.public.base64,
+             passphrase,
+             dataPost,
+             true
+           )
+         }
        );
      }catch(err){
        console.log(err);
@@ -353,13 +366,19 @@ export class PublicKeyManager {
       ));
 
       let externalPublicKey = await this.getExternalPublicKey();
+      externalPublicKey = {
+        comment: await new ReadLine().r(
+          new Paint().underpostInput('comment state ? <enter> skip')),
+        lastUpdate: (+ new Date()),
+        signKey: externalPublicKey
+      };
 
       if(!new Util().existAttr(externalPublicKey, "error")){
 
         let foundKey = false;
         let ind_ = 0;
         for(let key of this.pool){
-          if(key.data.base64PublicKey==externalPublicKey.data.base64PublicKey){
+          if(key.signKey.data.base64PublicKey==externalPublicKey.signKey.data.base64PublicKey){
             foundKey = true;
             this.pool[ind_]=externalPublicKey;
             new Paint().underpostOption('cyan', 'success', 'updated sign public key');

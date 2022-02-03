@@ -231,7 +231,8 @@ export class Keys {
       dataContent = new Util().fusionObj([
         data,
         {
-          base64PublicKey: publicBase64
+          base64PublicKey: publicBase64,
+          B64PUKSHA256: SHA256(publicBase64).toString()
         }
       ]);
     }else{
@@ -297,7 +298,8 @@ export class Keys {
     );
     let dataPost = new Util().fusionObj([
       {
-        lastUpdate: (+ new Date())
+        http_port: tempData.http_port,
+        ws_port: tempData.ws_port
       },
       tempData.network_user
     ]);
