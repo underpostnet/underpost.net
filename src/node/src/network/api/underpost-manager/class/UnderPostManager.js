@@ -291,8 +291,12 @@ export class UnderPostManager {
 
           tempData[type].splice(indexKey, 1);
 
-          keyIDDel == tempData[('active_'+type.split('Keys')[0]+'_public_key')] ?
-          tempData[('active_'+type.split('Keys')[0]+'_public_key')] = null:null;
+          if(keyIDDel == tempData[('active_'+type.split('Keys')[0]+'_public_key')]){
+            tempData[('active_'+type.split('Keys')[0]+'_public_key')] = null;
+            type == 'asymmetricKeys' &&
+            fs.existsSync(this.mainDir+'/data/keys/asymmetric/active.json') ?
+            fs.unlinkSync(this.mainDir+'/data/keys/asymmetric/active.json') : null;
+          }
 
           fs.writeFileSync(this.mainDir+'/data/underpost.json',
           new Util().jsonSave(tempData),
@@ -473,14 +477,27 @@ export class UnderPostManager {
 
         if(formatRow[indexKey]!=undefined){
           let keyIDKey = formatRow[indexKey].keyID;
-          try{
+          const saveActivateKey = () => {
             tempData[('active_'+type.split('Keys')[0]+'_public_key')]
             =
             keyIDKey;
             fs.writeFileSync(this.mainDir+'/data/underpost.json',
             new Util().jsonSave(tempData),
             this.charset);
+          };
+          try{
 
+              // ACTIVE Symmetric KEY ------------------------------------------
+
+              if(type === 'symmetricKeys'){
+                saveActivateKey();
+                return async () => {
+                  new Paint().underpostOption(
+                    'cyan', 'success', 'Activate key:'+keyIDKey+
+                    ' index:'+indexKey
+                  );
+                }
+              }
 
               let passphrase = await new ReadLine().h(
                 new Paint().underpostInput("Enter passphrase current "+type.split('Keys')[0]+" public key")
@@ -490,17 +507,6 @@ export class UnderPostManager {
                 type,
                 keyIDKey
               );
-
-              // ACTIVE Symmetric KEY ------------------------------------------
-
-              if(type === 'symmetricKeys'){
-                return async () => {
-                  new Paint().underpostOption(
-                    'cyan', 'success', 'Activate key:'+keyIDKey+
-                    ' index:'+indexKey
-                  );
-                }
-              }
 
               // ACTIVE Asymmetric KEY -----------------------------------------
 
@@ -525,6 +531,8 @@ export class UnderPostManager {
                 );
                 this.activeSenderAsymmetricSignKeyData = keySignData;
                 this.activeAsymmetricKeyData = fileKeyContent;
+
+                saveActivateKey();
 
                 fs.writeFileSync(
                   this.mainDir+'/data/keys/asymmetric/active.json',
