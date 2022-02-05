@@ -440,9 +440,8 @@ export class UnderPostManager {
         let fixKeysArr = KEYS.getFixKeyArr(tempData[type]);
 
         if(fixKeysArr[indexKey]!=undefined){
-
           let timeStampKey = fixKeysArr[indexKey].timestamp;
-          const activateKey = () => {
+          try{
             tempData[('active_'+type.split('Keys')[0]+'_public_key')]
             =
             timeStampKey;
@@ -456,37 +455,11 @@ export class UnderPostManager {
               );
               new Paint().underpostBar();
             }
-          };
-
-          switch (type) {
-            case "symmetricKeys":
-                  return activateKey();
-              break;
-            case "asymmetricKeys":
-                  let signKey = await new Keys().
-                  getAsymmetricSignPublicObj(
-                    KEYS,
-                    tempData,
-                    timeStampKey,
-                    blockChainConfig
-                  );
-                  if(signKey!=null){
-                    fs.writeFileSync(this.mainDir+'/data/keys/asymmetric/active.json',
-                    new Util().jsonSave(signKey),
-                    this.charset);
-                    return activateKey();
-                  }else{
-                    return async () => {
-                      new Paint().underpostOption('red', 'error', 'failer sign key');
-                      new Paint().underpostBar();
-                    }
-                  }
-              break;
-            default:
-              return async () => {
-                new Paint().underpostOption('red', 'error', 'invalid type key');
-                new Paint().underpostBar();
-              }
+          }catch(err){
+            return async () => {
+              new Paint().underpostOption('red', 'error', new Util().jsonSave(err));
+              new Paint().underpostBar();
+            }
           }
         }else{
           return async () => {
@@ -1030,10 +1003,7 @@ export class UnderPostManager {
          let keyPool = await new ReadLine()
          .yn("Use a key receiver from the public key pool ?");
 
-         let sender = JSON.parse(fs.readFileSync(
-             this.mainDir+'/data/keys/asymmetric/active.json',
-             this.charset
-         ));
+         // se pide sender
          let receiver = null;
 
          switch (keyPool) {

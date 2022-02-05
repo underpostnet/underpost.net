@@ -14,7 +14,7 @@ var data = JSON.parse(fs.readFileSync('{{path}}/data/underpost.json', charset));
 var microdata = JSON.parse(fs.readFileSync(data.dataPath+'microdata.json', charset));
 eval(fs.readFileSync(data.underpostClientPath+'util.js', charset));
 var dev = process.argv.slice(2)[0]=='d' ? true: false;
-dev ? (data.url = 'http://'+data.http_host_dev+':'+data.http_port):null;
+dev ? (data.url = 'http://'+data.http_host_dev+':'+data.network.node.http_port):null;
 var serverToken = getHash();
 var usersToken = [];
 
@@ -34,12 +34,12 @@ for(let mod of ServerMods){
   eval(loadServerMod(mod));
 }
 
-app.listen(data.http_port, () => {
+app.listen(data.network.node.http_port, () => {
   console.log('argv', process.argv);
   log('progress', 'underpost network v1.5');
   log('info', 'set server token -> '+serverToken);
   let mode = dev ? 'DEV MODE' : 'PROD MODE';
-  log('warn','HTTP '+mode+' SERVER ONLINE -> PORT:'+data.http_port);
+  log('warn','HTTP '+mode+' SERVER ONLINE -> PORT:'+data.network.node.http_port);
 });
 
 //------------------------------------------------------------------------------

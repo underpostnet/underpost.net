@@ -107,7 +107,13 @@ export class RestService {
     return {
       ip: (req.headers['x-forwarded-for'] || req.connection.remoteAddress),
       host: req.headers.host,
-      lang: req.acceptsLanguages()
+      lang: req.acceptsLanguages(),
+      browser: req.useragent.browser,
+      version: req.useragent.version,
+      os: req.useragent.os,
+      platform: req.useragent.platform,
+      geoIp: new Util().jsonSave(req.useragent.geoIp),
+      source: req.useragent.source
     }
   }
 
