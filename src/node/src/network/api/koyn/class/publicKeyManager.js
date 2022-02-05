@@ -122,14 +122,7 @@ export class PublicKeyManager {
     let validate_sign_key = true;
     try{
       for(let test_key of this.bridge.pool){
-          /*
-          let test_validate_sign_key = await new Keys()
-          .validateTempAsymmetricSignKey(
-            test_key.signKey,
-            blockChainConfig,
-            this.charset,
-            this.mainDir);
-            */
+
           let test_validate_sign_key = new Keys().validateDataTempKeyAsymmetricSign(
             test_key.signKey.data.base64PublicKey,
             test_key.signKey,
@@ -275,15 +268,6 @@ export class PublicKeyManager {
        +tempData.active_asymmetric_public_key);
        return [];
      }
-     /*
-     let dataPost = new Util().fusionObj([
-       {
-         http_port: tempData.http_port,
-         ws_port: tempData.ws_port
-       },
-       tempData.network_user
-     ]);
-     */
 
      new Paint().underpostOption("yellow", " ", "current asymmetric public key");
      console.log(asymmetricKeyData.public.raw);
@@ -308,15 +292,6 @@ export class PublicKeyManager {
              passphrase,
              true
            )
-           /*
-           signKey: new Keys().generateAsymetricFromSign(
-             asymmetricKeyData.private.genesis_dir,
-             asymmetricKeyData.public.base64,
-             passphrase,
-             dataPost,
-             true
-           )
-           */
          }
        );
      }catch(err){
@@ -368,16 +343,6 @@ export class PublicKeyManager {
           blockChainConfig,
           this.charset,
           this.mainDir);
-       /*
-     let validate_sign_key = await new Keys()
-     .validateTempAsymmetricSignKey(
-       test_key,
-       blockChainConfig,
-       this.charset,
-       this.mainDir);
-
-      console.log(test_key);
-      */
       if(validate_sign_key == true){
         return test_key
       }else{

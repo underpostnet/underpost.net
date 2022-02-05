@@ -257,33 +257,6 @@ export class Keys {
         passphrase
       )
     }
-
-
-    /*
-    let dataContent = {};
-    if(setPublicKey == true){
-      dataContent = new Util().fusionObj([
-        data,
-        {
-          base64PublicKey: publicBase64,
-          B64PUKSHA256: SHA256(publicBase64).toString()
-        }
-      ]);
-    }else{
-      dataContent = data;
-    }
-    return {
-      data: dataContent,
-      sign: this.encryptStringWithRsaPrivateKey(
-        SHA256(
-        new Util().JSONstr(dataContent)
-        ).toString(),
-        privateDirPem,
-        passphrase
-      )
-    }
-
-    */
   }
 
 
@@ -320,32 +293,6 @@ export class Keys {
     );
     fs.unlinkSync(publicDirPem);
     return result;
-
-
-    /*
-      nameDataFolder==undefined ? nameDataFolder = 'data': null;
-
-      let id_file_key = new Util().getHash();
-      let result = true;
-      fs.writeFileSync(
-        mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem',
-        new Util().existAttr(test_key.data, "sender") ?
-        Buffer.from(test_key.data.sender.data.base64PublicKey, 'base64').toString()
-        : Buffer.from(test_key.data.base64PublicKey, 'base64').toString(),
-        charset
-      );
-      if(
-        ! this.validateAsymmetricFromSign(
-        test_key,
-        blockChainConfig.keys.publicLen,
-        mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem')
-      ){
-        result = false;
-      }
-      fs.unlinkSync(mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem');
-      return result;
-
-      */
 
   }
 

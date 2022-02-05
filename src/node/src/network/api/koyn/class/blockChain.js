@@ -692,14 +692,6 @@ export class BlockChain {
 						this.userConfig.dataDir,
 						this.userConfig.dataFolder
 					);
-					/*
-					.validateTempAsymmetricSignKey(
-						transaction,
-						this.userConfig.blockchain,
-						this.userConfig.charset,
-						this.userConfig.dataDir,
-						this.userConfig.dataFolder);
-						*/
 					if(validateSign == false){
 						return false;
 					}
@@ -718,14 +710,6 @@ export class BlockChain {
 					this.userConfig.dataDir,
 					this.userConfig.dataFolder
 				);
-				/*
-				.validateTempAsymmetricSignKey(
-					transaction,
-					this.userConfig.blockchain,
-					this.userConfig.charset,
-					this.userConfig.dataDir,
-					this.userConfig.dataFolder);
-					*/
 				if(validateSign == false){
 					return false;
 				}

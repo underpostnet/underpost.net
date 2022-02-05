@@ -48,14 +48,6 @@ export class UnderPostManager {
         data.clientPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/client/';
         data.staticPath = this.mainDir+'/underpost/underpost.net/src/node/src/network/static/';
 
-        /*fs.writeFileSync(
-          this.mainDir+'/app.js',
-          fs.readFileSync(
-              this.mainDir+'/underpost/underpost.net/src/node/src/network/api/appServer.js',
-              this.charset
-          ).replace('{{path}}', this.mainDir),
-          this.charset);*/
-
         for(let module_ of [
         'microdata.json',
         'serverMods.json',
@@ -132,32 +124,6 @@ export class UnderPostManager {
         new Paint().underpostInput('server ws port')));
       data.network.node.ws_port > 9999999 ? data.network.node.ws_port = null : null;
 
-      /*
-
-      data.http_port = parseInt(await new ReadLine().r(
-        new Paint().underpostInput('http port')));
-      data.http_port > 9999999 ? data.http_port = null : null;
-
-      data.ws_port = parseInt(await new ReadLine().r(
-        new Paint().underpostInput('ws port')));
-      data.ws_port > 9999999 ? data.ws_port = null : null;
-
-      data.network_user.username = await new ReadLine().r(
-        new Paint().underpostInput('network user username'));
-      new Util().l(data.network_user.username) > max_chars ?
-      data.network_user.username = "" : null;
-
-      data.network_user.email = await new ReadLine().r(
-        new Paint().underpostInput('network user email'));
-      new Util().l(data.network_user.email) > max_chars ?
-      data.network_user.email = "" : null;
-
-      data.network_user.web = await new ReadLine().r(
-        new Paint().underpostInput('network user web'));
-      new Util().l(data.network_user.web) > max_chars ?
-      data.network_user.web = "" : null;
-
-      */
 
       new Paint().underpostBar();
 
@@ -218,16 +184,6 @@ export class UnderPostManager {
         });
         mainData.network.node = newNodeData;
       }
-
-      /*
-      if(!new Util().objEq(dataTemplate.network_user, mainData.network_user)){
-        let newUserData = {};
-        new Util().iterateKeys(dataTemplate.network_user, (key, value) => {
-          newUserData[key] = new Util().newInstance(mainData.network_user[key]);
-        });
-        mainData.network_user = newUserData;
-      }
-      */
 
       // check app paths
       let ind_module = 0;
@@ -414,14 +370,7 @@ export class UnderPostManager {
               }
               break;
             case "asymmetricKeys":
-              /*
-              let publicKey = await new RestService().
-              getRawContent(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
-              +timeStampKey+'/public.pem');
-              let privateKey = await new RestService().
-              getRawContent(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
-              +timeStampKey+'/private.pem');
-              */
+
               return async () => {
                 new Paint().underpostOption('white', ' ', 'Asymmetric Key Selected');
                 // console.log('\n'+colors.green(publicKey));
@@ -481,31 +430,7 @@ export class UnderPostManager {
                   new Paint().underpostBar();
                 }
 
-                /*
 
-                let sign_public_key = await new Keys()
-                .getAsymmetricSignPublicObj(
-                  KEYS,
-                  tempData,
-                  timeStampKey,
-                  blockChainConfig
-                );
-
-                console.log("sign_public_key ->");
-                console.log(sign_public_key);
-
-                if(sign_public_key!=null){
-                  new Util().copy(new Keys().
-                    getBase64AsymmetricPublicKeySignFromJSON(sign_public_key)
-                  );
-                  new Paint().underpostOption('cyan', 'success', 'Base64 Sign Public Key Copy to Clipboard');
-                  new Paint().underpostBar();
-                }else{
-                  new Paint().underpostOption('red', 'error', 'Base64 Sign Public Key generator failed');
-                  new Paint().underpostBar();
-                }
-
-                */
               }
               break;
             default:
@@ -609,17 +534,6 @@ export class UnderPostManager {
                 }
               }
 
-
-
-              /*
-            return async () => {
-              new Paint().underpostOption(
-                'yellow', 'success', 'Activate key:'+timeStampKey+
-                ' index:'+indexKey
-              );
-              new Paint().underpostBar();
-            }
-            */
           }catch(err){
             console.log(err);
             return async () => {
@@ -775,19 +689,7 @@ export class UnderPostManager {
              tempData.network.node
            ])
          );
-         /*
-         let resp = await new RestService().postJSON(
-           blockChainConfig.constructor.userConfig.bridgeUrl+'/node/ip',
-           new Util().fusionObj([
-             {
-               generation: blockChainConfig.constructor.generation,
-               ws_port: tempData.ws_port,
-               http_port: tempData.http_port
-             },
-             tempData.network_user
-           ])
-         );
-         */
+
          new Paint().underpostOption('yellow', ' ', 'bridge rest connection');
          console.log(resp);
 
@@ -975,15 +877,6 @@ export class UnderPostManager {
            validatorMode: true
          });
 
-         /*let chain = JSON.parse(fs.readFileSync(
-             this.mainDir
-             +'/data/blockchain/generation-'
-             +blockChainConfig.constructor.generation
-             +'/chain.json',
-             this.charset
-         ));*/
-
-
          // UPDATE CHAIN WITH BRIDGE
 
          await chainObj.setCurrentChain();
@@ -1029,26 +922,10 @@ export class UnderPostManager {
             this.mainDir
           );
 
-          /*
 
-          let senderValidator =  await new Keys()
-          .validateAsymmetricFromSign(
-            sender,
-            blockChainConfig.keys.publicLen,
-            this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
-            */
 
-          console.log(" sender validator ->");
-          console.log(senderValidator);
-          /*
-        let receiverValidator =  await new Keys()
-        .validateTempAsymmetricSignKey(
-          receiver,
-          blockChainConfig,
-          this.charset,
-          this.mainDir);
-
-          */
+        console.log(" sender validator ->");
+        console.log(senderValidator);
 
         console.log(" receiver validator ->");
         console.log( receiverValidator);
@@ -1118,17 +995,6 @@ export class UnderPostManager {
                    dataTransaction
                  );
 
-                 /*
-
-                 let endObjTransaction = new Keys().generateAsymetricFromSign(
-                   this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/private.pem',
-                   sender.data.base64PublicKey,
-                   passphrase,
-                   dataTransaction,
-                   false);
-
-                   */
-
                    console.log('endObjTransaction ->');
                    console.log(endObjTransaction);
 
@@ -1140,33 +1006,9 @@ export class UnderPostManager {
                      this.charset,
                      this.mainDir
                    );
-                   /*
-                   let validatorTransaction = await new Keys()
-                   .validateAsymmetricFromSign(
-                     endObjTransaction,
-                     blockChainConfig.keys.publicLen,
-                     this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
-                     */
+
                    console.log(validatorTransaction);
                    if(validatorTransaction == true){
-
-                     /*let pathDataTransactions =
-                     this.mainDir+'/data/blockchain/generation-'
-                     +blockChainConfig.constructor.generation+'/pending-transactions.json';
-
-                     let pendingTransactions = JSON.parse(fs.readFileSync(
-                       pathDataTransactions,
-                       this.charset
-                     ));
-
-                     pendingTransactions.push(endObjTransaction);
-
-                     fs.writeFileSync(
-                       pathDataTransactions,
-                       new Util().jsonSave(pendingTransactions),
-                       this.charset);
-
-                       new Paint().underpostOption('cyan', 'success', 'transaction moved to pending');*/
 
                        let postTransactionStatus = await new RestService().postJSON(
                          blockChainConfig.constructor.userConfig.bridgeUrl+'/transactions/'
@@ -1785,22 +1627,6 @@ export class UnderPostManager {
     new Paint().underpostOption('yellow', 'http port             ', tempData.network.node.http_port);
     new Paint().underpostOption('yellow', 'ws port               ', tempData.network.node.ws_port);
     new Paint().underpostBar();
-
-
-    /*
-
-    new Paint().underpostTextBotbar('Active user data');
-    new Paint().underpostOption('yellow', 'username              ', tempData.network_user.username);
-    new Paint().underpostOption('yellow', 'email                 ', tempData.network_user.email);
-    new Paint().underpostOption('yellow', 'web                   ', tempData.network_user.web);
-    new Paint().underpostOption('yellow', 'Symmetric Key Active  ', tempData.active_symmetric_public_key);
-    new Paint().underpostOption('yellow', 'Asymmetric Key Active ', tempData.active_asymmetric_public_key);
-    new Paint().underpostOption('yellow', 'ip                    ', tempData.network_user.ip);
-    new Paint().underpostOption('yellow', 'http port             ', tempData.http_port);
-    new Paint().underpostOption('yellow', 'ws port               ', tempData.ws_port);
-    new Paint().underpostBar();
-
-    */
 
   }
 
