@@ -203,7 +203,7 @@ export class PublicKeyManager {
     let tableLocalPool = await new Promise(async resolve => {
        let dataTable = new Util().newInstance(pool);
        for(let x of dataTable){
-         x.lastUpdate = new Date(x.lastUpdate).toLocaleString();
+
          if(validateChain.global == true){
            let amountData = await chainObj.currentAmountCalculator(
              x.signKey.data.base64PublicKey,
@@ -224,16 +224,16 @@ export class PublicKeyManager {
                break;
              }
          }
-         x.signKey.data.local = foundLocal;
-         x.signKey.data.base64PublicKey = "..."+x.signKey.data.base64PublicKey.slice(250, 256)+"...";
+         x.local = foundLocal;
 
        }
       resolve(dataTable.map(x=>{
         return {
-          lastUpdate: x.lastUpdate,
           comment: x.comment,
           amount: x.signKey.data.amount,
-          B64PUKSHA256: x.signKey.data.B64PUKSHA256
+          B64PUKSHA256: x.signKey.data.B64PUKSHA256,
+          created: new Date(x.signKey.data.timestamp).toISOString(),
+          local: x.local
         };
       }));
     });
@@ -284,7 +284,6 @@ export class PublicKeyManager {
          {
            comment: await new ReadLine().r(
              new Paint().underpostInput('comment state ? <enter> skip')),
-           lastUpdate: (+ new Date()),
            user: tempData.network.user,
            signKey:  new Keys().generateDataAsymetricSign(
              asymmetricKeyData.private.genesis_dir,
@@ -363,7 +362,6 @@ export class PublicKeyManager {
       externalPublicKey = {
         comment: await new ReadLine().r(
           new Paint().underpostInput('comment state ? <enter> skip')),
-        lastUpdate: (+ new Date()),
         signKey: externalPublicKey
       };
 

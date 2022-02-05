@@ -280,27 +280,30 @@ export class UnderPostManager {
 
         new Paint().underpostBar();
 
-        let fixKeysArr = KEYS.getFixKeyArr(tempData[type]);
+        let formatRow = KEYS.formatRowKeyTableLocal(tempData[type]);
 
         console.log('delete -> ');
-        console.log(fixKeysArr[indexKey]);
+        console.log(formatRow[indexKey]);
 
-        if(fixKeysArr[indexKey]!=undefined){
+        if(formatRow[indexKey]!=undefined){
           //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-          let timeStampDel = fixKeysArr[indexKey].timestamp;
+          let keyIDDel = formatRow[indexKey].keyID;
 
           tempData[type].splice(indexKey, 1);
+
+          keyIDDel == tempData[('active_'+type.split('Keys')[0]+'_public_key')] ?
+          tempData[('active_'+type.split('Keys')[0]+'_public_key')] = null:null;
 
           fs.writeFileSync(this.mainDir+'/data/underpost.json',
           new Util().jsonSave(tempData),
           this.charset);
 
           new FileGestor().deleteFolderRecursive(
-            this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'+timeStampDel
+            this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'+keyIDDel
           );
 
           return async () => {
-            new Paint().underpostOption('yellow', 'success', 'Delete key folder '+timeStampDel);
+            new Paint().underpostOption('yellow', 'success', 'Delete key folder '+keyIDDel);
             new Paint().underpostBar();
           }
           //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -332,29 +335,28 @@ export class UnderPostManager {
 
         new Paint().underpostBar();
 
-        let fixKeysArr = KEYS.getFixKeyArr(tempData[type]);
+        let formatRow = KEYS.formatRowKeyTableLocal(tempData[type]);
 
         // console.log('delete -> ');
-        // console.log(fixKeysArr[indexKey]);
+        // console.log(formatRow[indexKey]);
 
-        if(fixKeysArr[indexKey]!=undefined){
+        if(formatRow[indexKey]!=undefined){
           //''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-          let timeStampKey = fixKeysArr[indexKey].timestamp;
+          let keyIDKey = formatRow[indexKey].keyID;
 
           switch (type) {
             case "symmetricKeys":
                 let iv = await new RestService().
                 getJSON(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
-                +timeStampKey+'/iv.json');
+                +keyIDKey+'/iv.json');
                 let key = await new RestService().
                 getJSON(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
-                +timeStampKey+'/key.json');
+                +keyIDKey+'/key.json');
               return async () => {
                 new Paint().underpostOption('white', ' ', 'Symmetric Key Selected');
                 function rowKey(obj){
                   this.index = obj.index;
                   this.path = obj.path;
-                  this.date = new Date(parseInt(obj.path.split('/')[1])).toLocaleString();
                   this.iv = obj.iv;
                   this.key = obj.key;
                 }
@@ -362,7 +364,7 @@ export class UnderPostManager {
                   new rowKey({
                     iv: iv,
                     key: key,
-                    path: '/'+timeStampKey,
+                    path: '/'+keyIDKey,
                     index: indexKey
                   })
                 );
@@ -378,17 +380,16 @@ export class UnderPostManager {
                 // new Paint().underpostOption('white', ' ', 'Base64 Public Key:');
                 let fileKeyContent = await KEYS.getKeyContent(
                   type,
-                  timeStampKey
+                  keyIDKey
                 );
                 console.log(fileKeyContent);
                 function rowKey(obj){
                   this.index = obj.index;
                   this.path = obj.path;
-                  this.date = new Date(parseInt(obj.path.split('/')[1])).toLocaleString();
                 }
                 console.table(
                   new rowKey({
-                    path: '/'+timeStampKey,
+                    path: '/'+keyIDKey,
                     index: indexKey
                   })
                 );
@@ -468,27 +469,41 @@ export class UnderPostManager {
 
         new Paint().underpostBar();
 
-        let fixKeysArr = KEYS.getFixKeyArr(tempData[type]);
+        let formatRow = KEYS.formatRowKeyTableLocal(tempData[type]);
 
-        if(fixKeysArr[indexKey]!=undefined){
-          let timeStampKey = fixKeysArr[indexKey].timestamp;
+        if(formatRow[indexKey]!=undefined){
+          let keyIDKey = formatRow[indexKey].keyID;
           try{
             tempData[('active_'+type.split('Keys')[0]+'_public_key')]
             =
-            timeStampKey;
+            keyIDKey;
             fs.writeFileSync(this.mainDir+'/data/underpost.json',
             new Util().jsonSave(tempData),
             this.charset);
 
 
               let passphrase = await new ReadLine().h(
-                new Paint().underpostInput("Enter passphrase current asymmetric public key")
+                new Paint().underpostInput("Enter passphrase current "+type.split('Keys')[0]+" public key")
               );
 
               let fileKeyContent = await KEYS.getKeyContent(
                 type,
-                timeStampKey
+                keyIDKey
               );
+
+              // ACTIVE Symmetric KEY ------------------------------------------
+
+              if(type === 'symmetricKeys'){
+                return async () => {
+                  new Paint().underpostOption(
+                    'cyan', 'success', 'Activate key:'+keyIDKey+
+                    ' index:'+indexKey
+                  );
+                }
+              }
+
+              // ACTIVE Asymmetric KEY -----------------------------------------
+
               let keySignData = new Keys().generateDataAsymetricSign(
                 fileKeyContent.private.genesis_dir,
                 fileKeyContent.public.base64,
@@ -521,7 +536,7 @@ export class UnderPostManager {
 
                 return async () => {
                   new Paint().underpostOption(
-                    'cyan', 'success', 'Activate key:'+timeStampKey+
+                    'cyan', 'success', 'Activate key:'+keyIDKey+
                     ' index:'+indexKey
                   );
                   new Paint().underpostOption('cyan', 'success', 'Base64 Sign Public Key Copy to Clipboard');
@@ -550,7 +565,7 @@ export class UnderPostManager {
 
 
       },
-      getKeyContent: async (type, timestamp) => {
+      getKeyContent: async (type, keyID) => {
         type = type.split('Keys')[0];
         switch (type) {
           case "symmetric":
@@ -558,22 +573,22 @@ export class UnderPostManager {
               iv: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
-              '/'+timestamp+'/iv.json', true),
+              '/'+keyID+'/iv.json', true),
               key: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
-              '/'+timestamp+'/key.json', true)
+              '/'+keyID+'/key.json', true)
             }
           case "asymmetric":
             return {
               public: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
-              '/'+timestamp+'/public.pem'),
+              '/'+keyID+'/public.pem'),
               private: await new FileGestor().getDataFile(
               this.mainDir+'/data/keys/'
               +type+
-              '/'+timestamp+'/private.pem')
+              '/'+keyID+'/private.pem')
             }
           default:
             new Paint().underpostOption('red', 'error', 'invalid type key');
@@ -585,17 +600,16 @@ export class UnderPostManager {
 
 
       },
-      getFixKeyArr: arrKey => {
-        let fixKeysArr = [];
+      formatRowKeyTableLocal: arrKey => {
+        let formatRow = [];
         let indexKeyReal = 0;
         for(let key_time of arrKey){
-          fixKeysArr.push({
-            date: new Date(key_time).toLocaleString(),
-            timestamp: key_time
+          formatRow.push({
+            keyID: key_time
           });
           indexKeyReal++;
         }
-        return fixKeysArr;
+        return formatRow;
       },
       viewAll: async type => {
 
@@ -619,7 +633,7 @@ export class UnderPostManager {
         console.log(new FileGestor().getAllFilesPath(pathKeys, true));
 
         console.log("path: "+pathKeys);
-        let tableKeys = KEYS.getFixKeyArr(tempData[(type+'Keys')]);
+        let tableKeys = KEYS.formatRowKeyTableLocal(tempData[(type+'Keys')]);
 
         switch (type) {
           case "symmetric":
@@ -647,7 +661,7 @@ export class UnderPostManager {
               if(validateChain.global == true && validateWithPoolTransaction != null){
                 let amountData = await chainObj.currentAmountCalculator(
                   fs.readFileSync(
-                    this.mainDir+'/data/keys/asymmetric/'+rowKey.timestamp+'/public.pem')
+                    this.mainDir+'/data/keys/asymmetric/'+rowKey.keyID+'/public.pem')
                     .toString('base64'),
                   false
                 );
@@ -896,7 +910,7 @@ export class UnderPostManager {
 
        //  BlockChain  -> Immutable Time Consistency
 
-       const signSaveTransaction = async (sender, receiver, blockChainConfig, timestamp_key) => {
+       const signSaveTransaction = async (sender, receiver, blockChainConfig) => {
 
           console.log(" key receiver selected ->");
           console.log(receiver);
@@ -1113,8 +1127,7 @@ export class UnderPostManager {
                 await signSaveTransaction(
                   sender,
                   receiver,
-                  blockChainConfig,
-                  tempData.active_asymmetric_public_key
+                  blockChainConfig
                 );
 
                }else{

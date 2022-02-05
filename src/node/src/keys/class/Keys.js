@@ -14,6 +14,11 @@ export class Keys {
 
   constructor(){}
 
+
+  getKeyHash(){
+    return new Util().tu(new Util().getHash().split('-').pop())
+  }
+
   async generateKeys(path, passphrase) {
       try {
         const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa',
@@ -32,10 +37,10 @@ export class Keys {
                 }
         });
 
-        let time = (+ new Date());
-        !fs.existsSync(path+time) ? fs.mkdirSync(path+time):null;
-        fs.writeFileSync(path+time+'/private.pem', privateKey);
-        fs.writeFileSync(path+time+'/public.pem', publicKey);
+        let keyID = this.getKeyHash();
+        !fs.existsSync(path+keyID) ? fs.mkdirSync(path+keyID):null;
+        fs.writeFileSync(path+keyID+'/private.pem', privateKey);
+        fs.writeFileSync(path+keyID+'/public.pem', publicKey);
 
         console.log(colors.yellow('.generateKeys(path, passphrase)  -> success'));
 
@@ -126,6 +131,15 @@ export class Keys {
         new Util().JSONstr({content:"test"})
       )));
       /*
+
+      let { key, iv } = new Keys().generateKeyIv({ passphrase: passphrase });
+      let testKSymInstance = new Keys();
+      testKSymInstance.symmetric_config = {
+        key: key.toString(),
+        iv: iv.toString(),
+        algorithm: tempData.symmetricAlgorithm
+      };
+      
     	let test = 'asda';
     	console.log(k.encr(test));
     	console.log(k.encr(test));
@@ -144,23 +158,23 @@ export class Keys {
 
     let dataKey = this.generateKeyIv(obj);
 
-    let time = (+ new Date());
+    let keyID = this.getKeyHash();
 
     !fs.existsSync(obj.path+'/symmetric') ?
     fs.mkdirSync(obj.path+'/symmetric'):null;
 
-    !fs.existsSync(obj.path+'/symmetric/'+time) ?
-    fs.mkdirSync(obj.path+'/symmetric/'+time):null;
+    !fs.existsSync(obj.path+'/symmetric/'+keyID) ?
+    fs.mkdirSync(obj.path+'/symmetric/'+keyID):null;
 
     fs.writeFileSync(
-      obj.path+'/symmetric/'+time+'/key.json',
+      obj.path+'/symmetric/'+keyID+'/key.json',
       new Util().JSONstr(dataKey.key.toString()));
 
     fs.writeFileSync(
-      obj.path+'/symmetric/'+time+'/iv.json',
+      obj.path+'/symmetric/'+keyID+'/iv.json',
       new Util().JSONstr(dataKey.iv.toString()));
 
-    return time;
+    return keyID;
 
   }
 
@@ -182,21 +196,21 @@ export class Keys {
                 }
         });
 
-        let time = (+ new Date());
+        let keyID = this.getKeyHash();
 
         !fs.existsSync(obj.path+'/asymmetric') ?
         fs.mkdirSync(obj.path+'/asymmetric'):null;
 
-        !fs.existsSync(obj.path+'/asymmetric/'+time) ?
-        fs.mkdirSync(obj.path+'/asymmetric/'+time):null;
+        !fs.existsSync(obj.path+'/asymmetric/'+keyID) ?
+        fs.mkdirSync(obj.path+'/asymmetric/'+keyID):null;
 
-        fs.writeFileSync(obj.path+'/asymmetric/'+time+'/private.pem'
+        fs.writeFileSync(obj.path+'/asymmetric/'+keyID+'/private.pem'
         , privateKey);
 
-        fs.writeFileSync(obj.path+'/asymmetric/'+time+'/public.pem'
+        fs.writeFileSync(obj.path+'/asymmetric/'+keyID+'/public.pem'
         , publicKey);
 
-        return time;
+        return keyID;
 
       }catch(err){
 
@@ -237,7 +251,8 @@ export class Keys {
     if(enableID === true){
       idSign  = {
          base64PublicKey: publicBase64,
-         B64PUKSHA256: SHA256(publicBase64).toString()
+         B64PUKSHA256: SHA256(publicBase64).toString(),
+         timestamp: (+ new Date())
       };
       dataSign = new Util().fusionObj([
         idSign,

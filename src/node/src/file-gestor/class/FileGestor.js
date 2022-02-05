@@ -82,8 +82,8 @@ export class FileGestor {
                 obj: JSON.parse(bufferFile.toString()),
                 genesis_dir: dir,
                 size: {
-                  SI: sizeof.SI(dir),
-                  IEC: sizeof.IEC(dir)
+                  SI: sizeof.sizeof.SI(dir),
+                  IEC: sizeof.sizeof.IEC(dir)
                 },
                 stats: fs.statSync(dir)
               });
@@ -128,6 +128,7 @@ export class FileGestor {
               break;
           }
        }catch(err){
+         console.log(err);
          return { error: err }
        }
      });
