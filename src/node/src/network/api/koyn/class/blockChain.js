@@ -684,12 +684,22 @@ export class BlockChain {
 			for(let block of this.chain){
 				for(let transaction of block.node.dataTransaction){
 					let validateSign = await new Keys()
+					.validateDataTempKeyAsymmetricSign(
+						transaction.data.sender.data.base64PublicKey,
+						transaction,
+						this.userConfig.blockchain,
+						this.userConfig.charset,
+						this.userConfig.dataDir,
+						this.userConfig.dataFolder
+					);
+					/*
 					.validateTempAsymmetricSignKey(
 						transaction,
 						this.userConfig.blockchain,
 						this.userConfig.charset,
 						this.userConfig.dataDir,
 						this.userConfig.dataFolder);
+						*/
 					if(validateSign == false){
 						return false;
 					}
@@ -700,12 +710,22 @@ export class BlockChain {
 
 			for(let transaction of block.node.dataTransaction){
 				let validateSign = await new Keys()
+				.validateDataTempKeyAsymmetricSign(
+					transaction.data.sender.data.base64PublicKey,
+					transaction,
+					this.userConfig.blockchain,
+					this.userConfig.charset,
+					this.userConfig.dataDir,
+					this.userConfig.dataFolder
+				);
+				/*
 				.validateTempAsymmetricSignKey(
 					transaction,
 					this.userConfig.blockchain,
 					this.userConfig.charset,
 					this.userConfig.dataDir,
 					this.userConfig.dataFolder);
+					*/
 				if(validateSign == false){
 					return false;
 				}

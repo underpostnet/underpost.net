@@ -25,6 +25,8 @@ export class UnderPostManager {
     this.mainDir = mainDir;
     this.charset = charset;
     this.poolPublickey = null;
+    this.activeSenderAsymmetricSignKeyData = null;
+    this.activeAsymmetricKeyData = null;
 
     new Paint().underpostBanner();
 
@@ -100,6 +102,38 @@ export class UnderPostManager {
       let max_chars = 100;
       new Paint().underpostOption('yellow', 'warning', 'input max characters: '+max_chars);
 
+      data.network.user.username = await new ReadLine().r(
+        new Paint().underpostInput('network user username'));
+      new Util().l(data.network.user.username) > max_chars ?
+      data.network.user.username = "" : null;
+
+      data.network.user.state = await new ReadLine().r(
+        new Paint().underpostInput('network user state'));
+      new Util().l(data.network.user.state) > max_chars ?
+      data.network.user.state = "" : null;
+
+      data.network.user.msg = await new ReadLine().r(
+        new Paint().underpostInput('network user message'));
+      new Util().l(data.network.user.msg) > max_chars ?
+      data.network.user.msg = "" : null;
+
+
+
+      data.network.node.serverName = await new ReadLine().r(
+        new Paint().underpostInput('server name'));
+      new Util().l(data.network.node.serverName) > max_chars ?
+      data.network.node.serverName = "" : null;
+
+      data.network.node.http_port = parseInt(await new ReadLine().r(
+        new Paint().underpostInput('server http port')));
+      data.network.node.http_port > 9999999 ? data.network.node.http_port = null : null;
+
+      data.network.node.ws_port = parseInt(await new ReadLine().r(
+        new Paint().underpostInput('server ws port')));
+      data.network.node.ws_port > 9999999 ? data.network.node.ws_port = null : null;
+
+      /*
+
       data.http_port = parseInt(await new ReadLine().r(
         new Paint().underpostInput('http port')));
       data.http_port > 9999999 ? data.http_port = null : null;
@@ -122,6 +156,8 @@ export class UnderPostManager {
         new Paint().underpostInput('network user web'));
       new Util().l(data.network_user.web) > max_chars ?
       data.network_user.web = "" : null;
+
+      */
 
       new Paint().underpostBar();
 
@@ -166,6 +202,24 @@ export class UnderPostManager {
       ]);
 
       // check network_user obj
+
+      if(!new Util().objEq(dataTemplate.network.user, mainData.network.user)){
+        let newUserData = {};
+        new Util().iterateKeys(dataTemplate.network.user, (key, value) => {
+          newUserData[key] = new Util().newInstance(mainData.network.user[key]);
+        });
+        mainData.network.user = newUserData;
+      }
+
+      if(!new Util().objEq(dataTemplate.network.node, mainData.network.node)){
+        let newNodeData = {};
+        new Util().iterateKeys(dataTemplate.network.node, (key, value) => {
+          newNodeData[key] = new Util().newInstance(mainData.network.node[key]);
+        });
+        mainData.network.node = newNodeData;
+      }
+
+      /*
       if(!new Util().objEq(dataTemplate.network_user, mainData.network_user)){
         let newUserData = {};
         new Util().iterateKeys(dataTemplate.network_user, (key, value) => {
@@ -173,6 +227,7 @@ export class UnderPostManager {
         });
         mainData.network_user = newUserData;
       }
+      */
 
       // check app paths
       let ind_module = 0;
@@ -186,6 +241,14 @@ export class UnderPostManager {
 
       mainData.reset ?
       mainData = await initConfig(mainData) : null ;
+
+      // filtrar valores del arreglo de llaves
+      mainData.symmetricKeys = mainData.symmetricKeys.filter(
+        x=>!new Util().isOpenFalse(x)
+      );
+      mainData.asymmetricKeys = mainData.asymmetricKeys.filter(
+        x=>!new Util().isOpenFalse(x)
+      );
 
       fs.writeFileSync(
         this.mainDir+'/data/underpost.json',
@@ -351,12 +414,14 @@ export class UnderPostManager {
               }
               break;
             case "asymmetricKeys":
+              /*
               let publicKey = await new RestService().
               getRawContent(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
               +timeStampKey+'/public.pem');
               let privateKey = await new RestService().
               getRawContent(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
               +timeStampKey+'/private.pem');
+              */
               return async () => {
                 new Paint().underpostOption('white', ' ', 'Asymmetric Key Selected');
                 // console.log('\n'+colors.green(publicKey));
@@ -379,6 +444,45 @@ export class UnderPostManager {
                   })
                 );
 
+                try {
+                  let passphrase = await new ReadLine().h(
+                    new Paint().underpostInput("Enter passphrase current asymmetric public key")
+                  );
+
+                  let keySignData = new Keys().generateDataAsymetricSign(
+                    fileKeyContent.private.genesis_dir,
+                    fileKeyContent.public.base64,
+                    passphrase,
+                    true
+                  );
+                  let validateSign = new Keys().validateDataTempKeyAsymmetricSign(
+                    fileKeyContent.public.base64,
+                    keySignData,
+                    blockChainConfig,
+                    this.charset,
+                    this.mainDir
+                  );
+
+                  if(validateSign===true){
+                    console.log(new Util().jsonSave(keySignData));
+                    new Util().copy(new Keys().
+                      getBase64AsymmetricPublicKeySignFromJSON(keySignData)
+                    );
+                    new Paint().underpostOption('cyan', 'success', 'Base64 Sign Public Key Copy to Clipboard');
+                    new Paint().underpostBar();
+                  }else{
+                    new Paint().underpostOption('red', 'error', 'Base64 Sign Public Key generator failed');
+                    new Paint().underpostBar();
+                  }
+
+                }catch(err){
+                  console.log(err);
+                  new Paint().underpostOption('red', 'error', 'Base64 Sign Public Key generator failed');
+                  new Paint().underpostBar();
+                }
+
+                /*
+
                 let sign_public_key = await new Keys()
                 .getAsymmetricSignPublicObj(
                   KEYS,
@@ -400,6 +504,8 @@ export class UnderPostManager {
                   new Paint().underpostOption('red', 'error', 'Base64 Sign Public Key generator failed');
                   new Paint().underpostBar();
                 }
+
+                */
               }
               break;
             default:
@@ -448,6 +554,64 @@ export class UnderPostManager {
             fs.writeFileSync(this.mainDir+'/data/underpost.json',
             new Util().jsonSave(tempData),
             this.charset);
+
+
+              let passphrase = await new ReadLine().h(
+                new Paint().underpostInput("Enter passphrase current asymmetric public key")
+              );
+
+              let fileKeyContent = await KEYS.getKeyContent(
+                type,
+                timeStampKey
+              );
+              let keySignData = new Keys().generateDataAsymetricSign(
+                fileKeyContent.private.genesis_dir,
+                fileKeyContent.public.base64,
+                passphrase,
+                true
+              );
+              let validateSign = new Keys().validateDataTempKeyAsymmetricSign(
+                fileKeyContent.public.base64,
+                keySignData,
+                blockChainConfig,
+                this.charset,
+                this.mainDir
+              );
+
+              if(validateSign===true){
+                console.log(new Util().jsonSave(keySignData));
+                new Util().copy(new Keys().
+                  getBase64AsymmetricPublicKeySignFromJSON(keySignData)
+                );
+                this.activeSenderAsymmetricSignKeyData = keySignData;
+                this.activeAsymmetricKeyData = fileKeyContent;
+
+                fs.writeFileSync(
+                  this.mainDir+'/data/keys/asymmetric/active.json',
+                  new Util().jsonSave({
+                    activeSenderAsymmetricSignKeyData: this.activeSenderAsymmetricSignKeyData,
+                    activeAsymmetricKeyData: this.activeAsymmetricKeyData
+                  }),
+                  this.charset);
+
+                return async () => {
+                  new Paint().underpostOption(
+                    'cyan', 'success', 'Activate key:'+timeStampKey+
+                    ' index:'+indexKey
+                  );
+                  new Paint().underpostOption('cyan', 'success', 'Base64 Sign Public Key Copy to Clipboard');
+                  new Paint().underpostBar();
+                }
+              }else{
+                return async () => {
+                  new Paint().underpostOption('red', 'error', 'Base64 Sign Public Key generator failed');
+                  new Paint().underpostBar();
+                }
+              }
+
+
+
+              /*
             return async () => {
               new Paint().underpostOption(
                 'yellow', 'success', 'Activate key:'+timeStampKey+
@@ -455,7 +619,9 @@ export class UnderPostManager {
               );
               new Paint().underpostBar();
             }
+            */
           }catch(err){
+            console.log(err);
             return async () => {
               new Paint().underpostOption('red', 'error', new Util().jsonSave(err));
               new Paint().underpostBar();
@@ -552,16 +718,19 @@ export class UnderPostManager {
             let chain = BCobj.chain;
             let validateChain = BCobj.validateChain;
 
+            let validateWithPoolTransaction =
             await chainObj.currentAmountCalculator(
               "",
               false,
               tempDataTransactions.pool
             );
+            // console.log(" validateWithPoolTransaction ->");
+            // console.log(validateWithPoolTransaction);
 
             let tableAsymmetricKeys = [];
 
             for(let rowKey of tableKeys){
-              if(validateChain.global == true){
+              if(validateChain.global == true && validateWithPoolTransaction != null){
                 let amountData = await chainObj.currentAmountCalculator(
                   fs.readFileSync(
                     this.mainDir+'/data/keys/asymmetric/'+rowKey.timestamp+'/public.pem')
@@ -597,7 +766,16 @@ export class UnderPostManager {
            this.mainDir+'/data/underpost.json',
            this.charset
          ));
-
+         let resp = await new RestService().postJSON(
+           blockChainConfig.constructor.userConfig.bridgeUrl+'/node/ip',
+           new Util().fusionObj([
+             {
+               generation: blockChainConfig.constructor.generation
+             },
+             tempData.network.node
+           ])
+         );
+         /*
          let resp = await new RestService().postJSON(
            blockChainConfig.constructor.userConfig.bridgeUrl+'/node/ip',
            new Util().fusionObj([
@@ -609,6 +787,7 @@ export class UnderPostManager {
              tempData.network_user
            ])
          );
+         */
          new Paint().underpostOption('yellow', ' ', 'bridge rest connection');
          console.log(resp);
 
@@ -832,21 +1011,44 @@ export class UnderPostManager {
           console.log(" key sender selected ->");
           console.log(sender);
 
+          // validar ambas llaves
+
+          let senderValidator = new Keys().validateDataTempKeyAsymmetricSign(
+            sender.data.base64PublicKey,
+            sender,
+            blockChainConfig,
+            this.charset,
+            this.mainDir
+          );
+
+          let receiverValidator = new Keys().validateDataTempKeyAsymmetricSign(
+            receiver.data.base64PublicKey,
+            receiver,
+            blockChainConfig,
+            this.charset,
+            this.mainDir
+          );
+
+          /*
+
           let senderValidator =  await new Keys()
           .validateAsymmetricFromSign(
             sender,
             blockChainConfig.keys.publicLen,
             this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
+            */
 
           console.log(" sender validator ->");
           console.log(senderValidator);
-
+          /*
         let receiverValidator =  await new Keys()
         .validateTempAsymmetricSignKey(
           receiver,
           blockChainConfig,
           this.charset,
           this.mainDir);
+
+          */
 
         console.log(" receiver validator ->");
         console.log( receiverValidator);
@@ -908,6 +1110,16 @@ export class UnderPostManager {
                      "Enter passphrase current asymmetric public key for sign data transaction")
                  );
 
+                 let endObjTransaction = new Keys().generateDataAsymetricSign(
+                   this.activeAsymmetricKeyData.private.genesis_dir,
+                   sender.data.base64PublicKey,
+                   passphrase,
+                   false,
+                   dataTransaction
+                 );
+
+                 /*
+
                  let endObjTransaction = new Keys().generateAsymetricFromSign(
                    this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/private.pem',
                    sender.data.base64PublicKey,
@@ -915,15 +1127,26 @@ export class UnderPostManager {
                    dataTransaction,
                    false);
 
+                   */
+
                    console.log('endObjTransaction ->');
                    console.log(endObjTransaction);
 
                    console.log('from sign validator ->');
+                   let validatorTransaction = new Keys().validateDataTempKeyAsymmetricSign(
+                     sender.data.base64PublicKey,
+                     endObjTransaction,
+                     blockChainConfig,
+                     this.charset,
+                     this.mainDir
+                   );
+                   /*
                    let validatorTransaction = await new Keys()
                    .validateAsymmetricFromSign(
                      endObjTransaction,
                      blockChainConfig.keys.publicLen,
                      this.mainDir+'/data/keys/asymmetric/'+timestamp_key+'/public.pem');
+                     */
                    console.log(validatorTransaction);
                    if(validatorTransaction == true){
 
@@ -1003,7 +1226,7 @@ export class UnderPostManager {
          let keyPool = await new ReadLine()
          .yn("Use a key receiver from the public key pool ?");
 
-         // se pide sender
+         let sender = this.activeSenderAsymmetricSignKeyData;
          let receiver = null;
 
          switch (keyPool) {
@@ -1501,6 +1724,12 @@ export class UnderPostManager {
     ! fs.existsSync(this.mainDir+'/data/keys') ?
     fs.mkdirSync(this.mainDir+'/data/keys') : null;
 
+    ! fs.existsSync(this.mainDir+'/data/keys/asymmetric') ?
+    fs.mkdirSync(this.mainDir+'/data/keys/asymmetric') : null;
+
+    ! fs.existsSync(this.mainDir+'/data/keys/symmetric') ?
+    fs.mkdirSync(this.mainDir+'/data/keys/symmetric') : null;
+
     ! fs.existsSync(this.mainDir+'/data/blockchain') ?
     fs.mkdirSync(this.mainDir+'/data/blockchain') : null;
 
@@ -1509,6 +1738,24 @@ export class UnderPostManager {
 
     ! fs.existsSync(this.mainDir+'/data/temp/test-key') ?
     fs.mkdirSync(this.mainDir+'/data/temp/test-key') : null;
+
+
+    fs.existsSync(this.mainDir+'/data/keys/asymmetric/active.json') ?
+    ((()=>{
+      const asymmetricDataActive =
+      JSON.parse(
+        fs.readFileSync(
+          this.mainDir+'/data/keys/asymmetric/active.json',
+          this.charset
+        )
+      );
+      this.activeSenderAsymmetricSignKeyData =
+      asymmetricDataActive.activeSenderAsymmetricSignKeyData;
+      this.activeAsymmetricKeyData =
+      asymmetricDataActive.activeAsymmetricKeyData;
+
+    })())
+    :new Paint().underpostOption('magenta', 'warn', 'No Active Asymetric Key Data');;
 
   }
 
@@ -1522,6 +1769,27 @@ export class UnderPostManager {
     ));
 
     new Paint().underpostTextBotbar('Active user data');
+
+    new Paint().underpostOption('cyan', ' ', ' User Data:');
+    new Paint().underpostOption('yellow', 'username              ', tempData.network.user.username);
+    new Paint().underpostOption('yellow', 'state                 ', tempData.network.user.state);
+    new Paint().underpostOption('yellow', 'msg                   ', tempData.network.user.msg);
+
+    new Paint().underpostOption('cyan', ' ', ' Keys Active:');
+    new Paint().underpostOption('yellow', 'Symmetric Key Active  ', tempData.active_symmetric_public_key);
+    new Paint().underpostOption('yellow', 'Asymmetric Key Active ', tempData.active_asymmetric_public_key);
+
+    new Paint().underpostOption('cyan', ' ', ' Local Server:');
+    new Paint().underpostOption('yellow', 'server name           ', tempData.network.node.serverName);
+    new Paint().underpostOption('yellow', 'ip                    ', tempData.network.node.ip);
+    new Paint().underpostOption('yellow', 'http port             ', tempData.network.node.http_port);
+    new Paint().underpostOption('yellow', 'ws port               ', tempData.network.node.ws_port);
+    new Paint().underpostBar();
+
+
+    /*
+
+    new Paint().underpostTextBotbar('Active user data');
     new Paint().underpostOption('yellow', 'username              ', tempData.network_user.username);
     new Paint().underpostOption('yellow', 'email                 ', tempData.network_user.email);
     new Paint().underpostOption('yellow', 'web                   ', tempData.network_user.web);
@@ -1531,6 +1799,8 @@ export class UnderPostManager {
     new Paint().underpostOption('yellow', 'http port             ', tempData.http_port);
     new Paint().underpostOption('yellow', 'ws port               ', tempData.ws_port);
     new Paint().underpostBar();
+
+    */
 
   }
 
@@ -1548,11 +1818,11 @@ export class UnderPostManager {
         this.mainDir+'/data/underpost.json',
         this.charset
       ));
-      let current_ip = tempData.network_user.ip;
+      let current_ip = tempData.network.node.ip;
       let new_ip = await new RestService().getIP();
       if( (current_ip!=new_ip) && new Util().validateIP(new_ip) ){
         try{
-          tempData.network_user.ip = new_ip;
+          tempData.network.node.ip = new_ip;
           fs.writeFileSync(
             this.mainDir+'/data/underpost.json',
             new Util().jsonSave(tempData),

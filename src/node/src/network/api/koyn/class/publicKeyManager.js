@@ -122,12 +122,21 @@ export class PublicKeyManager {
     let validate_sign_key = true;
     try{
       for(let test_key of this.bridge.pool){
+          /*
           let test_validate_sign_key = await new Keys()
           .validateTempAsymmetricSignKey(
             test_key.signKey,
             blockChainConfig,
             this.charset,
             this.mainDir);
+            */
+          let test_validate_sign_key = new Keys().validateDataTempKeyAsymmetricSign(
+            test_key.signKey.data.base64PublicKey,
+            test_key.signKey,
+            blockChainConfig,
+            this.charset,
+            this.mainDir);
+
           if(test_validate_sign_key == false){
             validate_sign_key = false;
             this.bridge.pool = [];
@@ -266,7 +275,7 @@ export class PublicKeyManager {
        +tempData.active_asymmetric_public_key);
        return [];
      }
-
+     /*
      let dataPost = new Util().fusionObj([
        {
          http_port: tempData.http_port,
@@ -274,6 +283,7 @@ export class PublicKeyManager {
        },
        tempData.network_user
      ]);
+     */
 
      new Paint().underpostOption("yellow", " ", "current asymmetric public key");
      console.log(asymmetricKeyData.public.raw);
@@ -291,6 +301,14 @@ export class PublicKeyManager {
            comment: await new ReadLine().r(
              new Paint().underpostInput('comment state ? <enter> skip')),
            lastUpdate: (+ new Date()),
+           user: tempData.network.user,
+           signKey:  new Keys().generateDataAsymetricSign(
+             asymmetricKeyData.private.genesis_dir,
+             asymmetricKeyData.public.base64,
+             passphrase,
+             true
+           )
+           /*
            signKey: new Keys().generateAsymetricFromSign(
              asymmetricKeyData.private.genesis_dir,
              asymmetricKeyData.public.base64,
@@ -298,6 +316,7 @@ export class PublicKeyManager {
              dataPost,
              true
            )
+           */
          }
        );
      }catch(err){
@@ -341,6 +360,15 @@ export class PublicKeyManager {
      new Paint().underpostOption('yellow', ' ', 'Base64 decode Obj:');
      let test_key = new Keys()
        .getJSONAsymmetricPublicKeySignFromBase64(inputBase64PublicKey);
+       console.log(new Util().jsonSave(test_key));
+
+      let validate_sign_key = new Keys().validateDataTempKeyAsymmetricSign(
+          test_key.data.base64PublicKey,
+          test_key,
+          blockChainConfig,
+          this.charset,
+          this.mainDir);
+       /*
      let validate_sign_key = await new Keys()
      .validateTempAsymmetricSignKey(
        test_key,
@@ -349,6 +377,7 @@ export class PublicKeyManager {
        this.mainDir);
 
       console.log(test_key);
+      */
       if(validate_sign_key == true){
         return test_key
       }else{
@@ -374,6 +403,17 @@ export class PublicKeyManager {
       };
 
       if(!new Util().existAttr(externalPublicKey, "error")){
+
+        let tempData = JSON.parse(fs.readFileSync(
+          this.mainDir+'/data/underpost.json',
+          this.charset
+        ));
+        let userData = new Util().newInstance(tempData.network.user);
+        await new Util().iterateKeysAsync(userData, async (key, value) =>
+            userData[key] = await new ReadLine().r(
+              new Paint().underpostInput('add user data '+key+' ? <enter> skip'))
+        );
+        externalPublicKey.user = userData;
 
         let foundKey = false;
         let ind_ = 0;

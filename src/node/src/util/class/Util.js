@@ -962,6 +962,12 @@ let max = Math.max( ...arr );
 		}
 	}
 
+	async  iterateKeysAsync(obj, fn){
+		for(let key_ of Object.keys(obj)){
+			await fn(key_, obj[key_]);
+		}
+	}
+
 	 isLen(obj){
 		return obj.hasOwnProperty("length");
 	}

@@ -225,7 +225,41 @@ export class Keys {
       return decrypted.toString("utf8");
   }
 
-  generateAsymetricFromSign(privateDirPem, publicBase64, passphrase, data, setPublicKey){
+  generateDataAsymetricSign(privateDirPem, publicBase64, passphrase, enableID, data){
+    console.log(colors.magenta("generateDataAsymetricSign ..."));
+    // este metodo genera una llave individual firmada para
+    // hacerla portable y usarla para en pool o en una transaccion
+    let idSign = null;
+    let dataSign = {};
+    if(data !== undefined){
+      dataSign = data;
+    }
+    if(enableID === true){
+      idSign  = {
+         base64PublicKey: publicBase64,
+         B64PUKSHA256: SHA256(publicBase64).toString()
+      };
+      dataSign = new Util().fusionObj([
+        idSign,
+        dataSign
+      ]);
+    }
+    if(new Util().objEq(dataSign, {})){
+      return console.log(colors.error("generateAsymetricFromSign() -> invalid data"));
+    }
+    return {
+      data: dataSign,
+      sign: this.encryptStringWithRsaPrivateKey(
+        SHA256(
+        new Util().JSONstr(dataSign)
+        ).toString(),
+        privateDirPem,
+        passphrase
+      )
+    }
+
+
+    /*
     let dataContent = {};
     if(setPublicKey == true){
       dataContent = new Util().fusionObj([
@@ -248,39 +282,11 @@ export class Keys {
         passphrase
       )
     }
+
+    */
   }
 
-  validateAsymmetricFromSign(obj, lengthBase64, publicDirPem){
-    // 364
-    try {
-      let dataSha = SHA256(new Util().JSONstr(obj.data)).toString();
-      let decrSign = this.decryptStringWithRsaPublicKey(
-        obj.sign,
-        publicDirPem
-      );
-      if(new Util().existAttr(obj.data, "sender")){
-        // console.log(obj.data.sender.data);
-        // console.log((decrSign==dataSha));
-        // console.log(lengthBase64);
-        // console.log(obj.data.sender.data.base64PublicKey.length);
-        return(
-          (decrSign==dataSha)
-          &&
-          (obj.data.sender.data.base64PublicKey.length==lengthBase64)
-        );
-      }else{
-        return(
-          (decrSign==dataSha)
-          &&
-          (obj.data.base64PublicKey.length==lengthBase64)
-        );
-      }
-    }catch(err){
-      console.log("validateAsymmetricFromSign(obj, length, publicDirPem) error ->");
-      console.log(err);
-      return false;
-    }
-  }
+
 
   getBase64AsymmetricPublicKeySignFromJSON(data){
     return Buffer.from(new Util().JSONstr(data)).toString('base64');
@@ -290,40 +296,33 @@ export class Keys {
     return JSON.parse(Buffer.from(data, 'base64').toString());
   }
 
-
-  async getAsymmetricSignPublicObj(KEYS, tempData, timeStampKey, blockChainConfig){
-    let fileKeyContent = await KEYS.getKeyContent(
-      "asymmetricKeys",
-      timeStampKey
-    );
-    let dataPost = new Util().fusionObj([
-      {
-        http_port: tempData.http_port,
-        ws_port: tempData.ws_port
-      },
-      tempData.network_user
-    ]);
-    let passphrase = await new ReadLine().h(
-      new Paint().underpostInput("Enter passphrase current asymmetric public key")
-    );
-    try {
-      return await this.generateAsymetricFromSign(
-        fileKeyContent.private.genesis_dir,
-        fileKeyContent.public.base64,
-        passphrase,
-        dataPost,
-        true
-      );
-    }catch(err){
-      console.log(err);
-      new Paint().underpostOption('red', 'error', 'invalid assymetric passphrase');
-      return null;
-    }
-  }
-
-  async validateTempAsymmetricSignKey(
-    test_key, blockChainConfig, charset, mainDir, nameDataFolder
+  validateDataTempKeyAsymmetricSign(
+    base64PublicKey,
+    test_key,
+    blockChainConfig,
+    charset,
+    mainDir,
+    nameDataFolder
   ){
+    console.log(colors.magenta("validateDataTempKeyAsymmetricSign ..."));
+    nameDataFolder==undefined ? nameDataFolder = 'data': null;
+    const id_file_key = new Util().getHash();
+    const publicDirPem = mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem';
+    fs.writeFileSync(
+      publicDirPem,
+      Buffer.from(base64PublicKey, 'base64').toString(),
+      charset
+    );
+    const result = (
+      SHA256(new Util().JSONstr(test_key.data)).toString()
+      ===
+      this.decryptStringWithRsaPublicKey(test_key.sign, publicDirPem)
+    );
+    fs.unlinkSync(publicDirPem);
+    return result;
+
+
+    /*
       nameDataFolder==undefined ? nameDataFolder = 'data': null;
 
       let id_file_key = new Util().getHash();
@@ -345,6 +344,8 @@ export class Keys {
       }
       fs.unlinkSync(mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem');
       return result;
+
+      */
 
   }
 
