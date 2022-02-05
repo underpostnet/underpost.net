@@ -239,6 +239,20 @@ export class PublicKeyManager {
     });
 
     console.table(tableLocalPool);
+
+    let viewUserData = await new ReadLine().yn("View user data ?");
+
+    if(viewUserData === "y"){
+
+      let idViewUser = await new ReadLine().r(
+        new Paint().underpostInput("Index user data ?")
+      );
+      console.table({
+        ...tableLocalPool[idViewUser],
+        ...pool[idViewUser].user
+      });
+    }
+
   }
 
   async getPoolPublicKey(){
