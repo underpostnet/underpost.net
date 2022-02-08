@@ -23,11 +23,10 @@ const pathsEmptyArray = [
   pathApi+'/chain.json',
   pathApi+'/signHistory.json',
   pathApi+'/koyn-nodes.json',
-  pathApi+'/public-key-pull.json'
+  pathApi+'/public-key-pull.json',
+  pathApi+'/temp-items-link.json'
 ];
-const pathsDeleteArray = [
-  pathApi+'/doc.json'
-];
+const pathsDeleteArray = [];
 
 deleteFolderRecursive(pathClient+'/data');
 
