@@ -1,5 +1,3 @@
-/src/node/apps
-/src/scheme/src
-/src/node/node_modules
-/src/node/package-lock.json
-/src/node/src/network/api/underpost-manager/bin/config.json
+/node_modules
+/package-lock.json
+/underpos-modules-v1/underpost-manager-v1/bin/config.json
