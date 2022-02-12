@@ -15,8 +15,20 @@ export class WSclient {
     });
   }
 
+  async onConnection(fn){
+    this.connection.on('connection', async data => {
+      await fn(data);
+    });
+  }
+
   async onOpen(fn){
     this.connection.on('open', async data => {
+      await fn(data);
+    });
+  }
+
+  async onClose(fn){
+    this.connection.on('close', async data => {
       await fn(data);
     });
   }
@@ -32,11 +44,13 @@ export class WSclient {
 
   async clearEvent(type){
     /*
+      handleSocket Types ->
     "message"
     "close"
     "open"
+    "connection"
     */
-    this.connection.removeEventListener(type, this.handleSocketMessage);
+    this.connection.removeEventListener(type, this.connection);
   }
 
   close(){
