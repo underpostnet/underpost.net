@@ -21,7 +21,7 @@ export class BlockChain {
 
 			this.version = obj.version;
 
-			this.setPreviousHahsGeneration(obj.pathPreviousHashGeneration);
+			this.seed = obj.seed;
 
 			this.difficultyConfig = obj.difficultyConfig;
 
@@ -197,14 +197,6 @@ export class BlockChain {
 
 	}
 
-	setPreviousHahsGeneration(path){
-		path == null ?
-		this.previousHashGeneration = SHA256(
-			new Util().JSONstr(this.dataGenesisHashGeneration)
-		).toString():
-		this.previousHashGeneration = fs.readFileSync(path, this.userConfig.charset);
-	}
-
   currentBlockConfig(){
 		let diff = this.calculateDifficulty();
     switch (new Util().l(this.chain)) {
@@ -223,7 +215,7 @@ export class BlockChain {
 					date: (+ new Date()),
 					version: this.version,
 					generation: this.generation,
-					previousHashGeneration: this.previousHashGeneration
+					seed: this.seed
         }
       default:
         return {
@@ -238,7 +230,7 @@ export class BlockChain {
 					date: (+ new Date()),
 					version: this.version,
 					generation: this.generation,
-					previousHashGeneration: this.previousHashGeneration
+					seed: this.seed
         }
     }
   }
@@ -249,7 +241,7 @@ export class BlockChain {
 			rewardConfig: this.rewardConfig,
 			generation: this.generation,
 		  version: this.version,
-			previousHashGeneration: this.previousHashGeneration
+			seed: this.seed
 		}
 	}
 

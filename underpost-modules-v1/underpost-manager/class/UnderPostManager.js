@@ -757,8 +757,7 @@ export class UnderPostManager {
                version: '0.0.0',
                name: "Koλn",
                hashGeneration: null,
-               // pathPreviousHashGeneration: '../data/blockchain/generation-0/hash',
-               pathPreviousHashGeneration: blockChainConfig.constructor.pathPreviousHashGeneration,
+               seed: blockChainConfig.constructor.seed,
                dataGenesisHashGeneration: 'khrónos',
                userConfig: {
                  blocksToUndermine: 1,
