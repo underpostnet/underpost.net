@@ -1267,6 +1267,10 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
 	return valObj;
 }
 
+ clearDir(dir_){
+	return dir_.replace(/\\/g, '/').replace(/\/\//g, "/");
+}
+
 
 
 
