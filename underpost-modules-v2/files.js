@@ -3,6 +3,7 @@ import navDir from './navDir.js';
 import fs from 'fs';
 import {default as fsWithCallbacks} from 'fs'
 const _fs = fsWithCallbacks.promises;
+import colors from 'colors/safe.js';
 
 // create/update -> fs.writeFileSync( file-path, data, options )
 // read -> fs.readFileSync( file-path, options )
@@ -33,6 +34,7 @@ options ->
      console.log(colors.red(' readRecursive: (dir, out) => no directory found:'+navDir(dir))),
 
    copyDir: async (src, dest, ignore) => {
+        ignore == undefined ? ignore = [] : null;
         await _fs.mkdir(dest, { recursive: true });
         let entries = await _fs.readdir(src, { withFileTypes: true });
 
