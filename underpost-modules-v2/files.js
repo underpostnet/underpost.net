@@ -6,7 +6,9 @@ const _fs = fsWithCallbacks.promises;
 
 // create/update -> fs.writeFileSync( file-path, data, options )
 // read -> fs.readFileSync( file-path, options )
-// delete -> fs.unlinkSync( file-path );
+// delete -> fs.unlinkSync( file-path )
+
+// fs.renameSync( oldPath, newPath )
 
 // ! fs.existsSync( file-path/folder-path ) ?
 // fs.mkdirSync( folder-path ) : null;
