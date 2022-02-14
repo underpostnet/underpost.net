@@ -8,6 +8,9 @@ const _fs = fsWithCallbacks.promises;
 // read -> fs.readFileSync( file-path, options )
 // delete -> fs.unlinkSync( file-path );
 
+// ! fs.existsSync( file-path/folder-path ) ?
+// fs.mkdirSync( folder-path ) : null;
+
 /*
 options ->
 {
