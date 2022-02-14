@@ -1,19 +1,18 @@
 
 
 import path from 'path';
+import util from './util.js';
 
 const __dirname =
-process.argv[1].replace(/\\/g, '/').split('/')
+util.clearDir(process.argv[1]).split('/')
 .slice(0, -1).join('/');
-
-/* '//' -> '/'  -> .replace(/\/\//g, "/"); */
 
 const navDir = toPath => {
 	switch (toPath) {
 		case undefined:
 				return __dirname
 		default:
-			  return path.join(__dirname, toPath).replace(/\\/g, '/')
+			  return util.clearDir(path.join(__dirname, toPath))
 	}
 };
 
