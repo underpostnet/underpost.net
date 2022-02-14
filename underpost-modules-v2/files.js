@@ -4,8 +4,9 @@ import fs from 'fs';
 import {default as fsWithCallbacks} from 'fs'
 const _fs = fsWithCallbacks.promises;
 
-// fs.writeFileSync( file, data, options )
-// fs.readFileSync( file, options )
+// create/update -> fs.writeFileSync( file-path, data, options )
+// read -> fs.readFileSync( file-path, options )
+// delete -> fs.unlinkSync( file-path );
 
 /*
 options ->
