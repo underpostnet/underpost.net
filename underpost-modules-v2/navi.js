@@ -7,7 +7,7 @@ const __dirname =
 util.clearDir(process.argv[1]).split('/')
 .slice(0, -1).join('/');
 
-const navDir = toPath => {
+const navi = toPath => {
 	switch (toPath) {
 		case undefined:
 				return __dirname
@@ -16,4 +16,4 @@ const navDir = toPath => {
 	}
 };
 
-export default navDir;
+export default navi;

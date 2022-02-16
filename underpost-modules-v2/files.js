@@ -1,5 +1,5 @@
 
-import navDir from './navDir.js';
+import navi from './navi.js';
 import fs from 'fs';
 import {default as fsWithCallbacks} from 'fs'
 const _fs = fsWithCallbacks.promises;
@@ -26,12 +26,12 @@ options ->
  const files = {
 
    readRecursive: (dir, out) =>
-     fs.existsSync(navDir(dir)) ?
-     fs.readdirSync(navDir(dir)).forEach( async file =>
-     fs.lstatSync(navDir(dir)+'/'+file).isDirectory() ?
+     fs.existsSync(navi(dir)) ?
+     fs.readdirSync(navi(dir)).forEach( async file =>
+     fs.lstatSync(navi(dir)+'/'+file).isDirectory() ?
      files.readRecursive(dir+'/'+file, out) :
-     out(navDir()+dir+'/'+file)) :
-     console.log(colors.red(' readRecursive: (dir, out) => no directory found:'+navDir(dir))),
+     out(navi(dir)+'/'+file)) :
+     console.log(colors.red(' readRecursive: (dir, out) => no directory found:'+navi(dir))),
 
    copyDir: async (src, dest, ignore) => {
         ignore == undefined ? ignore = [] : null;

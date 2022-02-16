@@ -21,15 +21,15 @@ const rest = {
     //   .on('error', function(error) {
     //     console.log(error);
     //   })
-    //   .pipe(fs.createWriteStream(navDir('../fontawesome-5.3.1.zip')))
+    //   .pipe(fs.createWriteStream(navi('../fontawesome-5.3.1.zip')))
     //   .on('finish', function() {
     //     console.log('finished dowloading');
-    //     const zip = new admZip(navDir('../fontawesome-5.3.1.zip'));
+    //     const zip = new admZip(navi('../fontawesome-5.3.1.zip'));
     //     console.log('start unzip');
-    //     zip.extractAllTo(navDir('../'), true);
+    //     zip.extractAllTo(navi('../'), true);
     //     console.log('finished unzip');
-    //     fs.unlinkSync(navDir('../fontawesome-5.3.1.zip'));
-    //     fs.renameSync(navDir('../fontawesome-free-5.3.1-web'), navDir('../fontawesome'));
+    //     fs.unlinkSync(navi('../fontawesome-5.3.1.zip'));
+    //     fs.renameSync(navi('../fontawesome-free-5.3.1-web'), navi('../fontawesome'));
     //   });
   }
 

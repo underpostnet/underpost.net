@@ -16,7 +16,7 @@ import colors from "colors/safe.js";
 import var_dump from "var_dump";
 import path from "path";
 
-import navDir from "../../../underpost-modules-v2/navDir.js";
+import navi from "../../../underpost-modules-v2/navi.js";
 
 export class UnderPostManager {
 
@@ -24,7 +24,7 @@ export class UnderPostManager {
 
     let charset = 'utf8';
 
-    this.mainDir = navDir();
+    this.mainDir = navi();
     this.charset = charset;
     this.poolPublickey = null;
     this.activeSenderAsymmetricSignKeyData = null;
@@ -47,7 +47,7 @@ export class UnderPostManager {
          ]){
 
            let originPath = fs.readFileSync(
-               navDir('../../underpost-data-template/'+module_),
+               navi('../../underpost-data-template/'+module_),
                this.charset
            );
 
@@ -1517,7 +1517,7 @@ export class UnderPostManager {
 
     let mainData = {};
     let dataTemplate = JSON.parse(
-      fs.readFileSync(navDir('../../underpost-data-template/underpost.json'))
+      fs.readFileSync(navi('../../underpost-data-template/underpost.json'))
     );
 
     //--------------------------------------------------------------------------
