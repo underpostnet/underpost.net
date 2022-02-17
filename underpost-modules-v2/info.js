@@ -32,6 +32,7 @@ const info = {
       }
   },
   req: (req, path, logGroups) => {
+    path.modules = path.modules.join('|');
     const display_ = info.reqData(req, path, logGroups);
     const source_ = display_.source;
     delete display_.source;

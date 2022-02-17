@@ -22,7 +22,8 @@ const util = {
   	'-' + util.chr4() +
   	'-' + util.chr4() +
   	'-' + util.chr4() + util.chr4() + util.chr4();
-  }
+  },
+  newInstance: obj_ => JSON.parse(JSON.stringify(obj_))
 };
 
 
