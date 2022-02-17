@@ -14,10 +14,10 @@ const rest = {
     });
   }),
 
-  postJSON: (url, data, headers) => new Promise((resolve, reject) =>
+  FETCH: (method, url, data, headers) => new Promise((resolve, reject) =>
   fetch(url, {
-    method: 'post',
-    body:    JSON.stringify(data),
+    method: method,
+    body: JSON.stringify(data),
     headers: headers ? headers : { 'Content-Type': 'application/json' },
   }).then(res => {
     res.json().then(json => {
