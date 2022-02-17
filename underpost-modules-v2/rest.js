@@ -1,5 +1,6 @@
 import fileGetContents from 'file-get-contents';
 import colors from 'colors/safe.js';
+import fetch from 'node-fetch';
 
 const rest = {
    getRaw: async path => new Promise((resolve, reject) => {
@@ -13,6 +14,20 @@ const rest = {
     });
   }),
 
+  postJSON: (url, data, headers) => new Promise((resolve, reject) =>
+  fetch(url, {
+    method: 'post',
+    body:    JSON.stringify(data),
+    headers: headers ? headers : { 'Content-Type': 'application/json' },
+  }).then(res => {
+    res.json().then(json => {
+          resolve(json);
+    }).catch(error => {
+          reject(error);
+    });
+  }).catch(error => {
+        reject(error);
+  })),
 
   zipDownloader: () => {
     // defual url -> https://underpost.net/download/
