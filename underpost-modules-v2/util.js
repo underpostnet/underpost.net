@@ -14,7 +14,15 @@ const util = {
   	for(let i_=ini; i_<=fin; i_++){ list_.push(i_); }
   	return list_;
   },
-  getKeys: obj_ => Object.keys(obj_)
+  getKeys: obj_ => Object.keys(obj_),
+  chr4: () => Math.random().toString(16).slice(-4),
+  getHash: () => {
+  	return util.chr4() + util.chr4() +
+  	'-' + util.chr4() +
+  	'-' + util.chr4() +
+  	'-' + util.chr4() +
+  	'-' + util.chr4() + util.chr4() + util.chr4();
+  }
 };
 
 

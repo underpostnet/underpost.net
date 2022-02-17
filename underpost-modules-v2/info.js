@@ -31,18 +31,17 @@ const info = {
         ...{source: req.useragent.source}
       }
   },
-  req: (req, path, paths, logGroups) => {
-    const dataPath = paths.filter(x=>x.path==path.uri)[0];
+  req: (req, path, logGroups) => {
     const display_ = info.reqData(req, path, logGroups);
     const source_ = display_.source;
     delete display_.source;
     console.log(
       ' \n > '
      + colors.bgYellow(colors.black(' '
-     + util.tu(dataPath.methods)
+     + req.method
      + ' ') )+ colors.green(' .'+path.uri)
      + '\n  '+colors.yellow(display_.date));
-    console.table({ ...dataPath, ...display_ });
+    console.table(display_);
     console.log(' source: '+colors.green(source_));
   }
 };
