@@ -20,18 +20,19 @@ const info = {
   }:null,
   log: (req, info_) => {
     const source_ = info_.source;
+    const date_ = info_.date;
     delete info_.source;
+    delete info_.date;
     console.log(
       ' \n > '
      + colors.bgYellow(colors.black(' '
      + req.method
      + ' ') )+ colors.green(' .'+info_.uri)
-     + '\n  '+colors.yellow(info_.date));
+     + '\n  '+colors.yellow(date_));
     console.table(info_);
     console.log(' source: '+colors.green(source_));
   },
   view: (req, data) => {
-    data.modules = data.modules.join('|');
     const info_ = info.reqData(req, data);
     info.log(req, info_);
   },
