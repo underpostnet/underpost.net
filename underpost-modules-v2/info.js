@@ -39,7 +39,16 @@ const info = {
   api: (req, data) => {
     const info_ = info.reqData(req, data);
     info.log(req, info_);
-  }
+  },
+  router: _app => _app._router.stack
+    .map((v,i,a) => true ?
+    {
+      index: i,
+      path: v.route ? v.route.path: undefined,
+      methods: v.route ? util.getKeys(v.route.methods).join('|'): undefined
+    }
+    :null
+  )
 
 };
 
