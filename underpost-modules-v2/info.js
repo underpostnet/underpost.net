@@ -33,8 +33,14 @@ const info = {
     console.log(' source: '+colors.green(source_));
   },
   view: (req, data) => {
-    const info_ = info.reqData(req, data);
-    info.log(req, info_);
+    let info_ = info.reqData(req, data);
+    const sitemap_ = util.changeKeyname(info_.sitemap, "active", "active-sitemap");
+    info_.microdata = info_.microdata.join('|');
+    delete info_.sitemap;
+    info.log(req, {
+      ...info_,
+      ...sitemap_
+    });
   },
   api: (req, data) => {
     const info_ = info.reqData(req, data);
