@@ -28,7 +28,17 @@ const util = {
   	obj[newKey] = util.newInstance(obj[oldKey]);
   	delete obj[oldKey];
   	return obj;
-  }
+  },
+  makeid: (length, num) => {
+    let result           = '';
+    let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		num ? characters += '0123456789':null;
+    let charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+       }
+       return result;
+    }
 };
 
 
