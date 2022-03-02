@@ -774,7 +774,7 @@ export class UnderPostManager {
                  charset: this.charset,
                  transactionTemplate: blockChainConfig.network.transactionTemplate,
                  minimumZeros: "0",
-                 limitMbBlock: 20,
+                 limitMbBlock: blockChainConfig.constructor.limitMbBlock,
                  blockchain: blockChainConfig,
                  dataDir: this.mainDir,
                  dataFolder: 'data'
@@ -869,7 +869,7 @@ export class UnderPostManager {
              maxErrorAttempts: 5,
              RESTdelay: 1000,
              charset: this.charset,
-             limitMbBlock: 20,
+             limitMbBlock: blockChainConfig.constructor.limitMbBlock,
              blockchain: blockChainConfig,
              dataDir: this.mainDir,
              dataFolder: 'data'
@@ -1142,6 +1142,11 @@ export class UnderPostManager {
          this.mainDir+'/data/underpost.json',
          this.charset
        ));
+
+       if(tempData.active_asymmetric_public_key==null){
+         new Paint().underpostOption('red', 'error', "No active asymmetric Key");
+         return;
+       }
 
        let fileKeyContent = await KEYS.getKeyContent(
          "asymmetricKeys",

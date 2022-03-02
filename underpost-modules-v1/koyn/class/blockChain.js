@@ -241,7 +241,11 @@ export class BlockChain {
 			rewardConfig: this.rewardConfig,
 			generation: this.generation,
 		  version: this.version,
-			seed: this.seed
+			limitMbBlock: this.userConfig.limitMbBlock,
+			seed: this.seed,
+			structs: {
+				transactionTemplate: this.userConfig.transactionTemplate
+			}
 		}
 	}
 
@@ -493,7 +497,7 @@ export class BlockChain {
 					if(! this.validateKeysBlock(block)){
 						keysValidate = false;
 					}
-					if(new Util().getSizeJSON(block).megaBytes>this.userConfig.limitMbBlock){
+					if(new Util().getSizeJSON(block).megaBytes>chain[0].dataGenesis.limitMbBlock){
 						sizeValidate = false;
 					}
 				}
@@ -514,7 +518,10 @@ export class BlockChain {
 			 keysValidate =
 			 this.validateKeysBlock(this.newBlock);
 			 hashValidate = this.checkValid(this.newBlock);
-			 if(new Util().getSizeJSON(this.newBlock).megaBytes>this.userConfig.limitMbBlock){
+			 const limitJSON = new Util().l(this.chain) > 0 ?
+			 this.chain[0].dataGenesis.limitMbBlock :
+			 this.newBlock.dataGenesis.limitMbBlock ;
+			 if(new Util().getSizeJSON(this.newBlock).megaBytes>limitJSON){
 				 sizeValidate = false;
 			 }
 			 if(this.validateTimesTransactions(this.newBlock)==false){
@@ -556,12 +563,12 @@ export class BlockChain {
 
 		if(block.block.index!=0){
 
-			let blockTemplate = new Util().fusionObj([this.chain[0]]);
+			let blockTemplate = new Util().newInstance(this.chain[0]);
 
 			for(let transaction_ of block.node.dataTransaction){
 
 				let transactionTemplate = new Util().uniqueArray(
-					new Util().getAllKeys(blockTemplate.transactionTemplate)
+					new Util().getAllKeys(blockTemplate.dataGenesis.structs.transactionTemplate)
 				);
 
 				let transactionBlock = new Util().uniqueArray(
@@ -575,7 +582,6 @@ export class BlockChain {
 			}
 
 			delete blockTemplate.dataGenesis;
-			delete blockTemplate.transactionTemplate;
 			let auxBlock = new Util().newInstance(block);
 			auxBlock.node.dataTransaction = [];
 
@@ -868,9 +874,7 @@ export class BlockChain {
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig(),
-						dataGenesis: this.genesisBlockChainConfig(),
-						transactionTemplate: this.userConfig.transactionTemplate,
-						limitMbBlock: this.userConfig.limitMbBlock
+						dataGenesis: this.genesisBlockChainConfig()
 					}, ws);
 					if(statusMainProcess.status == false){return statusMainProcess;}
 					break;
@@ -879,7 +883,7 @@ export class BlockChain {
 						rewardAddress: this.userConfig.rewardAddress,
 						paths: obj.paths,
 						blockConfig: this.currentBlockConfig(),
-						limitMbBlock: this.userConfig.limitMbBlock
+						limitMbBlock: this.chain[0].dataGenesis.limitMbBlock
 					}, ws);
 					if(statusMainProcess.status == false){return statusMainProcess;}
 			}

@@ -24,10 +24,7 @@ export class Block {
       this.nonce = obj.nonce;
 
       obj.dataGenesis ?
-      ((()=>{
-        this.dataGenesis = obj.dataGenesis;
-        this.transactionTemplate = obj.transactionTemplate;
-      })()) :
+      this.dataGenesis = obj.dataGenesis :
       null;
 
     }
@@ -40,7 +37,6 @@ export class Block {
               node: this.node,
               block: this.block,
               dataGenesis: this.dataGenesis,
-              transactionTemplate: this.transactionTemplate,
               nonce: this.nonce
             })
           ).toString();
@@ -60,10 +56,8 @@ export class Block {
       return await new Promise(async resolve => {
 
             this.block = Object.assign(this.block, obj.blockConfig);
-            obj.blockConfig.index == 0 ? ((()=>{
-              this.dataGenesis = obj.dataGenesis;
-              this.transactionTemplate = obj.transactionTemplate;
-            })()): null;
+            obj.blockConfig.index == 0 ?
+            this.dataGenesis = obj.dataGenesis : null;
 
             this.node = Object.assign(
               {
@@ -100,7 +94,7 @@ export class Block {
             let s_ = 0;
 
             let limitSizeActive = false;
-            let limitMbBlock = obj.limitMbBlock;
+            let limitMbBlock = obj.blockConfig.index == 0 ? obj.dataGenesis.limitMbBlock : obj.limitMbBlock;
             let roundDigitSize = 3;
             // let unitSizeLog = "megaBytes";
             let unitSizeLog = "kiloBytes";
