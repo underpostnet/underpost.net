@@ -35,7 +35,7 @@ const info = {
   view: (req, data) => {
     let info_ = info.reqData(req, data);
     const sitemap_ = util.changeKeyname(info_.sitemap, "active", "active-sitemap");
-    info_.microdata = info_.microdata.join('|');
+    info_.jsonld = info_.jsonld.join('|');
     delete info_.sitemap;
     info.log(req, {
       ...info_,
