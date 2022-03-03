@@ -5,6 +5,9 @@ import { RestService } from "../../rest/class/restService.js";
 import { Paint } from "../../paint/class/paint.js";
 import { Keys } from "../../keys/class/Keys.js";
 import SHA256 from "crypto-js/sha256.js";
+import Ajv from "ajv";
+// import Ajv from "ajv/dist/jtd.js";
+// import AjvMergePath from 'ajv-merge-patch';
 import fs from "fs";
 import colors from "colors/safe.js";
 
@@ -243,9 +246,7 @@ export class BlockChain {
 		  version: this.version,
 			limitMbBlock: this.userConfig.limitMbBlock,
 			seed: this.seed,
-			structs: {
-				transactionTemplate: this.userConfig.transactionTemplate
-			}
+			structs: this.userConfig.blockchain.network.structs
 		}
 	}
 
@@ -563,42 +564,34 @@ export class BlockChain {
 
 		if(block.block.index!=0){
 
-			let blockTemplate = new Util().newInstance(this.chain[0]);
+
+
+			 // let ajv = new Ajv(); // {allErrors: true}
+			 // AjvMergePath(ajv);
+
+			 console.log("structs validator ->");
+			 console.log(new Util().jsonSave(this.chain[0].dataGenesis.structs));
+
+			 const schemasBlockchain = new Util().getKeys(this.chain[0].dataGenesis.structs)
+			 .map(key =>
+				 	this.chain[0].dataGenesis.structs[key]
+			 ); // .reverse()
+
+			 // console.log(' set -> ');
+			 // console.log(new Util().jsonSave(schemasBlockchain[1]));
+			 // ajv.addSchema(schemasBlockchain[1]);
+
+			const ajv = new Ajv({schemas: schemasBlockchain});
 
 			for(let transaction_ of block.node.dataTransaction){
-
-				let transactionTemplate = new Util().uniqueArray(
-					new Util().getAllKeys(blockTemplate.dataGenesis.structs.transactionTemplate)
-				);
-
-				let transactionBlock = new Util().uniqueArray(
-					new Util().getAllKeys(transaction_)
-				);
-
-				if(!new Util().objEq(transactionTemplate, transactionBlock)){
+		    const validate = ajv.getSchema("transaction");
+		    if(validate(transaction_)===false){
 					return false;
 				}
-
 			}
 
-			delete blockTemplate.dataGenesis;
-			let auxBlock = new Util().newInstance(block);
-			auxBlock.node.dataTransaction = [];
 
-			let keysTemplate = new Util().uniqueArray(
-				new Util().getAllKeys(blockTemplate)
-			);
-
-			let keysBlock = new Util().uniqueArray(
-				new Util().getAllKeys(auxBlock)
-			);
-
-			// console.log("keysTemplate");
-			// console.log(keysTemplate);
-			// console.log("keysBlock");
-			// console.log(keysBlock);
-
-			return new Util().objEq(keysTemplate, keysBlock);
+			return true;
 
 		}else{
 			return true;
@@ -726,30 +719,13 @@ export class BlockChain {
 			// console.log(this.latestBlock());
 			return await new RestService().postJSON(
 						this.userConfig.bridgeUrl+'/chain/block',
-						this.clearBlock(
-							new Util().newInstance(this.newBlock)
-						)
+						this.newBlock
 			);
 		};
 		console.log(colors.cyan('bridge-propagation-status:'));
 		let result = await bridgePropagation();
 		console.log(result);
 		return result.global;
-	}
-
-	clearBlock(obj){
-		/*if(new Util().existAttr(obj, "stop")){
-			delete obj.stop;
-		}*/
-		return obj;
-	}
-
-	clearChain(){
-		let auxChain = [];
-		for(let block of this.chain){
-			auxChain.push(this.clearBlock(new Util().newInstance(block)));
-		}
-		return auxChain;
 	}
 
 	checkValid(block) {
@@ -1005,7 +981,7 @@ export class BlockChain {
 
 		fs.writeFileSync(
 			path_save+'/generation-'+this.generation+'/chain.json',
-			new Util().jsonSave(this.clearChain()),
+			new Util().jsonSave(this.chain),
 			this.userConfig.charset
 		);
 

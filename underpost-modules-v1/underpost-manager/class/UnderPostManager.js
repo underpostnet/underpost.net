@@ -772,7 +772,6 @@ export class UnderPostManager {
                  maxErrorAttempts: 5,
                  RESTdelay: 1000,
                  charset: this.charset,
-                 transactionTemplate: blockChainConfig.network.transactionTemplate,
                  minimumZeros: "0",
                  limitMbBlock: blockChainConfig.constructor.limitMbBlock,
                  blockchain: blockChainConfig,
