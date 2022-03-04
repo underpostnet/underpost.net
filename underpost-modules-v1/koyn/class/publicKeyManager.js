@@ -18,7 +18,6 @@ export class PublicKeyManager {
     this.charset = charset;
     this.pool = [];
     this.bridge = {
-      lastUpdate: null,
       pool: []
     };
     this.pathPool = "";
@@ -80,7 +79,6 @@ export class PublicKeyManager {
     if(new Util().l(this.bridge.pool) == 0 ){
       return;
     }
-    this.bridge.lastUpdate = (+ new Date());
 
     let news_keys = [];
     let updates_keys = [];
@@ -96,12 +94,10 @@ export class PublicKeyManager {
       for(let poolObj of this.pool){
         if(poolObj.signKey.data.base64PublicKey == bridgeObj.signKey.data.base64PublicKey){
           foundKey = true;
-          if(poolObj.lastUpdate < bridgeObj.lastUpdate){
-            updates_keys.push({
-              index: ind_b,
-              data: bridgeObj
-            });
-          }
+          updates_keys.push({
+            index: ind_b,
+            data: bridgeObj
+          });
           break;
         }
         ind_b++;
@@ -133,7 +129,6 @@ export class PublicKeyManager {
           if(test_validate_sign_key == false){
             validate_sign_key = false;
             this.bridge.pool = [];
-            this.bridge.lastUpdate = null;
           }
       }
       if(!validate_sign_key){
