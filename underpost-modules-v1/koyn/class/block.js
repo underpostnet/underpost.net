@@ -51,7 +51,7 @@ export class Block {
       }
     }
 
-    async mineBlock(obj, ws, interval) {
+    async mineBlock(obj, ws, interval, dev) {
       new Paint().underpostOption('yellow', ' ', 'init mine block process');
       return await new Promise(async resolve => {
 
@@ -59,28 +59,13 @@ export class Block {
             obj.blockConfig.index == 0 ?
             this.dataGenesis = obj.dataGenesis : null;
 
-            this.node = Object.assign(
-              {
-                dataApp: await this.setData(
-                  obj.paths.filter((el)=>{
-                    return (el.type=='App')
-                  })
-                )
-              },
-              {
-                dataTransaction: await this.setData(
-                  obj.paths.filter((el)=>{
-                    return (el.type=='Transaction')
-                  })
-                )
-              },
-              {
-                rewardAddress: obj.rewardAddress
-              }
-            );
+            this.node = {
+              dataTransaction: [],
+              dataApp: await this.setData(obj.paths, dev),
+              rewardAddress: obj.rewardAddress
+            };
 
             console.log(colors.magenta('Mining Block '+this.block.index+' ...'));
-
 
             let current_ = (+ new Date());
 
@@ -285,32 +270,24 @@ export class Block {
 
     }
 
-    async setData(paths){
-      let storage = [];
+    async setData(paths, dev){
+      let dataApp = [];
       for(let path of paths){
-        console.log(colors.green('GET DATA  | '+new Date().toLocaleString()+' | url:'+path.url));
-        switch (path.type) {
-          case "App":
-            storage.push({
-              type: path.type,
-              url: path.url,
-              data: await new RestService().getRawContent(path.url+'/sign/'+this.block.generation)
-            });
-            break;
-          case "Transaction":
-            storage.push({
-              type: path.type,
-              url: path.url,
-              data: await new RestService().getJSON(path.url+'/transactions/'+this.block.generation)
-            });
-            break;
-          default:
-            storage.push({
-              error: "not valid type:"+path.type
-            });
-        }
+        console.log(colors.green('GET DATA  | '+new Date().toLocaleString()+' | url:'+path));
+
+        const dataItemsApp = await new RestService().getRawContent(
+          'http'+(dev?'':'s')+'://'+path+'/koyn/data-items/'+this.block.generation
+        );
+
+        // ajv validator
+        
+        dataApp.push({
+          path,
+          ...JSON.parse(dataItemsApp)
+        });
+
       }
-      return storage;
+      return dataApp;
     }
 
 

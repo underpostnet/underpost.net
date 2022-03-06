@@ -419,7 +419,9 @@ export class BlockChain {
 		let blockProcess = await this.newBlock.mineBlock(
 			obj,
 			ws,
-			this.userConfig.intervalBridgeMonitoring);
+			this.userConfig.intervalBridgeMonitoring,
+			this.userConfig.dev
+		);
 
     if(blockProcess.status == true){
 
@@ -774,17 +776,24 @@ export class BlockChain {
 		return true;
 	}
 
+
+	buildUrlApp(path){
+		return 'http'+(this.userConfig.dev?'':'s')+'://'+path
+	}
+
 	async validateSignAppNode(blockNode, allBlockValidate){
+		// console.log(blockNode);
 		if(this.userConfig.bridgeUrl!=null){
 		for(let signObj of blockNode){
 			let countAttempts = 0;
 			const attempt = async () => {
 				// console.log(colors.yellow("init-validate-sign"));
-				// console.log(colors.yellow("url:"+signObj.url));
+				// console.log(colors.yellow("signObj"));
+				// console.log(signObj);
 				// console.log(colors.yellow("attempt:"+(countAttempts+1)));
 				let signResult = await new RestService().postJSON(
-							signObj.url+'/validate', {
-							sign: JSON.parse(signObj.data).sign,
+							this.buildUrlApp(signObj.path)+'/koyn/validate', {
+							sign: signObj.sign,
 							generation: this.generation,
 							allValidate: allBlockValidate
 				});

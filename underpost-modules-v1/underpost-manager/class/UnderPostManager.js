@@ -778,7 +778,7 @@ export class UnderPostManager {
 
            let BCP = await new Promise(async resolve => {
 
-             var blockChainProcess = new BlockChain({
+             let blockChainProcess = new BlockChain({
                generation: blockChainConfig.constructor.generation,
                version: '0.0.0',
                name: "Koλn",
@@ -802,7 +802,8 @@ export class UnderPostManager {
                  limitMbBlock: blockChainConfig.constructor.limitMbBlock,
                  blockchain: blockChainConfig,
                  dataDir: this.mainDir,
-                 dataFolder: 'data'
+                 dataFolder: 'data',
+                 dev: true
                },
                rewardConfig: {
                  intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */
@@ -826,16 +827,7 @@ export class UnderPostManager {
                new Paint().underpostOption('yellow', ' ', 'success bridge ws connection');
 
                resolve(await blockChainProcess.mainProcess({
-                 paths: [
-                   {
-                     url: 'http://localhost:3001/koyn',
-                     type: 'App'
-                   }/*,
-                   {
-                     url: 'http://localhost:3001/koyn',
-                     type: 'Transaction'
-                   }*/
-                 ]
+                 paths: [ 'localhost:3001' ]
                }, this.wsBridge));
 
              });
@@ -897,7 +889,8 @@ export class UnderPostManager {
              limitMbBlock: blockChainConfig.constructor.limitMbBlock,
              blockchain: blockChainConfig,
              dataDir: this.mainDir,
-             dataFolder: 'data'
+             dataFolder: 'data',
+             dev: true
            },
            validatorMode: true
          });
@@ -1079,6 +1072,11 @@ export class UnderPostManager {
            this.mainDir+'/data/underpost.json',
            this.charset
          ));
+
+         if(tempData.active_asymmetric_public_key==null){
+           new Paint().underpostOption('red', 'error', "No active asymmetric Key");
+           return;
+         }
 
          let asymmetricKeyData = await KEYS.getKeyContent(
            "asymmetricKeys",
