@@ -378,16 +378,42 @@ export class UnderPostManager {
                 );
 
                 try {
+
                   let passphrase = await new ReadLine().h(
                     new Paint().underpostInput("Enter passphrase current asymmetric public key")
                   );
 
-                  let keySignData = new Keys().generateDataAsymetricSign(
-                    this.mainDir+'/data/keys/asymmetric/'+keyIDKey+'/private.pem',
-                    fileKeyContent.public.base64,
-                    passphrase,
-                    true
+                  const withCyberiaAuthToken = await new ReadLine().yn(
+                    "Attach cyberia online public key auth token"
                   );
+
+                  let keySignData;
+
+                  if(withCyberiaAuthToken=='y'){
+
+                    keySignData = new Keys().generateDataAsymetricSign(
+                      this.mainDir+'/data/keys/asymmetric/'+keyIDKey+'/private.pem',
+                      fileKeyContent.public.base64,
+                      passphrase,
+                      true,
+                      {
+                        AUTH_TOKEN: await new ReadLine().r(
+                          new Paint().underpostInput("Insert auth Token")
+                        )
+                      }
+                    );
+
+                  }else{
+
+                    keySignData = new Keys().generateDataAsymetricSign(
+                      this.mainDir+'/data/keys/asymmetric/'+keyIDKey+'/private.pem',
+                      fileKeyContent.public.base64,
+                      passphrase,
+                      true
+                    );
+
+                  }
+
                   let validateSign = new Keys().validateDataTempKeyAsymmetricSign(
                     fileKeyContent.public.base64,
                     keySignData,

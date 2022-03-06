@@ -569,8 +569,8 @@ export class BlockChain {
 			 // let ajv = new Ajv(); // {allErrors: true}
 			 // AjvMergePath(ajv);
 
-			 console.log("structs validator ->");
-			 console.log(new Util().jsonSave(this.chain[0].dataGenesis.structs));
+			 // console.log("structs validator ->");
+			 // console.log(new Util().jsonSave(this.chain[0].dataGenesis.structs));
 
 			 const schemasBlockchain = new Util().getKeys(this.chain[0].dataGenesis.structs)
 			 .map(key =>
