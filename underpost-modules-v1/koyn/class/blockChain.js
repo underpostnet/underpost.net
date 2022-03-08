@@ -409,18 +409,24 @@ export class BlockChain {
 
 	}
 
-	async addBlock(obj, ws) {
+	async addBlock(paths, ws) {
 
 		console.log('\n---------------------------------------');
 		console.log(colors.yellow('NEW BLOCK | '+new Date().toLocaleString()));
+
+		const obj = {
+			blockConfig: this.currentBlockConfig(),
+			userConfig: this.userConfig,
+			dataGenesis: this.chain[0] ? this.chain[0].dataGenesis : this.genesisBlockChainConfig(),
+			paths
+		};
+
 		console.log(obj.blockConfig);
     this.newBlock = new Block();
 
 		let blockProcess = await this.newBlock.mineBlock(
 			obj,
-			ws,
-			this.userConfig.intervalBridgeMonitoring,
-			this.userConfig.dev
+			ws
 		);
 
     if(blockProcess.status == true){
@@ -584,9 +590,9 @@ export class BlockChain {
 			 // ajv.addSchema(schemasBlockchain[1]);
 
 			const ajv = new Ajv({schemas: schemasBlockchain});
+			const validate = ajv.getSchema("transaction");
 
 			for(let transaction_ of block.node.dataTransaction){
-		    const validate = ajv.getSchema("transaction");
 		    if(validate(transaction_)===false){
 					return false;
 				}
@@ -855,21 +861,11 @@ export class BlockChain {
 		for(let i=1; i<=(this.userConfig.blocksToUndermine); i++){
 			switch (new Util().l(this.chain)) {
 				case 0:
-					statusMainProcess = await this.addBlock({
-						rewardAddress: this.userConfig.rewardAddress,
-						paths: obj.paths,
-						blockConfig: this.currentBlockConfig(),
-						dataGenesis: this.genesisBlockChainConfig()
-					}, ws);
+					statusMainProcess = await this.addBlock(obj.paths, ws);
 					if(statusMainProcess.status == false){return statusMainProcess;}
 					break;
 				default:
-					statusMainProcess = await this.addBlock({
-						rewardAddress: this.userConfig.rewardAddress,
-						paths: obj.paths,
-						blockConfig: this.currentBlockConfig(),
-						limitMbBlock: this.chain[0].dataGenesis.limitMbBlock
-					}, ws);
+					statusMainProcess = await this.addBlock(obj.paths, ws);
 					if(statusMainProcess.status == false){return statusMainProcess;}
 			}
 		}

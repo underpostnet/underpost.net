@@ -3,6 +3,7 @@ import { RestService } from "../../rest/class/RestService.js";
 import { Paint } from "../../paint/class/paint.js";
 import colors from "colors/safe.js";
 import { Util } from "../../util/class/Util.js";
+import Ajv from "ajv";
 
 
 export class Block {
@@ -51,7 +52,7 @@ export class Block {
       }
     }
 
-    async mineBlock(obj, ws, interval, dev) {
+    async mineBlock(obj, ws) {
       new Paint().underpostOption('yellow', ' ', 'init mine block process');
       return await new Promise(async resolve => {
 
@@ -61,8 +62,8 @@ export class Block {
 
             this.node = {
               dataTransaction: [],
-              dataApp: await this.setData(obj.paths, dev),
-              rewardAddress: obj.rewardAddress
+              dataApp: await this.setData(obj),
+              rewardAddress: obj.userConfig.rewardAddress
             };
 
             console.log(colors.magenta('Mining Block '+this.block.index+' ...'));
@@ -79,7 +80,7 @@ export class Block {
             let s_ = 0;
 
             let limitSizeActive = false;
-            let limitMbBlock = obj.blockConfig.index == 0 ? obj.dataGenesis.limitMbBlock : obj.limitMbBlock;
+            let limitMbBlock = obj.dataGenesis.limitMbBlock;
             let roundDigitSize = 3;
             // let unitSizeLog = "megaBytes";
             let unitSizeLog = "kiloBytes";
@@ -146,7 +147,7 @@ export class Block {
 
             //var onWsMsgController = 0;
             const monitoringBridge = async force => {
-              if( (current_-timer_monitoring_>interval) || (force==true) ){
+              if( (current_-timer_monitoring_>obj.userConfig.intervalBridgeMonitoring) || (force==true) ){
                 timer_monitoring_ = new Util().newInstance(current_);
                 return await new Promise( async wsResolve => {
                   let fromHash = new Util().getHash();
@@ -270,17 +271,18 @@ export class Block {
 
     }
 
-    async setData(paths, dev){
+    async setData(obj){
       let dataApp = [];
-      for(let path of paths){
+      for(let path of obj.paths){
         console.log(colors.green('GET DATA  | '+new Date().toLocaleString()+' | url:'+path));
 
         const dataItemsApp = await new RestService().getRawContent(
-          'http'+(dev?'':'s')+'://'+path+'/koyn/data-items/'+this.block.generation
+          'http'+(obj.userConfig.dev?'':'s')+'://'+path+'/koyn/data-items/'+this.block.generation
         );
 
-        // ajv validator
-        
+        // const ajv = new Ajv({schemas: schemasBlockchain});
+        // const validate = ajv.getSchema("transaction");
+
         dataApp.push({
           path,
           ...JSON.parse(dataItemsApp)
