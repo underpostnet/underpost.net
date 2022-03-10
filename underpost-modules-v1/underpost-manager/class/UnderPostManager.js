@@ -47,7 +47,7 @@ export class UnderPostManager {
          ]){
 
            let originPath = fs.readFileSync(
-               navi('../../underpost-data-template/'+module_),
+               navi('../../underpost-data-template/network/'+module_),
                this.charset
            );
 
@@ -1545,7 +1545,7 @@ export class UnderPostManager {
 
     let mainData = {};
     let dataTemplate = JSON.parse(
-      fs.readFileSync(navi('../../underpost-data-template/underpost.json'))
+      fs.readFileSync(navi('../../underpost-data-template/network/underpost.json'))
     );
 
     //--------------------------------------------------------------------------
