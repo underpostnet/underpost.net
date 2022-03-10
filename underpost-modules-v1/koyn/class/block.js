@@ -283,6 +283,8 @@ export class Block {
         // const ajv = new Ajv({schemas: schemasBlockchain});
         // const validate = ajv.getSchema("transaction");
 
+        // los emit el SHA256 debe ser unico por el tlmestamp
+
         dataApp.push({
           path,
           ...JSON.parse(dataItemsApp)
