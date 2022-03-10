@@ -24,7 +24,7 @@ export class UnderPostManager {
 
     let charset = 'utf8';
 
-    this.mainDir = navi();
+    this.mainDir = navi('../');
     this.charset = charset;
     this.poolPublickey = null;
     this.activeSenderAsymmetricSignKeyData = null;
@@ -57,13 +57,13 @@ export class UnderPostManager {
              case 'json':
                  originPath = JSON.parse(originPath);
                  fs.writeFileSync(
-                   this.mainDir+'/data/'+module_,
+                   this.mainDir+'/data/network/'+module_,
                    new Util().jsonSave(originPath),
                    this.charset);
                break;
              default:
                  fs.writeFileSync(
-                   this.mainDir+'/data/'+module_,
+                   this.mainDir+'/data/network/'+module_,
                    originPath,
                    this.charset);
 
@@ -137,7 +137,7 @@ export class UnderPostManager {
       dataTemplate = await initConfig(dataTemplate);
 
       fs.writeFileSync(
-        this.mainDir+'/data/underpost.json',
+        this.mainDir+'/data/network/underpost.json',
         new Util().jsonSave(dataTemplate),
         this.charset);
 
@@ -186,7 +186,7 @@ export class UnderPostManager {
       );
 
       fs.writeFileSync(
-        this.mainDir+'/data/underpost.json',
+        this.mainDir+'/data/network/underpost.json',
         new Util().jsonSave(mainData),
         this.charset);
 
@@ -200,7 +200,7 @@ export class UnderPostManager {
       create: async (type) => {
 
         let tempData = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/underpost.json',
+          this.mainDir+'/data/network/underpost.json',
           this.charset
         ));
 
@@ -218,13 +218,13 @@ export class UnderPostManager {
           case 'symmetricKeys':
             tempData[type].push(await new Keys().generateSymmetricKeys({
               passphrase: keyPass,
-              path: this.mainDir+'/data/keys'
+              path: this.mainDir+'/data/network/keys'
             }));
             break;
           case 'asymmetricKeys':
             tempData[type].push(await new Keys().generateAsymmetricKeys({
               passphrase: keyPass,
-              path: this.mainDir+'/data/keys'
+              path: this.mainDir+'/data/network/keys'
             }));
             break;
           default:
@@ -234,7 +234,7 @@ export class UnderPostManager {
             }
         }
 
-        fs.writeFileSync(this.mainDir+'/data/underpost.json',
+        fs.writeFileSync(this.mainDir+'/data/network/underpost.json',
         new Util().jsonSave(tempData),
         this.charset);
 
@@ -248,7 +248,7 @@ export class UnderPostManager {
       delete: async (type) => {
 
         let tempData = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/underpost.json',
+          this.mainDir+'/data/network/underpost.json',
           this.charset
         ));
 
@@ -273,16 +273,16 @@ export class UnderPostManager {
           if(keyIDDel == tempData[('active_'+type.split('Keys')[0]+'_public_key')]){
             tempData[('active_'+type.split('Keys')[0]+'_public_key')] = null;
             type == 'asymmetricKeys' &&
-            fs.existsSync(this.mainDir+'/data/keys/asymmetric/active.json') ?
-            fs.unlinkSync(this.mainDir+'/data/keys/asymmetric/active.json') : null;
+            fs.existsSync(this.mainDir+'/data/network/keys/asymmetric/active.json') ?
+            fs.unlinkSync(this.mainDir+'/data/network/keys/asymmetric/active.json') : null;
           }
 
-          fs.writeFileSync(this.mainDir+'/data/underpost.json',
+          fs.writeFileSync(this.mainDir+'/data/network/underpost.json',
           new Util().jsonSave(tempData),
           this.charset);
 
           new FileGestor().deleteFolderRecursive(
-            this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'+keyIDDel
+            this.mainDir+'/data/network/keys/'+type.split('Keys')[0]+'/'+keyIDDel
           );
 
           return async () => {
@@ -302,12 +302,12 @@ export class UnderPostManager {
       view: async (type) => {
 
         let tempData = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/underpost.json',
+          this.mainDir+'/data/network/underpost.json',
           this.charset
         ));
 
         let blockChainConfig = JSON.parse(fs.readFileSync(
-            this.mainDir+'/data/blockchain-config.json',
+            this.mainDir+'/data/network/blockchain-config.json',
             this.charset
         ));
 
@@ -330,10 +330,10 @@ export class UnderPostManager {
           switch (type) {
             case "symmetricKeys":
                 let iv = await new RestService().
-                getJSON(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
+                getJSON(this.mainDir+'/data/network/keys/'+type.split('Keys')[0]+'/'
                 +keyIDKey+'/iv.json');
                 let key = await new RestService().
-                getJSON(this.mainDir+'/data/keys/'+type.split('Keys')[0]+'/'
+                getJSON(this.mainDir+'/data/network/keys/'+type.split('Keys')[0]+'/'
                 +keyIDKey+'/key.json');
               return async () => {
                 new Paint().underpostOption('white', ' ', 'Symmetric Key Selected');
@@ -392,7 +392,7 @@ export class UnderPostManager {
                   if(withCyberiaAuthToken=='y'){
 
                     keySignData = new Keys().generateDataAsymetricSign(
-                      this.mainDir+'/data/keys/asymmetric/'+keyIDKey+'/private.pem',
+                      this.mainDir+'/data/network/keys/asymmetric/'+keyIDKey+'/private.pem',
                       fileKeyContent.public.base64,
                       passphrase,
                       true,
@@ -406,7 +406,7 @@ export class UnderPostManager {
                   }else{
 
                     keySignData = new Keys().generateDataAsymetricSign(
-                      this.mainDir+'/data/keys/asymmetric/'+keyIDKey+'/private.pem',
+                      this.mainDir+'/data/network/keys/asymmetric/'+keyIDKey+'/private.pem',
                       fileKeyContent.public.base64,
                       passphrase,
                       true
@@ -462,12 +462,12 @@ export class UnderPostManager {
       activate: async type => {
 
         let tempData = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/underpost.json',
+          this.mainDir+'/data/network/underpost.json',
           this.charset
         ));
 
         let blockChainConfig = JSON.parse(fs.readFileSync(
-            this.mainDir+'/data/blockchain-config.json',
+            this.mainDir+'/data/network/blockchain-config.json',
             this.charset
         ));
 
@@ -486,7 +486,7 @@ export class UnderPostManager {
             tempData[('active_'+type.split('Keys')[0]+'_public_key')]
             =
             keyIDKey;
-            fs.writeFileSync(this.mainDir+'/data/underpost.json',
+            fs.writeFileSync(this.mainDir+'/data/network/underpost.json',
             new Util().jsonSave(tempData),
             this.charset);
           };
@@ -516,7 +516,7 @@ export class UnderPostManager {
               // ACTIVE Asymmetric KEY -----------------------------------------
 
               let keySignData = new Keys().generateDataAsymetricSign(
-                this.mainDir+'/data/keys/asymmetric/'+keyIDKey+'/private.pem',
+                this.mainDir+'/data/network/keys/asymmetric/'+keyIDKey+'/private.pem',
                 fileKeyContent.public.base64,
                 passphrase,
                 true
@@ -540,7 +540,7 @@ export class UnderPostManager {
                 saveActivateKey();
 
                 fs.writeFileSync(
-                  this.mainDir+'/data/keys/asymmetric/active.json',
+                  this.mainDir+'/data/network/keys/asymmetric/active.json',
                   new Util().jsonSave({
                     activeSenderAsymmetricSignKeyData: this.activeSenderAsymmetricSignKeyData,
                     activeAsymmetricKeyData: this.activeAsymmetricKeyData
@@ -584,22 +584,22 @@ export class UnderPostManager {
           case "symmetric":
             return {
               iv: await new FileGestor().getDataFile(
-              this.mainDir+'/data/keys/'
+              this.mainDir+'/data/network/keys/'
               +type+
               '/'+keyID+'/iv.json', true),
               key: await new FileGestor().getDataFile(
-              this.mainDir+'/data/keys/'
+              this.mainDir+'/data/network/keys/'
               +type+
               '/'+keyID+'/key.json', true)
             }
           case "asymmetric":
             return {
               public: await new FileGestor().getDataFile(
-              this.mainDir+'/data/keys/'
+              this.mainDir+'/data/network/keys/'
               +type+
               '/'+keyID+'/public.pem'),
               private: await new FileGestor().getDataFile(
-              this.mainDir+'/data/keys/'
+              this.mainDir+'/data/network/keys/'
               +type+
               '/'+keyID+'/private.pem')
             }
@@ -627,12 +627,12 @@ export class UnderPostManager {
       viewAll: async type => {
 
         let tempData = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/underpost.json',
+          this.mainDir+'/data/network/underpost.json',
           this.charset
         ));
 
         let blockChainConfig = JSON.parse(fs.readFileSync(
-            this.mainDir+'/data/blockchain-config.json',
+            this.mainDir+'/data/network/blockchain-config.json',
             this.charset
         ));
 
@@ -642,7 +642,7 @@ export class UnderPostManager {
           +blockChainConfig.constructor.generation
         );
 
-        let pathKeys = this.mainDir+'/data/keys/'+type;
+        let pathKeys = this.mainDir+'/data/network/keys/'+type;
         console.log(new FileGestor().getAllFilesPath(pathKeys, true));
 
         console.log("path: "+pathKeys);
@@ -674,7 +674,7 @@ export class UnderPostManager {
               if(validateChain.global == true && validateWithPoolTransaction != null){
                 let amountData = await chainObj.currentAmountCalculator(
                   fs.readFileSync(
-                    this.mainDir+'/data/keys/asymmetric/'+rowKey.keyID+'/public.pem')
+                    this.mainDir+'/data/network/keys/asymmetric/'+rowKey.keyID+'/public.pem')
                     .toString('base64'),
                   false
                 );
@@ -699,12 +699,12 @@ export class UnderPostManager {
          await this.networkUpdateStatus();
 
          let blockChainConfig = JSON.parse(fs.readFileSync(
-             this.mainDir+'/data/blockchain-config.json',
+             this.mainDir+'/data/network/blockchain-config.json',
              this.charset
          ));
 
          let tempData = JSON.parse(fs.readFileSync(
-           this.mainDir+'/data/underpost.json',
+           this.mainDir+'/data/network/underpost.json',
            this.charset
          ));
          let resp = await new RestService().postJSON(
@@ -792,8 +792,8 @@ export class UnderPostManager {
                  intervalBridgeMonitoring: 1000,
                  zerosConstDifficulty: null,
                  rewardAddress: publicKey,
-                 blockChainDataPath: this.mainDir+'/data/blockchain',
-                 // blockChainDataPath: '../data/blockchain',
+                 blockChainDataPath: this.mainDir+'/data/network/blockchain',
+                 // blockChainDataPath: '../data/network/blockchain',
                  // blockChainDataPath: null,
                  maxErrorAttempts: 5,
                  RESTdelay: 1000,
@@ -802,7 +802,7 @@ export class UnderPostManager {
                  limitMbBlock: blockChainConfig.constructor.limitMbBlock,
                  blockchain: blockChainConfig,
                  dataDir: this.mainDir,
-                 dataFolder: 'data',
+                 dataFolder: 'data/network',
                  dev: true
                },
                rewardConfig: {
@@ -859,11 +859,11 @@ export class UnderPostManager {
        },
        clearChain: async ()=>{
          let blockChainConfig = JSON.parse(fs.readFileSync(
-             this.mainDir+'/data/blockchain-config.json',
+             this.mainDir+'/data/network/blockchain-config.json',
              this.charset
          ));
          fs.writeFileSync(
-           this.mainDir+'/data/blockchain/generation-'+blockChainConfig.constructor.generation+'/chain.json',
+           this.mainDir+'/data/network/blockchain/generation-'+blockChainConfig.constructor.generation+'/chain.json',
            "[]",
            this.charset);
           new Paint().underpostOption('yellow', 'success', 'Clear Chain Generation 0');
@@ -880,8 +880,8 @@ export class UnderPostManager {
              intervalBridgeMonitoring: 1000,
              zerosConstDifficulty: null,
              rewardAddress: "",
-             blockChainDataPath: this.mainDir+'/data/blockchain',
-             // blockChainDataPath: '../data/blockchain',
+             blockChainDataPath: this.mainDir+'/data/network/blockchain',
+             // blockChainDataPath: '../data/network/blockchain',
              // blockChainDataPath: null,
              maxErrorAttempts: 5,
              RESTdelay: 1000,
@@ -889,7 +889,7 @@ export class UnderPostManager {
              limitMbBlock: blockChainConfig.constructor.limitMbBlock,
              blockchain: blockChainConfig,
              dataDir: this.mainDir,
-             dataFolder: 'data',
+             dataFolder: 'data/network',
              dev: true
            },
            validatorMode: true
@@ -1006,7 +1006,7 @@ export class UnderPostManager {
                  );
 
                  let endObjTransaction = new Keys().generateDataAsymetricSign(
-                   this.mainDir+'/data/keys/asymmetric/'+tempData.active_asymmetric_public_key+'/private.pem',
+                   this.mainDir+'/data/network/keys/asymmetric/'+tempData.active_asymmetric_public_key+'/private.pem',
                    sender.data.base64PublicKey,
                    passphrase,
                    false,
@@ -1069,7 +1069,7 @@ export class UnderPostManager {
        try {
 
          let tempData = JSON.parse(fs.readFileSync(
-           this.mainDir+'/data/underpost.json',
+           this.mainDir+'/data/network/underpost.json',
            this.charset
          ));
 
@@ -1084,7 +1084,7 @@ export class UnderPostManager {
          );
 
          let blockChainConfig = JSON.parse(fs.readFileSync(
-             this.mainDir+'/data/blockchain-config.json',
+             this.mainDir+'/data/network/blockchain-config.json',
              this.charset
          ));
 
@@ -1162,7 +1162,7 @@ export class UnderPostManager {
 
 
        let tempData = JSON.parse(fs.readFileSync(
-         this.mainDir+'/data/underpost.json',
+         this.mainDir+'/data/network/underpost.json',
          this.charset
        ));
 
@@ -1177,7 +1177,7 @@ export class UnderPostManager {
        );
 
        let blockChainConfig = JSON.parse(fs.readFileSync(
-           this.mainDir+'/data/blockchain-config.json',
+           this.mainDir+'/data/network/blockchain-config.json',
            this.charset
        ));
 
@@ -1552,13 +1552,13 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
 
     if(
-      fs.existsSync(this.mainDir+'/data')
+      fs.existsSync(this.mainDir+'/data/network')
       &&
-      fs.existsSync(this.mainDir+'/data/underpost.json')
+      fs.existsSync(this.mainDir+'/data/network/underpost.json')
     ){
 
         mainData = JSON.parse(
-          fs.readFileSync(this.mainDir+'/data/underpost.json')
+          fs.readFileSync(this.mainDir+'/data/network/underpost.json')
         );
         await updateTemplate();
 
@@ -1591,31 +1591,34 @@ export class UnderPostManager {
     ! fs.existsSync(this.mainDir+'/data') ?
     fs.mkdirSync(this.mainDir+'/data') : null;
 
-    ! fs.existsSync(this.mainDir+'/data/keys') ?
-    fs.mkdirSync(this.mainDir+'/data/keys') : null;
+    ! fs.existsSync(this.mainDir+'/data/network') ?
+    fs.mkdirSync(this.mainDir+'/data/network') : null;
 
-    ! fs.existsSync(this.mainDir+'/data/keys/asymmetric') ?
-    fs.mkdirSync(this.mainDir+'/data/keys/asymmetric') : null;
+    ! fs.existsSync(this.mainDir+'/data/network/keys') ?
+    fs.mkdirSync(this.mainDir+'/data/network/keys') : null;
 
-    ! fs.existsSync(this.mainDir+'/data/keys/symmetric') ?
-    fs.mkdirSync(this.mainDir+'/data/keys/symmetric') : null;
+    ! fs.existsSync(this.mainDir+'/data/network/keys/asymmetric') ?
+    fs.mkdirSync(this.mainDir+'/data/network/keys/asymmetric') : null;
 
-    ! fs.existsSync(this.mainDir+'/data/blockchain') ?
-    fs.mkdirSync(this.mainDir+'/data/blockchain') : null;
+    ! fs.existsSync(this.mainDir+'/data/network/keys/symmetric') ?
+    fs.mkdirSync(this.mainDir+'/data/network/keys/symmetric') : null;
 
-    ! fs.existsSync(this.mainDir+'/data/temp') ?
-    fs.mkdirSync(this.mainDir+'/data/temp') : null;
+    ! fs.existsSync(this.mainDir+'/data/network/blockchain') ?
+    fs.mkdirSync(this.mainDir+'/data/network/blockchain') : null;
 
-    ! fs.existsSync(this.mainDir+'/data/temp/test-key') ?
-    fs.mkdirSync(this.mainDir+'/data/temp/test-key') : null;
+    ! fs.existsSync(this.mainDir+'/data/network/temp') ?
+    fs.mkdirSync(this.mainDir+'/data/network/temp') : null;
+
+    ! fs.existsSync(this.mainDir+'/data/network/temp/test-key') ?
+    fs.mkdirSync(this.mainDir+'/data/network/temp/test-key') : null;
 
 
-    fs.existsSync(this.mainDir+'/data/keys/asymmetric/active.json') ?
+    fs.existsSync(this.mainDir+'/data/network/keys/asymmetric/active.json') ?
     ((()=>{
       const asymmetricDataActive =
       JSON.parse(
         fs.readFileSync(
-          this.mainDir+'/data/keys/asymmetric/active.json',
+          this.mainDir+'/data/network/keys/asymmetric/active.json',
           this.charset
         )
       );
@@ -1625,7 +1628,7 @@ export class UnderPostManager {
       asymmetricDataActive.activeAsymmetricKeyData;
 
     })())
-    :new Paint().underpostOption('magenta', 'warn', 'No Active Asymetric Key Data');;
+    :new Paint().underpostOption('magenta', 'warn', 'No Active Asymetric Key data/network');;
 
   }
 
@@ -1634,11 +1637,11 @@ export class UnderPostManager {
     await this.networkUpdateStatus();
 
     let tempData = JSON.parse(fs.readFileSync(
-      this.mainDir+'/data/underpost.json',
+      this.mainDir+'/data/network/underpost.json',
       this.charset
     ));
 
-    new Paint().underpostTextBotbar('Active user data');
+    new Paint().underpostTextBotbar('Active user data/network');
 
     new Paint().underpostOption('cyan', ' ', ' User Data:');
     new Paint().underpostOption('yellow', 'username              ', tempData.network.user.username);
@@ -1669,7 +1672,7 @@ export class UnderPostManager {
   async networkUpdateStatus(){
     return await new Promise(async resolve => {
       let tempData = JSON.parse(fs.readFileSync(
-        this.mainDir+'/data/underpost.json',
+        this.mainDir+'/data/network/underpost.json',
         this.charset
       ));
       let current_ip = tempData.network.node.ip;
@@ -1678,7 +1681,7 @@ export class UnderPostManager {
         try{
           tempData.network.node.ip = new_ip;
           fs.writeFileSync(
-            this.mainDir+'/data/underpost.json',
+            this.mainDir+'/data/network/underpost.json',
             new Util().jsonSave(tempData),
             this.charset);
           new Paint().underpostOption('cyan', ' ', 'ip updated');

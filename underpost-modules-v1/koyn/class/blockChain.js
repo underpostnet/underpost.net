@@ -188,7 +188,7 @@ export class BlockChain {
 
 		this.userConfig.blockChainDataPath == null ?
 		fs.writeFileSync(
-	    '../data/rewardConfig.json',
+	    '../data/network/rewardConfig.json',
 	    new Util().jsonSave(this.rewardConfig),
 	    this.userConfig.charset
 	  ) :
@@ -882,7 +882,7 @@ export class BlockChain {
 				try{
 					switch (this.userConfig.blockChainDataPath) {
 						case null:
-								this.saveChain('../data/blockchain');
+								this.saveChain('../data/network/blockchain');
 							break;
 						default:
 							  this.saveChain(this.userConfig.blockChainDataPath);
@@ -953,7 +953,7 @@ export class BlockChain {
 			let pathZeros;
 			this.userConfig.blockChainDataPath == null ?
 			pathZeros =
-			'../data/zeros-test/'+this.userConfig.zerosConstDifficulty+'.json' :
+			'../data/network/zeros-test/'+this.userConfig.zerosConstDifficulty+'.json' :
 			pathZeros =
 			this.userConfig.blockChainDataPath+'/zeros-test/'+this.userConfig.zerosConstDifficulty+'.json';
 

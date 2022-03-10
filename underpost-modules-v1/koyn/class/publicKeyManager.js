@@ -28,12 +28,12 @@ export class PublicKeyManager {
   async init(){
 
     let blockChainConfig = JSON.parse(fs.readFileSync(
-        this.mainDir+'/data/blockchain-config.json',
+        this.mainDir+'/data/network/blockchain-config.json',
         this.charset
     ));
 
     this.pathPool =
-    this.mainDir+'/data/blockchain/generation-'
+    this.mainDir+'/data/network/blockchain/generation-'
     + blockChainConfig.constructor.generation;
 
     ! fs.existsSync(this.pathPool) ?
@@ -69,7 +69,7 @@ export class PublicKeyManager {
   async updatePoolWithBridge(){
 
     let blockChainConfig = JSON.parse(fs.readFileSync(
-        this.mainDir+'/data/blockchain-config.json',
+        this.mainDir+'/data/network/blockchain-config.json',
         this.charset
     ));
 
@@ -168,12 +168,12 @@ export class PublicKeyManager {
   async viewPool(pool){
 
     let blockChainConfig = JSON.parse(fs.readFileSync(
-        this.mainDir+'/data/blockchain-config.json',
+        this.mainDir+'/data/network/blockchain-config.json',
         this.charset
     ));
 
     let tempData = JSON.parse(fs.readFileSync(
-      this.mainDir+'/data/underpost.json',
+      this.mainDir+'/data/network/underpost.json',
       this.charset
     ));
 
@@ -212,7 +212,7 @@ export class PublicKeyManager {
          let foundLocal = null;
          for(let localKey of tempData.asymmetricKeys){
            let localBase64PublicKey = fs.readFileSync(
-             this.mainDir+'/data/keys/asymmetric/'+localKey+'/public.pem')
+             this.mainDir+'/data/network/keys/asymmetric/'+localKey+'/public.pem')
              .toString('base64');
              if(x.signKey.data.base64PublicKey==localBase64PublicKey){
                foundLocal = localKey;
@@ -253,7 +253,7 @@ export class PublicKeyManager {
   async getPoolPublicKey(){
 
       let tempData = JSON.parse(fs.readFileSync(
-        this.mainDir+'/data/underpost.json',
+        this.mainDir+'/data/network/underpost.json',
         this.charset
       ));
 
@@ -263,7 +263,7 @@ export class PublicKeyManager {
       );
 
       let blockChainConfig = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/blockchain-config.json',
+          this.mainDir+'/data/network/blockchain-config.json',
           this.charset
       ));
 
@@ -295,7 +295,7 @@ export class PublicKeyManager {
              new Paint().underpostInput('comment state ? <enter> skip')),
            user: tempData.network.user,
            signKey:  new Keys().generateDataAsymetricSign(
-             this.mainDir+'/data/keys/asymmetric/'+tempData.active_asymmetric_public_key+'/private.pem',
+             this.mainDir+'/data/network/keys/asymmetric/'+tempData.active_asymmetric_public_key+'/private.pem',
              asymmetricKeyData.public.base64,
              passphrase,
              true
@@ -321,7 +321,7 @@ export class PublicKeyManager {
    async getExternalPublicKey(){
 
      let blockChainConfig = JSON.parse(fs.readFileSync(
-         this.mainDir+'/data/blockchain-config.json',
+         this.mainDir+'/data/network/blockchain-config.json',
          this.charset
      ));
 
@@ -363,7 +363,7 @@ export class PublicKeyManager {
     try{
 
       let blockChainConfig = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/blockchain-config.json',
+          this.mainDir+'/data/network/blockchain-config.json',
           this.charset
       ));
 
@@ -377,7 +377,7 @@ export class PublicKeyManager {
       if(!new Util().existAttr(externalPublicKey, "error")){
 
         let tempData = JSON.parse(fs.readFileSync(
-          this.mainDir+'/data/underpost.json',
+          this.mainDir+'/data/network/underpost.json',
           this.charset
         ));
         let userData = new Util().newInstance(tempData.network.user);

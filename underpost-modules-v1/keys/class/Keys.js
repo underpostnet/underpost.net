@@ -295,8 +295,13 @@ export class Keys {
     console.log(colors.magenta("validateDataTempKeyAsymmetricSign ..."));
     nameDataFolder==undefined ? nameDataFolder = 'data': null;
     const id_file_key = new Util().getHash();
-    const publicDirPem = new Util().clearDir(mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem')
-    .replace('data/data', 'data');
+    let publicDirPem;
+    if(fs.existsSync(new Util().clearDir(mainDir+'/'+nameDataFolder+'/network/temp/test-key'))){
+      publicDirPem = new Util().clearDir(mainDir+'/'+nameDataFolder+'/network/temp/test-key/'+id_file_key+'.pem');
+    }else{
+      publicDirPem = new Util().clearDir(mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem');
+    }
+    publicDirPem = publicDirPem.replace('data/data', 'data');
     console.log(' test publicDirPem ->');
     console.log(publicDirPem);
     fs.writeFileSync(
