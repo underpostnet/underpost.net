@@ -56,7 +56,7 @@ export class RestService {
   async getIP(indexIP){
 
     const sourceIP = [
-      ['http://ipecho.net/plain',false],
+      // ['http://ipecho.net/plain',false],
       ['https://ident.me/',false],
       ['https://v4.ident.me/',false],
       ['https://api.ip.sb/ip',false],

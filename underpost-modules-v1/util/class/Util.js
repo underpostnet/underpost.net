@@ -1256,7 +1256,7 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
 
 
  jsonWebRender(objRender){
-	return `JSON.parse(`+'`'+JSONstr(objRender)+'`'+`);`;
+	return `JSON.parse(`+'`'+JSONstr(objRender)+'`'+`)`;
 }
 
 
