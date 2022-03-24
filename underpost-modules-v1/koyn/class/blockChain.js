@@ -569,42 +569,37 @@ export class BlockChain {
 	}
 
 	validateKeysBlock(block){
-
 		if(block.block.index!=0){
-
-
-
+			// console.log(' validateKeysBlock(block) -> ');
 			 // let ajv = new Ajv(); // {allErrors: true}
 			 // AjvMergePath(ajv);
-
 			 // console.log("structs validator ->");
 			 // console.log(new Util().jsonSave(this.chain[0].dataGenesis.structs));
-
+			 // console.log(new Util().getKeys(this.chain[0].dataGenesis.structs)
+			 // .map(key => {
+				//  console.log(this.chain[0].dataGenesis.structs[key]);
+				//   return  this.chain[0].dataGenesis.structs[key]["$id"];
+			 // }
+			 // ));
 			 const schemasBlockchain = new Util().getKeys(this.chain[0].dataGenesis.structs)
 			 .map(key =>
 				 	this.chain[0].dataGenesis.structs[key]
 			 ); // .reverse()
-
 			 // console.log(' set -> ');
 			 // console.log(new Util().jsonSave(schemasBlockchain[1]));
 			 // ajv.addSchema(schemasBlockchain[1]);
-
 			const ajv = new Ajv({schemas: schemasBlockchain});
-			const validate = ajv.getSchema("transaction");
-
-			for(let transaction_ of block.node.dataTransaction){
-		    if(validate(transaction_)===false){
-					return false;
-				}
+			const validate = ajv.getSchema("block");
+			const result = validate(block);
+			if(!result){
+				console.log(ajv.errorsText(validate.errors));
+				return false;
+			}else{
+				return true;
 			}
-
-
-			return true;
-
 		}else{
 			return true;
 		}
-
 	}
 
 	validateTimesTransactions(block){
