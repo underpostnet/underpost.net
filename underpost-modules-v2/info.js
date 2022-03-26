@@ -29,6 +29,12 @@ const info = {
      + req.method
      + ' ') )+ colors.green(' .'+info_.uri)
      + '\n  '+colors.yellow(date_));
+    info_.langs ?
+    (()=>{
+      delete info_.langs;
+      info_.title = JSON.stringify(info_.title);
+      info_.description = JSON.stringify(info_.description);
+    })():null;
     console.table(info_);
     console.log(' source: '+colors.green(source_));
   },
@@ -37,10 +43,15 @@ const info = {
     const sitemap_ = util.changeKeyname(info_.sitemap, "active", "active-sitemap");
     info_.jsonld = info_.jsonld.join('|');
     delete info_.sitemap;
-    info.log(req, {
+    let returnData = {
       ...info_,
       ...sitemap_
-    });
+    };
+    returnData.rawLang = util.newInstance(returnData.lang);
+    const testLang = returnData.lang.split('-')[0];
+    returnData.lang = data.langs.includes(testLang) ? testLang : data.langs[0];
+    info.log(req, returnData);
+    return returnData;
   },
   api: (req, data) => {
     const info_ = info.reqData(req, data);
