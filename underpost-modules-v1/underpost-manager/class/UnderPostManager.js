@@ -17,6 +17,7 @@ import var_dump from "var_dump";
 import path from "path";
 
 import navi from "../../../underpost-modules-v2/navi.js";
+import files from "../../../underpost-modules-v2/files.js";
 
 export class UnderPostManager {
 
@@ -1567,6 +1568,30 @@ export class UnderPostManager {
     }else{
       await newTemplate();
     }
+
+    //--------------------------------------------------------------------------
+    // update data keys id
+    //--------------------------------------------------------------------------
+
+    mainData.asymmetricKeys = [];
+    mainData.symmetricKeys = [];
+
+    files.readRecursive('../data/network/keys/asymmetric', out =>
+    mainData.asymmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
+
+    files.readRecursive('../data/network/keys/symmetric', out =>
+    mainData.symmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
+
+    mainData.asymmetricKeys = new Util().uniqueArray(mainData.asymmetricKeys);
+    mainData.symmetricKeys = new Util().uniqueArray(mainData.symmetricKeys);
+
+    fs.writeFileSync(
+      this.mainDir+'/data/network/underpost.json',
+      new Util().jsonSave(mainData),
+      this.charset);
+
+    //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     this.poolPublickey = new PublicKeyManager(
       this.mainDir,
