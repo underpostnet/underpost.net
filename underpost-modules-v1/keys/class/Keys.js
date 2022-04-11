@@ -154,7 +154,7 @@ export class Keys {
 
 
   async generateSymmetricKeys(obj){
-
+    try {
 
     let dataKey = this.generateKeyIv(obj);
 
@@ -175,6 +175,12 @@ export class Keys {
       new Util().JSONstr(dataKey.iv.toString()));
 
     return keyID;
+
+    }catch(err){
+
+      return null;
+
+    }
 
   }
 
