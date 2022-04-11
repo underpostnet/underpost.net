@@ -674,7 +674,9 @@ export class UnderPostManager {
               if(validateChain.global == true && validateWithPoolTransaction != null){
                 let amountData = await chainObj.currentAmountCalculator(
                   fs.readFileSync(
-                    this.mainDir+'/data/network/keys/asymmetric/'+rowKey.keyID+'/public.pem')
+                    new Util().clearDir(
+                      this.mainDir+'/data/network/keys/asymmetric/'+rowKey.keyID+'/public.pem'
+                    ))
                     .toString('base64'),
                   false
                 );
