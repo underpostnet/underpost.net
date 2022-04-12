@@ -66,6 +66,7 @@ export class FileGestor {
 
    async getDataFile(dir, typeFile){
      return await new Promise( async resolve => {
+       dir = new Util().clearDir(dir);
        if(! fs.existsSync(dir) ){
          return { error: "ENOENT, no such file or directory" };
        }
