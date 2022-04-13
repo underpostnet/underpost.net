@@ -3,6 +3,7 @@
 const util = {
   timer: ms_ => new Promise(res => setTimeout(res, ms_)),
   jsonSave: obj_ => JSON.stringify(obj_, null, 4),
+  jsonWebRender: objRender => `JSON.parse(`+'`'+JSON.stringify(objRender)+'`'+`)`,
   clearDir: dir_ => dir_.replace(/\\/g, '/').replace(/\/\//g, "/"),
   uriValidator: uri_ => uri_ == undefined ? '' : util.clearDir(uri_),
   l: arr_ => arr_.length,
