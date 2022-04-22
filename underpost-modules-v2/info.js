@@ -51,12 +51,12 @@ const info = {
     returnData.rawLang = util.newInstance(returnData.lang);
     const testLang = returnData.lang.split('-')[0];
     returnData.lang = data.langs.includes(testLang) ? testLang : data.langs[0];
-    info.log(req, returnData, colors.redBG(colors.white('VIEW')));
+    info.log(req, returnData, colors.redBG(colors.white(' VIEW ')));
     return returnData;
   },
   api: (req, data) => {
     const info_ = info.reqData(req, data);
-    info.log(req, info_, colors.blueBG(colors.white('API')));
+    info.log(req, info_, colors.blueBG(colors.white(' API ')));
   },
   router: _app => _app._router.stack
     .map((v,i,a) => true ?
