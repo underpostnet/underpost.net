@@ -1174,6 +1174,11 @@ export class UnderPostManager {
          return;
        }
 
+       if(!fs.existsSync(this.mainDir+'/data/network/keys/asymmetric/'+tempData.active_asymmetric_public_key)){
+         new Paint().underpostOption('red', 'error', "No found active asymmetric Key");
+         return;
+       }
+
        let fileKeyContent = await KEYS.getKeyContent(
          "asymmetricKeys",
          tempData.active_asymmetric_public_key
