@@ -672,7 +672,7 @@ export class UnderPostManager {
             let tableAsymmetricKeys = [];
 
             for(let rowKey of tableKeys){
-              if(validateChain.global == true && validateWithPoolTransaction != null){
+              if(validateChain.global == true && validateWithPoolTransaction != null && rowKey.keyID != "active.json"){
                 let amountData = await chainObj.currentAmountCalculator(
                   fs.readFileSync(
                     new Util().clearDir(
