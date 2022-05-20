@@ -1587,6 +1587,9 @@ export class UnderPostManager {
     files.readRecursive('../data/network/keys/symmetric', out =>
     mainData.symmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
 
+    mainData.symmetricKeys = mainData.symmetricKeys.filter(out=>out!='active.json');
+    mainData.asymmetricKeys = mainData.asymmetricKeys.filter(out=>out!='active.json');
+
     mainData.asymmetricKeys = new Util().uniqueArray(mainData.asymmetricKeys);
     mainData.symmetricKeys = new Util().uniqueArray(mainData.symmetricKeys);
 
