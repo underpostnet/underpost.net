@@ -1623,29 +1623,17 @@ export class UnderPostManager {
 
   async dataFolderCheck(){
 
-    ! fs.existsSync(this.mainDir+'/data') ?
-    fs.mkdirSync(this.mainDir+'/data') : null;
-
-    ! fs.existsSync(this.mainDir+'/data/network') ?
-    fs.mkdirSync(this.mainDir+'/data/network') : null;
-
-    ! fs.existsSync(this.mainDir+'/data/network/keys') ?
-    fs.mkdirSync(this.mainDir+'/data/network/keys') : null;
+    ! fs.existsSync(this.mainDir+'/data/network/temp/test-key') ?
+    fs.mkdirSync(this.mainDir+'/data/network/temp/test-key', { recursive: true }) : null;
 
     ! fs.existsSync(this.mainDir+'/data/network/keys/asymmetric') ?
-    fs.mkdirSync(this.mainDir+'/data/network/keys/asymmetric') : null;
+    fs.mkdirSync(this.mainDir+'/data/network/keys/asymmetric', { recursive: true }) : null;
 
     ! fs.existsSync(this.mainDir+'/data/network/keys/symmetric') ?
     fs.mkdirSync(this.mainDir+'/data/network/keys/symmetric') : null;
 
     ! fs.existsSync(this.mainDir+'/data/network/blockchain') ?
     fs.mkdirSync(this.mainDir+'/data/network/blockchain') : null;
-
-    ! fs.existsSync(this.mainDir+'/data/network/temp') ?
-    fs.mkdirSync(this.mainDir+'/data/network/temp') : null;
-
-    ! fs.existsSync(this.mainDir+'/data/network/temp/test-key') ?
-    fs.mkdirSync(this.mainDir+'/data/network/temp/test-key') : null;
 
 
     fs.existsSync(this.mainDir+'/data/network/keys/asymmetric/active.json') ?
