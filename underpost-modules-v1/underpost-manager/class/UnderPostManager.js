@@ -694,6 +694,46 @@ export class UnderPostManager {
             new Paint().underpostOption('red', 'error', 'invalid type key');
         }
 
+      },
+      addB64: async () => {
+
+        let paste_key = await new ReadLine().yn("paste key ?");
+        switch (paste_key) {
+          case "y":
+              try {
+                paste_key = JSON.parse(new Util().paste());
+                const idKey = new Keys().getKeyHash();
+                const privateKey = Buffer.from(paste_key.privateKey, 'base64').toString();
+                const publicKey = Buffer.from(paste_key.publicKey, 'base64').toString();
+                new Paint().underpostOption('yellow', ' ', 'generating id keys: '+idKey+' ...');
+                
+                fs.mkdirSync(this.mainDir+'/data/network/keys/asymmetric/'+idKey);
+
+                fs.writeFileSync(
+                  this.mainDir+'/data/network/keys/asymmetric/'+idKey+'/private.pem',
+                  privateKey,
+                  this.charset);
+                fs.writeFileSync(
+                  this.mainDir+'/data/network/keys/asymmetric/'+idKey+'/public.pem',
+                  publicKey,
+                  this.charset);
+
+                  this.updateDataKeysId();
+                  new Paint().underpostOption('green', 'success', 'generating id keys: '+idKey+'');
+
+              } catch (error) {
+                console.log(colors.red(error));
+                new Paint().underpostOption('red', 'error', 'invalid data base64 keys');
+                return;
+              }
+            break;
+          case "n":
+            return
+          default:
+            new Paint().underpostOption('red', 'error', "invalid option");
+            return;
+        }
+        
       }
     };
 
@@ -1410,6 +1450,14 @@ export class UnderPostManager {
             }
           },
           {
+            text: 'Add base64 Keys',
+            fn: async ()=>{
+              await asymmetricKeysGestor(
+                await KEYS.addB64('asymmetricKeys')
+              );
+            }
+          },
+          {
             text: 'Delete Key',
             fn: async ()=>{
               await asymmetricKeysGestor(
@@ -1578,25 +1626,7 @@ export class UnderPostManager {
     // update data keys id
     //--------------------------------------------------------------------------
 
-    mainData.asymmetricKeys = [];
-    mainData.symmetricKeys = [];
-
-    files.readRecursive('../data/network/keys/asymmetric', out =>
-    mainData.asymmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
-
-    files.readRecursive('../data/network/keys/symmetric', out =>
-    mainData.symmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
-
-    mainData.symmetricKeys = mainData.symmetricKeys.filter(out=>out!='active.json');
-    mainData.asymmetricKeys = mainData.asymmetricKeys.filter(out=>out!='active.json');
-
-    mainData.asymmetricKeys = new Util().uniqueArray(mainData.asymmetricKeys);
-    mainData.symmetricKeys = new Util().uniqueArray(mainData.symmetricKeys);
-
-    fs.writeFileSync(
-      this.mainDir+'/data/network/underpost.json',
-      new Util().jsonSave(mainData),
-      this.charset);
+    this.updateDataKeysId(mainData);
 
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
@@ -1619,6 +1649,34 @@ export class UnderPostManager {
     //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
 
+  }
+
+  updateDataKeysId(mainData){
+
+    if(!mainData) mainData = JSON.parse(fs.readFileSync(
+      this.mainDir+'/data/network/underpost.json',
+      this.charset
+    ));
+
+    mainData.asymmetricKeys = [];
+    mainData.symmetricKeys = [];
+
+    files.readRecursive('../data/network/keys/asymmetric', out =>
+    mainData.asymmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
+
+    files.readRecursive('../data/network/keys/symmetric', out =>
+    mainData.symmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
+
+    mainData.symmetricKeys = mainData.symmetricKeys.filter(out=>out!='active.json');
+    mainData.asymmetricKeys = mainData.asymmetricKeys.filter(out=>out!='active.json');
+
+    mainData.asymmetricKeys = new Util().uniqueArray(mainData.asymmetricKeys);
+    mainData.symmetricKeys = new Util().uniqueArray(mainData.symmetricKeys);
+
+    fs.writeFileSync(
+      this.mainDir+'/data/network/underpost.json',
+      new Util().jsonSave(mainData),
+      this.charset);
   }
 
   async dataFolderCheck(){
