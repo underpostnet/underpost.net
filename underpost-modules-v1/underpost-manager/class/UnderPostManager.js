@@ -695,7 +695,7 @@ export class UnderPostManager {
         }
 
       },
-      addB64: async () => {
+      addAsymmetricB64: async () => {
 
         let paste_key = await new ReadLine().yn("paste key ?");
         switch (paste_key) {
@@ -706,6 +706,12 @@ export class UnderPostManager {
                 const privateKey = Buffer.from(paste_key.privateKey, 'base64').toString();
                 const publicKey = Buffer.from(paste_key.publicKey, 'base64').toString();
                 new Paint().underpostOption('yellow', ' ', 'generating id keys: '+idKey+' ...');
+
+                if(KEYS.checkDuplicate('asymmetric', {privateKey, publicKey})){
+                  return () => {
+                    new Paint().underpostOption('red', 'error', 'duplicate keys'); 
+                  };
+                }
                 
                 fs.mkdirSync(this.mainDir+'/data/network/keys/asymmetric/'+idKey);
 
@@ -730,10 +736,29 @@ export class UnderPostManager {
           case "n":
             return
           default:
-            new Paint().underpostOption('red', 'error', "invalid option");
+            return () => new Paint().underpostOption('red', 'error', "invalid option");
             return;
         }
         
+      },
+      checkDuplicate: (type, keys) => {
+        let duplicate = false;
+        if(type=='asymmetric'){
+          let mainData = JSON.parse(fs.readFileSync(
+            this.mainDir+'/data/network/underpost.json',
+            this.charset
+          ));
+          mainData.asymmetricKeys.map( idKey => {
+            if( fs.readFileSync(this.mainDir+'/data/network/keys/asymmetric/'+idKey+'/public.pem', 
+            this.charset)==keys.publicKey){
+              duplicate = true;
+
+            }
+          });
+
+        }
+        return duplicate;
+
       }
     };
 
@@ -1453,7 +1478,7 @@ export class UnderPostManager {
             text: 'Add base64 Keys',
             fn: async ()=>{
               await asymmetricKeysGestor(
-                await KEYS.addB64('asymmetricKeys')
+                await KEYS.addAsymmetricB64('asymmetricKeys')
               );
             }
           },
