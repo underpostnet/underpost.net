@@ -121,18 +121,36 @@ export class Block {
 
               // console.log("checkDataTransactionStatus ->");
               // console.log(bridgeDataTransactions);
-              let auxDataTransactions = new Util().newInstance(this.node.dataTransaction);
+              // let auxDataTransactions = new Util().newInstance(this.node.dataTransaction);
               let logs = false;
               if(new Util().l(bridgeDataTransactions)>0){
                 console.log(colors.cyan("set news transactions count:"+
                   new Util().l(bridgeDataTransactions)
                 ));
-                this.node.dataTransaction = this.node.dataTransaction.concat(bridgeDataTransactions);
+                // this.node.dataTransaction = this.node.dataTransaction.concat(bridgeDataTransactions);
+
+                let stop_ = false;
+                for(let _transaction of bridgeDataTransactions){
+                  if(!stop_){
+                    this.node.dataTransaction.push(_transaction);
+                    if(new Util().getSizeJSON(this)>limitMbBlock){
+
+                      this.node.dataTransaction.pop();
+                      console.log(colors.red("already maximum block weight"))
+                      console.log(new Util().getSizeJSON(this));
+                      limitSizeActive = true;      
+                      logs = true;
+                      stop_ = true;
+
+                    }
+                  }
+                }
 
                 logs = true;
               }
 
               // console.log(new Util().getSizeJSON(this));
+              /*
               if(new Util().getSizeJSON(this).megaBytes > limitMbBlock){
                 console.log(colors.red("maximum block weight exceeded"))
                 this.node.dataTransaction = auxDataTransactions;
@@ -141,6 +159,7 @@ export class Block {
 
                 logs = true;
               }
+              */
               logs ? console.log() : null;
 
             };

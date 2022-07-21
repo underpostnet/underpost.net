@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 export class WSclient {
 
   constructor(obj){
-    this.host_name = ('w'+(obj.ssl ? 'ss': 's')+'://'+obj.ws_host+':'+obj.ws_port);
+    this.host_name = ('w'+(obj.ssl ? 'ss': 's')+'://'+obj.ws_host+(obj.ssl ?'':':'+obj.ws_port));
     this.connection = new WebSocket(this.host_name);
     // console.log(this);
   }

@@ -771,6 +771,16 @@ export class UnderPostManager {
              this.charset
          ));
 
+         const allowMine = await new RestService().getJSON(
+          (blockChainConfig.constructor.userConfig.bridgeUrl+'/allow-mine/'+blockChainConfig.constructor.generation)
+          );
+
+          if(!allowMine.allow){
+            new Paint().underpostOption('red','error', 'not allow mine status');
+             console.log(JSON.stringify(allowMine, null, 4));
+             return;
+          }
+
          let tempData = JSON.parse(fs.readFileSync(
            this.mainDir+'/data/network/underpost.json',
            this.charset
@@ -871,13 +881,12 @@ export class UnderPostManager {
                  blockchain: blockChainConfig,
                  dataDir: this.mainDir,
                  dataFolder: 'data/network',
-                 dev: true
+                 dev: false /** */
                },
                rewardConfig: {
-                 intervalChangeEraBlock: 1, /* 1 - 210000 - 300000 */
+                 intervalChangeEraBlock: 300000, /* 1 - 210000 - 300000 */
                  totalEra: 9,
-                 hashesPerCurrency: 10,
-                 upTruncFactor: 15
+                 upTruncFactor: 75
                },
                difficultyConfig: {
                  hashRateSeconds: input_hash_rate_seconds,
@@ -895,7 +904,7 @@ export class UnderPostManager {
                new Paint().underpostOption('yellow', ' ', 'success bridge ws connection');
 
                resolve(await blockChainProcess.mainProcess({
-                 paths: [ 'localhost:3001' ]
+                 paths: [ 'www.cyberiaonline.com' ] /* 'localhost:3001'  */
                }, this.wsBridge));
 
              });

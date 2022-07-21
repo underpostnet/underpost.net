@@ -178,7 +178,7 @@ export class BlockChain {
 			this.rewardConfig.sumBlocks += this.rewardConfig.intervalChangeEraBlock;
 			this.rewardConfig.sumReward += this.rewardConfig.rewardCurrencyPerBlock[
 				(new Util().l(this.rewardConfig.reward)-1)
-			];
+			] * this.rewardConfig.intervalChangeEraBlock;
 			this.rewardConfig.blocks.push(this.rewardConfig.sumBlocks);
 
 		}
