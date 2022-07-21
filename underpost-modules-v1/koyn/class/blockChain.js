@@ -995,6 +995,10 @@ export class BlockChain {
 
 	async currentAmountCalculator(base64PublicKey, log, dataTransaction){
 
+		base64PublicKey = 
+		Buffer.from(base64PublicKey, 'base64')
+		.replace(/\r/g, '').toString('base64');
+
 		if(dataTransaction!=undefined){
 			this.chain.push({
 				node: {

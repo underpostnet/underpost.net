@@ -348,6 +348,7 @@ let prevNowPlaying = null;
     }, 5000);
 }
 
+app.use(express.static('public'));
 
 -------------------------------------------------------
 -------------------------------------------------------
@@ -1283,7 +1284,9 @@ let value_ = new Util().pad(minutes_, size)+":"+new Util().pad(seconds_, size);
 
 
 
-
+ clearPem(str){
+	return str.replace(/(\r\n|\n|\r)/gm, '');
+};
 	// end
 
 
