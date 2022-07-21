@@ -967,7 +967,7 @@ export class UnderPostManager {
              blockchain: blockChainConfig,
              dataDir: this.mainDir,
              dataFolder: 'data/network',
-             dev: true
+             dev: false
            },
            validatorMode: true
          });
