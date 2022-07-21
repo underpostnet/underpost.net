@@ -249,10 +249,6 @@ export class Keys {
     console.log(colors.magenta("generateDataAsymetricSign ..."));
     // este metodo genera una llave individual firmada para
     // hacerla portable y usarla para en pool o en una transaccion
-    publicBase64 = 
-    Buffer.from(publicBase64, 'base64').toString()
-    .replace(/\r/g, '').toString('base64');
-    
     let idSign = null;
     let dataSign = {};
     if(data !== undefined){

@@ -116,7 +116,7 @@ export class FileGestor {
                 name: dir.split('/').pop(),
                 mimeType: mime.getType(dir),
                 buffer: bufferFile,
-                base64: bufferFile.toString().replace(/\r/g, '').toString('base64'),
+                base64: bufferFile.toString('base64'),
                 source: 'data:'+mime.getType(dir)+';base64,'+bufferFile.toString('base64'),
                 raw: bufferFile.toString(),
                 genesis_dir: dir,
