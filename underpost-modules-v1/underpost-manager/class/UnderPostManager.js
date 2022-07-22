@@ -904,7 +904,7 @@ export class UnderPostManager {
                new Paint().underpostOption('yellow', ' ', 'success bridge ws connection');
 
                resolve(await blockChainProcess.mainProcess({
-                 paths: [ 'www.cyberiaonline.com' ] /* 'localhost:3001'  */
+                 paths: blockChainConfig.constructor.pathsDataApps /* 'localhost:3001'  */
                }, this.wsBridge));
 
              });
