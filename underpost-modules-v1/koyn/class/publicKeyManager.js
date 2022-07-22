@@ -257,6 +257,14 @@ export class PublicKeyManager {
         this.charset
       ));
 
+      
+      if(new Util().isOpenFalse(tempData.active_asymmetric_public_key)){
+        new Paint().underpostOption('red','error', 'invalid assymetric key active: '
+        +tempData.active_asymmetric_public_key);
+        return [];
+      }
+
+
       let asymmetricKeyData = await this.modules.KEYS.getKeyContent(
         "asymmetricKeys",
          tempData.active_asymmetric_public_key
