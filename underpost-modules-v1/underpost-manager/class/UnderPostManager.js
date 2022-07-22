@@ -881,7 +881,7 @@ export class UnderPostManager {
                  blockchain: blockChainConfig,
                  dataDir: this.mainDir,
                  dataFolder: 'data/network',
-                 dev: false /** */
+                 dev: blockChainConfig.constructor.dev /** */
                },
                rewardConfig: {
                  intervalChangeEraBlock: 300000, /* 1 - 210000 - 300000 */
@@ -967,7 +967,7 @@ export class UnderPostManager {
              blockchain: blockChainConfig,
              dataDir: this.mainDir,
              dataFolder: 'data/network',
-             dev: false
+             dev: blockChainConfig.constructor.dev
            },
            validatorMode: true
          });
