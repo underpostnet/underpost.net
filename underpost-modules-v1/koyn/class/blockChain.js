@@ -266,8 +266,8 @@ export class BlockChain {
 	getRewardToIndexBlock(block, rewardConfig, next){
 		let indexBlock = null;
 		next ? indexBlock = block.block.index+1 : indexBlock = block.block.index ;
-		for(let i of new Util().range(1, rewardConfig.totalEra)){
-			if((rewardConfig.blocks[i-1]<=indexBlock)&&(indexBlock<rewardConfig.blocks[i])){
+		for(let i of new Util().range(0, rewardConfig.totalEra-1)){
+			if(indexBlock <= rewardConfig.blocks[i]){
 				return rewardConfig.rewardCurrencyPerBlock[i];
 			}
 		}
