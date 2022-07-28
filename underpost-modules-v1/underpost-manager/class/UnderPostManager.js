@@ -13,7 +13,7 @@ import SHA256 from "crypto-js/sha256.js";
 
 import fs from "fs";
 import colors from "colors/safe.js";
-import var_dump from "var_dump";
+// import var_dump from "var_dump";
 import path from "path";
 
 import navi from "../../../underpost-modules-v2/navi.js";
@@ -25,7 +25,7 @@ export class UnderPostManager {
 
     let charset = 'utf8';
 
-    this.mainDir = navi('../');
+    this.mainDir = obj ? obj : navi('../');
     this.charset = charset;
     this.poolPublickey = null;
     this.activeSenderAsymmetricSignKeyData = null;
@@ -48,7 +48,7 @@ export class UnderPostManager {
          ]){
 
            let originPath = fs.readFileSync(
-               navi('../underpost_modules/underpost-data-template/network/'+module_),
+               /*navi*/('./underpost_modules/underpost-data-template/network/'+module_),
                this.charset
            );
 
@@ -1635,7 +1635,7 @@ export class UnderPostManager {
 
     let mainData = {};
     let dataTemplate = JSON.parse(
-      fs.readFileSync(navi('../underpost_modules/underpost-data-template/network/underpost.json'))
+      fs.readFileSync(/*navi*/('./underpost_modules/underpost-data-template/network/underpost.json'))
     );
 
     //--------------------------------------------------------------------------
@@ -1695,10 +1695,10 @@ export class UnderPostManager {
     mainData.asymmetricKeys = [];
     mainData.symmetricKeys = [];
 
-    files.readRecursive('../data/network/keys/asymmetric', out =>
+    files.readRecursive(this.mainDir+'/data/network/keys/asymmetric', out =>
     mainData.asymmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
 
-    files.readRecursive('../data/network/keys/symmetric', out =>
+    files.readRecursive(this.mainDir+'/data/network/keys/symmetric', out =>
     mainData.symmetricKeys.push((out.split('symmetric/')[1].split('/')[0])));
 
     mainData.symmetricKeys = mainData.symmetricKeys.filter(out=>out!='active.json');
