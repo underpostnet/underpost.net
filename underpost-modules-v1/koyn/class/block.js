@@ -1,5 +1,5 @@
 import SHA256 from "crypto-js/sha256.js";
-import { RestService } from "../../rest/class/RestService.js";
+import { RestService } from "../../rest/class/restService.js";
 import { Paint } from "../../paint/class/paint.js";
 import colors from "colors/safe.js";
 import { Util } from "../../util/class/Util.js";
