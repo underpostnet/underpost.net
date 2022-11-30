@@ -308,6 +308,7 @@ export class Keys {
       publicDirPem = new Util().clearDir(mainDir+'/'+nameDataFolder+'/temp/test-key/'+id_file_key+'.pem');
     }
     publicDirPem = publicDirPem.replace('data/data', 'data');
+    if(publicDirPem[0]==':')publicDirPem = 'c'+publicDirPem;
     console.log(' test publicDirPem ->');
     console.log(publicDirPem);
     fs.writeFileSync(
